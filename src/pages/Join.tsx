@@ -1,4 +1,130 @@
-﻿export default function Join() {
-  return <main className="p-8">TODO: Join</main>;
+import { useEffect } from "react";
+import { Link, useNavigate, useParams } from "react-router";
+import { joinCodeStore, useLogout, useMe } from "@/lib/auth";
+import { Button, ErrorNote, Spinner } from "@/components/ui";
+import { AuthShell, CardChip } from "@/components/student/AuthShell";
+import { classLabel, normalizeJoinCode, useClassByCode } from "@/components/student/useClassByCode";
+
+/** How long "Joining Section 1 · 2569/1…" stays visible before moving on to /login. */
+const HANDOFF_DELAY_MS = 700;
+
+/** /join/:code — landing page of a section QR code. Stores the code, then hands over to /login. */
+export default function Join() {
+  const params = useParams();
+  const code = normalizeJoinCode(params.code);
+  const me = useMe();
+  const cls = useClassByCode(code || undefined);
+  const logout = useLogout();
+  const navigate = useNavigate();
+
+  const signedIn = !!me.data;
+
+  // Remember the code for the login call (kept in sessionStorage until login succeeds).
+  useEffect(() => {
+    if (code) joinCodeStore.set(code);
+  }, [code]);
+
+  // Valid class + not signed in → continue to /login after a short confirmation.
+  useEffect(() => {
+    if (!cls.data || me.isPending || signedIn) return;
+    const t = window.setTimeout(() => navigate("/login", { replace: true }), HANDOFF_DELAY_MS);
+    return () => window.clearTimeout(t);
+  }, [cls.data, me.isPending, signedIn, navigate]);
+
+  const invalid = !code || cls.notFound;
+
+  return (
+    <AuthShell>
+      {invalid ? (
+        <>
+          <h2 className="text-2xl font-bold tracking-tight">This class link doesn't work</h2>
+          <p className="mt-2 text-[15px] text-muted">
+            The code {code ? <span className="font-mono font-semibold text-ink">{code}</span> : "in this link"} is unknown or
+            the class has ended. Ask your instructor for your section's current QR code.
+          </p>
+          <InvalidCleanup />
+          <Link
+            to="/login"
+            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl bg-ink px-4 text-sm font-semibold text-white hover:bg-zinc-700"
+          >
+            Go to sign in
+          </Link>
+        </>
+      ) : cls.isError ? (
+        <>
+          <h2 className="text-2xl font-bold tracking-tight">Couldn't check your class</h2>
+          <div className="mt-4">
+            <ErrorNote>We couldn't reach the server. Check your connection and try again.</ErrorNote>
+          </div>
+          <Button className="mt-6" block size="lg" onClick={() => void cls.refetch()} loading={cls.isFetching}>
+            Try again
+          </Button>
+        </>
+      ) : !cls.data || me.isPending ? (
+        <div className="flex flex-col items-center py-6 text-center" role="status" aria-live="polite">
+          <Spinner className="size-7 text-muted" />
+          <p className="mt-4 text-[15px] font-medium">Checking your class code…</p>
+          <p className="mt-1 font-mono text-xs text-muted">{code}</p>
+        </div>
+      ) : signedIn ? (
+        <>
+          <CardChip>{classLabel(cls.data)} · via QR</CardChip>
+          <h2 className="mt-5 text-2xl font-bold tracking-tight">You're already signed in</h2>
+          <p className="mt-2 text-[15px] text-muted">
+            To join <span className="font-semibold text-ink">{cls.data.name}</span>, sign out and sign in again with your
+            student account. If you're already in this class, just go Home.
+          </p>
+          <div className="mt-6 space-y-2">
+            <Button
+              block
+              size="lg"
+              loading={logout.isPending}
+              onClick={() =>
+                logout.mutate(undefined, {
+                  onSuccess: () => {
+                    joinCodeStore.set(code);
+                    navigate("/login", { replace: true });
+                  },
+                })
+              }
+            >
+              Sign out and continue
+            </Button>
+            <Button
+              block
+              size="lg"
+              variant="outline"
+              onClick={() => {
+                joinCodeStore.clear();
+                navigate(me.data?.role === "admin" ? "/admin" : "/", { replace: true });
+              }}
+            >
+              {me.data?.role === "admin" ? "Back to the dashboard" : "Go Home"}
+            </Button>
+          </div>
+          {logout.isError && (
+            <div className="mt-4">
+              <ErrorNote>Couldn't sign out. Please try again.</ErrorNote>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="flex flex-col items-center py-6 text-center" role="status" aria-live="polite">
+          <Spinner className="size-7 text-success" />
+          <p className="mt-4 text-[15px] font-semibold">Joining {classLabel(cls.data)}…</p>
+          <Link to="/login" replace className="mt-3 text-sm text-muted underline hover:text-ink">
+            Continue to sign in
+          </Link>
+        </div>
+      )}
+    </AuthShell>
+  );
 }
 
+/** Forget a bad code so it isn't sent with the next login. */
+function InvalidCleanup() {
+  useEffect(() => {
+    joinCodeStore.clear();
+  }, []);
+  return null;
+}

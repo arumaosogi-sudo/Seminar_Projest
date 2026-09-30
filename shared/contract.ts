@@ -233,7 +233,17 @@ export const questionInput = z.object({
   id: z.number().int().positive().optional(), // omit for new questions
   type: z.enum(["single", "multi", "truefalse", "short"]),
   prompt: z.string().trim().min(1).max(2000),
-  imageUrl: z.string().url().max(500).nullable().optional(),
+  /** https:// URL or a site-relative path under /images/ (no other schemes, no path traversal) */
+  imageUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .refine(
+      (v) => /^https:\/\/[a-z0-9.-]+(:\d+)?(\/[^\s]*)?$/i.test(v) || (/^\/images\/[^\s]*$/.test(v) && !v.includes("..") && !v.includes("//")),
+      { message: "Image URL must start with https:// or /images/" },
+    )
+    .nullable()
+    .optional(),
   options: z.array(z.object({ id: z.string().min(1).max(20), text: z.string().trim().min(1).max(500) })).max(12).default([]),
   /** single: option id · multi: option ids · truefalse: boolean · short: accepted answers */
   answer: z.union([z.string(), z.array(z.string()), z.boolean()]),
