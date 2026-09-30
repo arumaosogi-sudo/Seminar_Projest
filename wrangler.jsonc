@@ -1,0 +1,31 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "digital-muscle",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-09-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+
+  // React SPA is served as static assets; /api/* goes to the Worker first.
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+
+  // D1 (SQLite). `database_id` is filled in after `wrangler d1 create digital-muscle-db`.
+  // Local dev (`npm run dev`) uses a local SQLite file under .wrangler/ and needs no Cloudflare account.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "digital-muscle-db",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // Non-secret config. Secrets (SESSION_SECRET) go in .dev.vars locally and `wrangler secret put` in production.
+  "vars": {
+    "ALLOWED_STUDENT_DOMAIN": "lamduan.mfu.ac.th",
+    "GOOGLE_CLIENT_ID": "",
+    "ADMIN_EMAILS": ""
+  }
+}

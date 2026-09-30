@@ -1,0 +1,48 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+/*
+ * Design tokens from Figma page "the idea อันล่าสุดที่ทำและได้แก้ไขไป" (seminar_project).
+ * Neutrals = Tailwind zinc. Each menu has its own accent:
+ *   Games = violet · 3D Explore = teal · Tests = blue · success = green · danger = red
+ * Use the semantic names below (bg-app, text-ink, text-muted, border-line, bg-games, …) in components.
+ */
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-app: #f7f7f8;          /* page background */
+  --color-surface: #ffffff;      /* cards */
+  --color-ink: #18181b;          /* zinc-900: headings, primary buttons */
+  --color-muted: #71717a;        /* zinc-500: secondary text */
+  --color-faint: #a1a1aa;        /* zinc-400 */
+  --color-line: #e4e4e7;         /* zinc-200: borders */
+  --color-login-panel: #a4a29f;  /* grey panel behind the sign-in card */
+
+  --color-games: #7c3aed;        /* violet-600 */
+  --color-games-soft: #ede9fe;   /* violet-100 */
+  --color-games-ink: #5b21b6;    /* violet-800 */
+  --color-explore: #0d9488;      /* teal-600 */
+  --color-explore-soft: #ccfbf1; /* teal-100 */
+  --color-explore-ink: #115e59;  /* teal-800 */
+  --color-tests: #2563eb;        /* blue-600 */
+  --color-tests-soft: #dbeafe;   /* blue-100 */
+  --color-tests-ink: #1e40af;    /* blue-800 */
+  --color-success: #15803d;      /* green-700 */
+  --color-success-soft: #dcfce7;
+  --color-danger: #dc2626;       /* red-600 */
+  --color-danger-soft: #fee2e2;
+
+  --radius-card: 1.25rem;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  @apply bg-app text-ink font-sans antialiased;
+}
+
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-tests;
+}

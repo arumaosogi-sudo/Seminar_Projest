@@ -1,0 +1,12 @@
+# Copy to .dev.vars for local development (never commit .dev.vars).
+# SESSION_SECRET: any long random string (at least 32 characters).
+SESSION_SECRET=change-me-to-a-long-random-string-at-least-32-chars
+
+# Enables the "dev login" form (type an e-mail instead of Google). LOCAL ONLY — never set in production.
+DEV_LOGIN=true
+
+# Instructors who may open /admin (comma-separated). Admins can also be added later in Admin → Settings.
+ADMIN_EMAILS=instructor@mfu.ac.th
+
+# Google OAuth Web Client ID (leave empty until the team creates one in Google Cloud Console).
+GOOGLE_CLIENT_ID=
