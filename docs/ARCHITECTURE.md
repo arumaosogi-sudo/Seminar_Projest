@@ -32,7 +32,7 @@ src/
   pages/explore/          🧩 teammate area — placeholders
   pages/tests/            🧩 teammate area — placeholders (API is ready)
   pages/admin/            Login, Classes, Tests, TestBuilder, AssignTest, Results, Students, Settings
-public/images/            login-hero-{560,960}.webp
+public/images/            logo.png, login-hero-{desktop,tablet,phone}-*.webp, menu-*.png (see docs/DESIGN_NOTES.md)
 ```
 
 ## 3. Auth & session rules

@@ -57,7 +57,7 @@ export default function Tests() {
         </EmptyState>
       ) : (
         <Card className="overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto">
             <table className="w-full min-w-[860px] text-sm">
               <caption className="sr-only">Tests</caption>
               <thead>

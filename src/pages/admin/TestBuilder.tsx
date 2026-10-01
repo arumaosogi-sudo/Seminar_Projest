@@ -21,9 +21,9 @@ import {
   type DraftQuestion,
   type DraftTest,
 } from "@/components/admin/builder";
-import { QueryError, Segmented, Switch } from "@/components/admin/controls";
-import { errorMessage, formatDateTime, isApiStatus, kindLabel } from "@/components/admin/format";
-import { IconCheck, IconClose, IconDrag, IconDuplicate, IconEye, IconInfo, IconPlus, IconTrash, IconUpload } from "@/components/admin/icons";
+import { QueryError, Switch } from "@/components/admin/controls";
+import { errorMessage, formatDateTime, isApiStatus } from "@/components/admin/format";
+import { IconCheck, IconChevronDown, IconClose, IconDrag, IconPlus } from "@/components/admin/icons";
 import { adminKeys } from "@/components/admin/keys";
 import { ConfirmDialog, Modal } from "@/components/admin/Modal";
 import { useToast } from "@/components/admin/toastContext";
@@ -72,6 +72,8 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
   const [saveError, setSaveError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [focusKey, setFocusKey] = useState<string | null>(null);
+  /** Which card is in edit mode ("title" or a question key) — Figma shows only one expanded editor. */
+  const [active, setActive] = useState<string>(() => "title");
 
   // Revision counters: rev increments on every edit; savedRev = last revision persisted.
   const [rev, setRev] = useState(0);
@@ -252,87 +254,72 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
   };
 
   const maxScore = maxScoreOf(draft);
+  const startedAttempts = server.versions.find((v) => v.versionNo === server.currentVersion)?.attemptCount ?? 0;
   const statusNode = saving ? (
-    <span className="text-muted">Saving…</span>
+    <span className="text-[12px] font-semibold text-muted">Saving…</span>
   ) : saveError ? (
-    <span className="text-danger">
+    <span className="max-w-[260px] text-[12px] font-semibold text-danger">
       {saveError}{" "}
-      <button type="button" className="font-semibold underline" onClick={() => void save(true)}>
+      <button type="button" className="underline" onClick={() => void save(true)}>
         Retry
       </button>
     </span>
   ) : !dirty ? (
-    <span className="text-success">✓ Saved</span>
-  ) : validation.count > 0 ? (
-    <span className="text-amber-700">
-      Unsaved changes ·{" "}
-      <button type="button" className="font-semibold underline" onClick={() => setShowErrors(true)}>
-        {validation.count} issue{validation.count === 1 ? "" : "s"} to fix
-      </button>
+    <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-success">
+      <IconCheck size={14} /> Autosaved
     </span>
+  ) : validation.count > 0 ? (
+    <button type="button" className="text-[12px] font-semibold text-amber-700 underline" onClick={() => setShowErrors(true)}>
+      {validation.count} issue{validation.count === 1 ? "" : "s"} to fix
+    </button>
   ) : (
-    <span className="text-muted">Unsaved changes{locked ? " · autosave paused" : ""}</span>
+    <span className="text-[12px] font-semibold text-muted">Unsaved{locked ? " · autosave paused" : "…"}</span>
   );
 
   return (
     <div onBlur={flushOnBlur}>
-      {/* Header */}
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+      {/* Header (Figma: plain title, "Test builder · N questions · N points", status + Preview + Assign) */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <Link to="/admin/tests" className="text-sm font-semibold text-muted hover:text-ink">
-            ← Tests
-          </Link>
-          <div className="mt-1 flex items-center gap-3">
-            <input
-              aria-label="Test title"
-              value={draft.title}
-              maxLength={200}
-              onChange={(e) => update((d) => ({ ...d, title: e.target.value }))}
-              placeholder="Untitled test"
-              className={cx(
-                "min-w-0 flex-1 rounded-lg border border-transparent bg-transparent px-1 text-3xl font-bold tracking-tight outline-none hover:border-line focus:border-ink",
-                showErrors && validation.title && "border-danger",
-              )}
-            />
-            <DraftBadge />
-          </div>
-          <p className="mt-1 px-1 text-sm text-muted">
-            {kindLabel[draft.kind]} · {draft.questions.length} question{draft.questions.length === 1 ? "" : "s"} · {maxScore} point{maxScore === 1 ? "" : "s"} · v{server.currentVersion}
-            <span className="mx-2 text-faint">|</span>
-            <span aria-live="polite">{statusNode}</span>
+          <h1 className="truncate text-[32px] font-bold leading-10 text-ink">{draft.title || "Untitled test"}</h1>
+          <p className="mt-1 text-[15px] leading-[22px] text-muted">
+            Test builder · {draft.questions.length} question{draft.questions.length === 1 ? "" : "s"} · {maxScore} point{maxScore === 1 ? "" : "s"}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" onClick={() => setPreviewOpen(true)}>
-            <IconEye size={16} /> Preview
-          </Button>
-          <Button variant="outline" onClick={() => void save(true)} loading={saving} disabled={!dirty && !saveError}>
-            Save
-          </Button>
-          <Button accent="tests" onClick={() => void onAssign()}>
+        <div className="flex flex-wrap items-center gap-2.5 lg:mt-[15px]">
+          <DraftBadge />
+          <span aria-live="polite" className="px-1">
+            {statusNode}
+          </span>
+          {(locked || saveError) && (
+            <button
+              type="button"
+              onClick={() => void save(true)}
+              disabled={saving || (!dirty && !saveError)}
+              className="h-[43px] rounded-[11.5px] border border-line bg-surface px-5 text-[15px] font-semibold text-ink hover:bg-zinc-50 disabled:opacity-50"
+            >
+              Save
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setPreviewOpen(true)}
+            className="h-[43px] w-[95px] rounded-[11.5px] border border-line bg-surface text-[15px] font-semibold text-ink hover:bg-zinc-50"
+          >
+            Preview
+          </button>
+          <button
+            type="button"
+            onClick={() => void onAssign()}
+            className="h-11 w-[177px] whitespace-nowrap rounded-xl bg-tests text-[15px] font-semibold text-white hover:bg-blue-700"
+          >
             Assign to sections
-          </Button>
+          </button>
         </div>
       </div>
 
-      {showErrors && validation.general.length > 0 && (
-        <div className="mb-5">
-          <ErrorNote>{validation.general.join(" ")}</ErrorNote>
-        </div>
-      )}
-
-      {locked && (
-        <div className="mb-5 flex gap-3 rounded-2xl border border-violet-200 bg-games-soft px-4 py-3 text-sm text-games-ink" role="note">
-          <IconInfo className="mt-0.5 shrink-0" />
-          <p>
-            Students already started version {server.currentVersion}. Saving creates version {server.currentVersion + 1} — earlier attempts keep their original questions and
-            scores. Autosave is paused; use <strong>Save</strong> when you’re done.
-          </p>
-        </div>
-      )}
-
       {/* Tabs */}
-      <div role="tablist" aria-label="Builder sections" className="mb-5 flex gap-1 border-b border-line">
+      <div role="tablist" aria-label="Builder sections" className="mt-[34px] flex gap-[38px] pl-[17px]">
         {(["questions", "settings", "versions"] as Tab[]).map((t) => (
           <button
             key={t}
@@ -348,18 +335,36 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
               if (e.key === "ArrowRight") setTab(order[(i + 1) % 3]);
               if (e.key === "ArrowLeft") setTab(order[(i + 2) % 3]);
             }}
-            className={cx("-mb-px border-b-2 px-4 py-2.5 text-sm font-semibold capitalize", tab === t ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink")}
+            className={cx("py-1 text-[15px] capitalize transition-colors", tab === t ? "font-semibold text-tests" : "text-muted hover:text-ink")}
           >
             {t}
-            {t === "versions" && <span className="ml-1.5 text-xs text-muted">({server.versions.length})</span>}
+            {t === "versions" && ` (${server.versions.length})`}
           </button>
         ))}
       </div>
 
+      {locked && (
+        <p className="mt-[39px] rounded-[13.5px] border border-violet-200 bg-violet-50 px-5 py-[15px] text-[12px] font-semibold leading-[18px] text-games-ink" role="note">
+          {startedAttempts > 0 ? `${startedAttempts} student${startedAttempts === 1 ? "" : "s"}` : "Students"} already started version {server.currentVersion}. Your edits create
+          version {server.currentVersion + 1} — their attempts keep using the version they started. Autosave is paused; press Save when you’re done.
+        </p>
+      )}
+
+      {showErrors && validation.general.length > 0 && (
+        <div className="mt-5">
+          <ErrorNote>{validation.general.join(" ")}</ErrorNote>
+        </div>
+      )}
+
       {tab === "questions" && (
-        <div role="tabpanel" id="panel-questions" aria-labelledby="tab-questions" className="flex gap-4">
-          <div className="min-w-0 flex-1 space-y-4">
-            <Card className="border-t-4 border-t-ink p-6">
+        <div role="tabpanel" id="panel-questions" aria-labelledby="tab-questions" className={cx("flex gap-[21px]", locked ? "mt-[27px]" : "mt-[39px]")}>
+          <div className="min-w-0 max-w-[859px] flex-1 space-y-4">
+            {/* Title card */}
+            <div
+              onFocusCapture={() => setActive("title")}
+              onClick={() => setActive("title")}
+              className={cx("rounded-[17px] border bg-surface px-[23px] py-[26px]", active === "title" ? "border-2 border-tests" : "border-line")}
+            >
               <label className="sr-only" htmlFor="builder-title">
                 Title
               </label>
@@ -369,7 +374,10 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
                 maxLength={200}
                 onChange={(e) => update((d) => ({ ...d, title: e.target.value }))}
                 placeholder="Test title"
-                className="w-full border-b border-transparent bg-transparent pb-1 text-2xl font-bold outline-none focus:border-ink"
+                className={cx(
+                  "w-full bg-transparent text-[20px] font-semibold leading-7 text-ink outline-none placeholder:text-faint",
+                  showErrors && validation.title && "text-danger",
+                )}
               />
               {showErrors && validation.title && <p className="mt-1 text-xs text-danger">{validation.title}</p>}
               <label className="sr-only" htmlFor="builder-desc">
@@ -381,14 +389,14 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
                 maxLength={2000}
                 onChange={(e) => update((d) => ({ ...d, description: e.target.value }))}
                 placeholder="Description (shown to students before they start)"
-                rows={2}
-                className="mt-3 w-full resize-y border-b border-transparent bg-transparent text-sm text-zinc-700 outline-none focus:border-ink"
+                rows={1}
+                className="mt-1.5 field-sizing-content w-full resize-none bg-transparent text-[12px] leading-[18px] text-muted outline-none placeholder:text-faint"
               />
-            </Card>
+            </div>
 
             {draft.questions.length === 0 ? (
               <EmptyState title="No questions yet" action={<Button onClick={() => addQuestion()} disabled={atMax}>+ Add question</Button>}>
-                Add multiple-choice, checkbox, true/false or short-answer questions.
+                Add single-choice, multiple-choice, true/false or short-answer questions.
               </EmptyState>
             ) : (
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
@@ -398,6 +406,8 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
                       key={q.key}
                       q={q}
                       index={i}
+                      active={active === q.key}
+                      onActivate={() => setActive(q.key)}
                       errors={showErrors ? validation.byQuestion[q.key] : undefined}
                       onChange={(fn) => updateQuestion(q.key, fn)}
                       onDuplicate={() =>
@@ -423,29 +433,40 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
             </div>
           </div>
 
-          {/* Floating toolbar */}
-          <div className="hidden w-12 shrink-0 lg:block">
-            <div className="sticky top-6 flex flex-col items-center gap-1 rounded-2xl border border-line bg-surface p-1.5 shadow-sm" role="toolbar" aria-label="Question tools" aria-orientation="vertical">
+          {/* Floating toolbar (Figma: + · T · image · section). Only "add question" works today. */}
+          <div className="hidden w-[55px] shrink-0 lg:block">
+            <div
+              className="sticky top-6 flex flex-col items-center gap-3 rounded-[20px] border border-line bg-surface py-2.5"
+              role="toolbar"
+              aria-label="Question tools"
+              aria-orientation="vertical"
+            >
               <button
                 type="button"
                 onClick={() => addQuestion()}
                 disabled={atMax}
-                className="rounded-xl p-2 text-ink hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
+                className="grid size-9 place-items-center rounded-xl text-muted hover:bg-zinc-100 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
                 aria-label="Add question"
                 title={atMax ? `Maximum ${MAX_QUESTIONS} questions` : "Add question"}
               >
-                <IconPlus />
+                <IconPlus size={22} />
               </button>
-              <button type="button" disabled className="cursor-not-allowed rounded-xl p-2 text-faint" aria-label="Import CSV (coming soon)" title="Import CSV — coming soon">
-                <IconUpload />
-              </button>
+              {[
+                { label: "Add title and description (coming soon)", glyph: <span className="text-[13px] font-bold">T</span> },
+                { label: "Add image (coming soon)", glyph: <IconImage size={14} /> },
+                { label: "Add section (coming soon)", glyph: <span className="text-[13px] font-bold leading-none">=</span> },
+              ].map((t) => (
+                <button key={t.label} type="button" disabled aria-label={t.label} title={t.label} className="grid size-7 cursor-not-allowed place-items-center rounded-lg text-muted opacity-70">
+                  {t.glyph}
+                </button>
+              ))}
             </div>
           </div>
         </div>
       )}
 
       {tab === "settings" && (
-        <div role="tabpanel" id="panel-settings" aria-labelledby="tab-settings">
+        <div role="tabpanel" id="panel-settings" aria-labelledby="tab-settings" className="mt-[39px]">
           <Card className="max-w-2xl space-y-5 p-6">
             <Input
               name="settings-title"
@@ -477,7 +498,7 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
       )}
 
       {tab === "versions" && (
-        <div role="tabpanel" id="panel-versions" aria-labelledby="tab-versions">
+        <div role="tabpanel" id="panel-versions" aria-labelledby="tab-versions" className="mt-[39px]">
           <Card className="max-w-2xl overflow-hidden">
             {server.versions.length === 0 ? (
               <p className="p-6 text-sm text-muted">No frozen versions yet. A version is frozen the first time a student starts the test.</p>
@@ -521,11 +542,44 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
   );
 }
 
-/* ───────────────────────── Question card ───────────────────────── */
+function IconImage({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <circle cx="9" cy="9" r="2" />
+      <path d="m21 15-5-5L5 21" />
+    </svg>
+  );
+}
+
+/* ───────────────────────── Question card ─────────────────────────
+ * Figma (Google-Form style): every question shows as a read-only preview; the selected one gets a
+ * blue outline + 6 px left bar and turns into the editor (type, prompt, options, points, required). */
+
+const optionsOf = (q: DraftQuestion) =>
+  q.type === "truefalse"
+    ? [
+        { id: "true", text: "True" },
+        { id: "false", text: "False" },
+      ]
+    : q.options;
+
+const isCorrectOption = (q: DraftQuestion, id: string) =>
+  q.type === "single" ? q.single === id : q.type === "multi" ? q.multi.includes(id) : q.type === "truefalse" ? (q.tf === null ? false : String(q.tf) === id) : false;
+
+function Marker({ q }: { q: DraftQuestion }) {
+  return q.type === "multi" ? (
+    <span className="size-[18px] shrink-0 rounded-[5px] border border-zinc-300 bg-surface" aria-hidden="true" />
+  ) : (
+    <span className="size-[18px] shrink-0 rounded-full border border-zinc-300" aria-hidden="true" />
+  );
+}
 
 function QuestionCard({
   q,
   index,
+  active,
+  onActivate,
   errors,
   onChange,
   onDuplicate,
@@ -533,6 +587,8 @@ function QuestionCard({
 }: {
   q: DraftQuestion;
   index: number;
+  active: boolean;
+  onActivate: () => void;
   errors?: string[];
   onChange: (fn: (q: DraftQuestion) => DraftQuestion) => void;
   onDuplicate: () => void;
@@ -542,186 +598,237 @@ function QuestionCard({
   const uid = useId();
   const typeId = `${uid}-type`;
   const pointsId = `${uid}-points`;
+  const hasErrors = !!errors?.length;
+
+  const toggleCorrect = (id: string) =>
+    onChange((x) =>
+      x.type === "single"
+        ? { ...x, single: id }
+        : x.type === "multi"
+          ? { ...x, multi: x.multi.includes(id) ? x.multi.filter((m) => m !== id) : [...x.multi, id] }
+          : x.type === "truefalse"
+            ? { ...x, tf: id === "true" }
+            : x,
+    );
+
+  const handle = (
+    <button
+      type="button"
+      ref={setActivatorNodeRef}
+      {...attributes}
+      {...listeners}
+      aria-label={`Reorder question ${index + 1} (press space, then arrow keys)`}
+      className="-ml-0.5 cursor-grab touch-none rounded-md p-0.5 text-faint hover:bg-zinc-100 hover:text-ink active:cursor-grabbing"
+    >
+      <IconDrag size={18} />
+    </button>
+  );
 
   return (
     <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className={cx(isDragging && "relative z-10")}>
-      <Card className={cx("p-5 sm:p-6", isDragging && "shadow-xl ring-2 ring-tests", !!errors?.length && "border-red-300")}>
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            ref={setActivatorNodeRef}
-            {...attributes}
-            {...listeners}
-            aria-label={`Reorder question ${index + 1} (press space, then arrow keys)`}
-            className="-ml-2 cursor-grab touch-none rounded-lg p-1.5 text-faint hover:bg-zinc-100 hover:text-ink active:cursor-grabbing"
-          >
-            <IconDrag />
-          </button>
-          <span className="text-sm font-bold">Q{index + 1}</span>
-          <div className="ml-auto w-48">
-            <label htmlFor={typeId} className="sr-only">
-              Question type
-            </label>
-            <select
-              id={typeId}
-              value={q.type}
-              onChange={(e) => onChange((x) => changeType(x, e.target.value as QuestionType))}
-              className="h-9 w-full rounded-xl border border-line bg-surface px-3 text-sm outline-none focus:border-ink"
-            >
-              {(Object.keys(TYPE_LABEL) as QuestionType[]).map((t) => (
-                <option key={t} value={t}>
-                  {TYPE_LABEL[t]}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <label htmlFor={`prompt-${q.key}`} className="sr-only">
-          Question {index + 1} prompt
-        </label>
-        <textarea
-          id={`prompt-${q.key}`}
-          value={q.prompt}
-          maxLength={2000}
-          rows={2}
-          onChange={(e) => onChange((x) => ({ ...x, prompt: e.target.value }))}
-          placeholder="Question"
-          className="mt-3 w-full resize-y rounded-xl border border-line bg-app px-3.5 py-2.5 text-[15px] outline-none focus:border-ink focus:bg-surface"
-        />
-
-        <div className="mt-4">
-          {(q.type === "single" || q.type === "multi") && <ChoiceEditor q={q} onChange={onChange} />}
-          {q.type === "truefalse" && (
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm text-muted">Correct answer</span>
-              <Segmented<"true" | "false" | "">
-                label={`Question ${index + 1} correct answer`}
-                value={q.tf === null ? "" : q.tf ? "true" : "false"}
-                onChange={(v) => onChange((x) => ({ ...x, tf: v === "true" }))}
-                options={[
-                  { value: "true", label: "True" },
-                  { value: "false", label: "False" },
-                ]}
-              />
-            </div>
-          )}
-          {q.type === "short" && <ShortEditor q={q} onChange={onChange} />}
-        </div>
-
-        {errors && errors.length > 0 && (
-          <ul className="mt-3 space-y-0.5 text-xs text-danger" role="alert">
-            {errors.map((e) => (
-              <li key={e}>• {e}</li>
-            ))}
-          </ul>
+      <div
+        onFocusCapture={onActivate}
+        onClick={onActivate}
+        className={cx(
+          "relative overflow-hidden rounded-[19.5px] border bg-surface",
+          active ? "border-tests" : hasErrors ? "border-red-300" : "border-line",
+          isDragging && "shadow-xl",
         )}
+      >
+        {active && <span className="absolute inset-y-0 left-0 w-1.5 bg-tests" aria-hidden="true" />}
 
-        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-line pt-4">
-          <label htmlFor={pointsId} className="text-sm text-muted">
-            Points
-          </label>
-          <input
-            id={pointsId}
-            type="number"
-            min={0}
-            max={100}
-            step={1}
-            value={Number.isFinite(q.points) ? q.points : ""}
-            onChange={(e) => onChange((x) => ({ ...x, points: e.target.value === "" ? NaN : Math.trunc(Number(e.target.value)) }))}
-            className="h-9 w-20 rounded-lg border border-line bg-surface px-2 text-sm tabular-nums outline-none focus:border-ink"
-          />
-          <div className="ml-auto flex items-center gap-1">
-            <button type="button" onClick={onDuplicate} className="rounded-lg p-2 text-muted hover:bg-zinc-100 hover:text-ink" aria-label={`Duplicate question ${index + 1}`} title="Duplicate">
-              <IconDuplicate />
-            </button>
-            <button type="button" onClick={onDelete} className="rounded-lg p-2 text-muted hover:bg-danger-soft hover:text-danger" aria-label={`Delete question ${index + 1}`} title="Delete">
-              <IconTrash />
-            </button>
-            <span className="mx-2 h-6 w-px bg-line" aria-hidden="true" />
-            <Switch checked={q.required} onChange={(v) => onChange((x) => ({ ...x, required: v }))} label="Required" showLabel />
+        {!active ? (
+          /* ── Read-only preview ── */
+          <div className="px-[31px] pb-[22px] pt-[21px]">
+            <div className="flex items-center gap-2.5">
+              {handle}
+              <span className="text-[12px] font-semibold text-muted">Q{index + 1}</span>
+              <span className="ml-auto text-[12px] text-muted">
+                {TYPE_LABEL[q.type]} · {q.points} pt{q.points === 1 ? "" : "s"}
+              </span>
+            </div>
+            <p className="mt-[19px] whitespace-pre-line text-[15px] font-semibold leading-[22px] text-ink">
+              {q.prompt || <span className="font-normal text-faint">(no question text — click to edit)</span>}
+            </p>
+            {q.type === "short" ? (
+              <div className="mt-[18px] flex h-[43px] max-w-[359px] items-center rounded-[11.5px] border border-line px-[15px] text-[13px] text-faint">Short answer text</div>
+            ) : (
+              <ul className="mt-[17px] space-y-3">
+                {optionsOf(q).map((o) => (
+                  <li key={o.id} className="flex items-center gap-[14px] text-[14px] leading-[18px] text-ink">
+                    <Marker q={q} />
+                    <span className="min-w-0 flex-1 truncate">{o.text || <span className="text-faint">(empty option)</span>}</span>
+                    {isCorrectOption(q, o.id) && <IconCheck size={16} className="shrink-0 text-success" />}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {hasErrors && <p className="mt-3 text-xs text-danger">{errors!.length} issue{errors!.length === 1 ? "" : "s"} — click to fix</p>}
           </div>
-        </div>
-      </Card>
+        ) : (
+          /* ── Editor ── */
+          <div className="px-[31px] pb-[21px] pt-[22px]">
+            <div className="flex flex-wrap items-center gap-2.5">
+              {handle}
+              <span className="text-[12px] font-semibold text-muted">Q{index + 1}</span>
+              <div className="relative ml-auto w-[209px]">
+                <label htmlFor={typeId} className="sr-only">
+                  Question type
+                </label>
+                <select
+                  id={typeId}
+                  value={q.type}
+                  onChange={(e) => onChange((x) => changeType(x, e.target.value as QuestionType))}
+                  className="h-[37px] w-full cursor-pointer appearance-none rounded-[11.5px] border border-line bg-surface pl-4 pr-8 text-[13px] text-ink outline-none focus:border-gray-800"
+                >
+                  {(Object.keys(TYPE_LABEL) as QuestionType[]).map((t) => (
+                    <option key={t} value={t}>
+                      {TYPE_LABEL[t]}
+                    </option>
+                  ))}
+                </select>
+                <IconChevronDown size={12} strokeWidth={3} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-faint" />
+              </div>
+            </div>
+
+            <label htmlFor={`prompt-${q.key}`} className="sr-only">
+              Question {index + 1} prompt
+            </label>
+            <textarea
+              id={`prompt-${q.key}`}
+              value={q.prompt}
+              maxLength={2000}
+              rows={1}
+              onChange={(e) => onChange((x) => ({ ...x, prompt: e.target.value }))}
+              placeholder="Question"
+              className="mt-[18px] field-sizing-content w-full resize-none rounded-md bg-transparent text-[17px] font-semibold leading-6 text-ink outline-none placeholder:text-faint focus:bg-zinc-50"
+            />
+
+            {q.type === "short" ? (
+              <div className="mt-4">
+                <ShortEditor q={q} onChange={onChange} />
+              </div>
+            ) : (
+              <fieldset className="mt-[26px]">
+                <legend className="sr-only">Options — mark the correct {q.type === "multi" ? "ones" : "one"}</legend>
+                <ul className="space-y-[15px]">
+                  {optionsOf(q).map((o, i) => {
+                    const correct = isCorrectOption(q, o.id);
+                    return (
+                      <li key={o.id} className="group flex items-center gap-[13px]">
+                        <Marker q={q} />
+                        {q.type === "truefalse" ? (
+                          <span className="min-w-0 flex-1 text-[14px] text-ink">{o.text}</span>
+                        ) : (
+                          <input
+                            value={o.text}
+                            maxLength={500}
+                            onChange={(e) => onChange((x) => ({ ...x, options: x.options.map((p) => (p.id === o.id ? { ...p, text: e.target.value } : p)) }))}
+                            placeholder={`Option ${i + 1}`}
+                            aria-label={`Option ${i + 1}`}
+                            className="min-w-0 flex-1 rounded-md bg-transparent text-[14px] text-ink outline-none placeholder:text-faint focus:bg-zinc-50"
+                          />
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => toggleCorrect(o.id)}
+                          aria-pressed={correct}
+                          aria-label={`${correct ? "Correct answer" : "Mark as correct"}: option ${i + 1}`}
+                          className={cx(
+                            "shrink-0",
+                            correct
+                              ? "inline-flex h-[25px] items-center gap-1 rounded-full bg-[#e8f5ec] px-3 text-[12px] font-semibold text-success"
+                              : "text-[12px] text-faint hover:text-ink",
+                          )}
+                        >
+                          {correct ? (
+                            <>
+                              <IconCheck size={12} /> Correct
+                            </>
+                          ) : (
+                            "mark correct"
+                          )}
+                        </button>
+                        {q.type !== "truefalse" && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onChange((x) => ({
+                                ...x,
+                                options: x.options.filter((p) => p.id !== o.id),
+                                single: x.single === o.id ? "" : x.single,
+                                multi: x.multi.filter((m) => m !== o.id),
+                              }))
+                            }
+                            disabled={q.options.length <= 1}
+                            className="shrink-0 rounded p-0.5 text-faint opacity-0 hover:text-ink focus:opacity-100 group-hover:opacity-100 disabled:hidden"
+                            aria-label={`Remove option ${i + 1}`}
+                          >
+                            <IconClose size={14} />
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
+                  {q.type !== "truefalse" && q.options.length < 12 && (
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => onChange((x) => ({ ...x, options: [...x.options, { id: nextOptionId(x.options), text: `Option ${x.options.length + 1}` }] }))}
+                        className="flex items-center gap-[13px] text-[13px] text-faint hover:text-ink"
+                      >
+                        <Marker q={q} />
+                        Add option
+                      </button>
+                    </li>
+                  )}
+                </ul>
+              </fieldset>
+            )}
+
+            {hasErrors && (
+              <ul className="mt-3 space-y-0.5 text-xs text-danger" role="alert">
+                {errors!.map((e) => (
+                  <li key={e}>• {e}</li>
+                ))}
+              </ul>
+            )}
+
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-[15px]">
+              <label htmlFor={pointsId} className="text-[12px] text-muted">
+                Points
+              </label>
+              <input
+                id={pointsId}
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                value={Number.isFinite(q.points) ? q.points : ""}
+                onChange={(e) => onChange((x) => ({ ...x, points: e.target.value === "" ? NaN : Math.trunc(Number(e.target.value)) }))}
+                className="h-[35px] w-[63px] rounded-[11.5px] border border-line bg-surface text-center text-[13px] tabular-nums outline-none focus:border-gray-800"
+              />
+              <div className="ml-auto flex items-center gap-[21px] text-[12px] text-muted">
+                <button type="button" onClick={onDuplicate} className="hover:text-ink">
+                  Duplicate
+                </button>
+                <button type="button" onClick={onDelete} className="hover:text-danger">
+                  Delete
+                </button>
+                <Switch checked={q.required} onChange={(v) => onChange((x) => ({ ...x, required: v }))} label="Required" showLabel labelFirst accent="tests" />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
-  );
-}
-
-function ChoiceEditor({ q, onChange }: { q: DraftQuestion; onChange: (fn: (q: DraftQuestion) => DraftQuestion) => void }) {
-  const isSingle = q.type === "single";
-  const isCorrect = (id: string) => (isSingle ? q.single === id : q.multi.includes(id));
-  const toggle = (id: string) =>
-    onChange((x) => (isSingle ? { ...x, single: id } : { ...x, multi: x.multi.includes(id) ? x.multi.filter((m) => m !== id) : [...x.multi, id] }));
-
-  return (
-    <fieldset>
-      <legend className="mb-2 text-xs text-muted">{isSingle ? "Select the correct option" : "Tick every correct option"}</legend>
-      <ul className="space-y-2">
-        {q.options.map((o, i) => {
-          const correct = isCorrect(o.id);
-          return (
-            <li key={o.id} className="flex items-center gap-2">
-              <input
-                type={isSingle ? "radio" : "checkbox"}
-                name={`correct-${q.key}`}
-                checked={correct}
-                onChange={() => toggle(o.id)}
-                className="size-4 shrink-0 accent-success"
-                aria-label={`Mark option ${i + 1} as correct`}
-              />
-              <input
-                value={o.text}
-                maxLength={500}
-                onChange={(e) => onChange((x) => ({ ...x, options: x.options.map((p) => (p.id === o.id ? { ...p, text: e.target.value } : p)) }))}
-                placeholder={`Option ${i + 1}`}
-                aria-label={`Option ${i + 1}`}
-                className={cx(
-                  "h-10 min-w-0 flex-1 rounded-xl border bg-surface px-3 text-sm outline-none focus:border-ink",
-                  correct ? "border-green-300 bg-success-soft/40" : "border-line",
-                )}
-              />
-              {correct && (
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-xs font-semibold text-success">
-                  <IconCheck size={12} /> Correct
-                </span>
-              )}
-              <button
-                type="button"
-                onClick={() =>
-                  onChange((x) => ({
-                    ...x,
-                    options: x.options.filter((p) => p.id !== o.id),
-                    single: x.single === o.id ? "" : x.single,
-                    multi: x.multi.filter((m) => m !== o.id),
-                  }))
-                }
-                disabled={q.options.length <= 1}
-                className="shrink-0 rounded-lg p-1.5 text-muted hover:bg-zinc-100 hover:text-ink disabled:opacity-30"
-                aria-label={`Remove option ${i + 1}`}
-              >
-                <IconClose size={16} />
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-      {q.options.length < 12 && (
-        <button
-          type="button"
-          onClick={() => onChange((x) => ({ ...x, options: [...x.options, { id: nextOptionId(x.options), text: `Option ${x.options.length + 1}` }] }))}
-          className="mt-2 ml-6 text-sm font-semibold text-tests hover:underline"
-        >
-          + Add option
-        </button>
-      )}
-    </fieldset>
   );
 }
 
 function ShortEditor({ q, onChange }: { q: DraftQuestion; onChange: (fn: (q: DraftQuestion) => DraftQuestion) => void }) {
   return (
     <fieldset>
-      <legend className="mb-2 text-xs text-muted">Accepted answers (not case-sensitive; extra spaces are ignored)</legend>
+      <legend className="mb-2 text-[12px] text-muted">Accepted answers (not case-sensitive; extra spaces are ignored)</legend>
       <ul className="space-y-2">
         {q.accepted.map((a, i) => (
           <li key={i} className="flex items-center gap-2">
@@ -731,7 +838,7 @@ function ShortEditor({ q, onChange }: { q: DraftQuestion; onChange: (fn: (q: Dra
               onChange={(e) => onChange((x) => ({ ...x, accepted: x.accepted.map((s, j) => (j === i ? e.target.value : s)) }))}
               placeholder={`Accepted answer ${i + 1}`}
               aria-label={`Accepted answer ${i + 1}`}
-              className="h-10 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 text-sm outline-none focus:border-ink"
+              className="h-[43px] min-w-0 max-w-[359px] flex-1 rounded-[11.5px] border border-line bg-surface px-[15px] text-[14px] outline-none focus:border-gray-800"
             />
             <button
               type="button"
@@ -746,7 +853,7 @@ function ShortEditor({ q, onChange }: { q: DraftQuestion; onChange: (fn: (q: Dra
         ))}
       </ul>
       {q.accepted.length < 20 && (
-        <button type="button" onClick={() => onChange((x) => ({ ...x, accepted: [...x.accepted, ""] }))} className="mt-2 text-sm font-semibold text-tests hover:underline">
+        <button type="button" onClick={() => onChange((x) => ({ ...x, accepted: [...x.accepted, ""] }))} className="mt-2 text-[13px] font-semibold text-tests hover:underline">
           + Add accepted answer
         </button>
       )}

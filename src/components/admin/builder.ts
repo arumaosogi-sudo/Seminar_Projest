@@ -34,8 +34,8 @@ export interface DraftTest {
 }
 
 export const TYPE_LABEL: Record<QuestionType, string> = {
-  single: "Multiple choice",
-  multi: "Checkboxes",
+  single: "Single choice",
+  multi: "Multiple choice",
   truefalse: "True / False",
   short: "Short answer",
 };

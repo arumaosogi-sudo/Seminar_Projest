@@ -29,18 +29,18 @@ export default function Credits() {
       <ProseCard heading="Images & 3D models">
         <figure className="overflow-hidden rounded-2xl border border-line bg-white">
           <img
-            src="/images/login-hero-560.webp"
-            srcSet="/images/login-hero-560.webp 560w, /images/login-hero-960.webp 960w"
+            src="/images/login-hero-tablet-834.webp"
+            srcSet="/images/login-hero-tablet-834.webp 834w, /images/login-hero-tablet-1668.webp 1668w"
             sizes="(min-width: 768px) 640px, 100vw"
-            width={560}
-            height={543}
+            width={834}
+            height={440}
             loading="lazy"
             decoding="async"
             alt="Three anatomical figures running: muscles, muscles over the skeleton, and the skeleton"
             className="mx-auto h-auto max-h-72 w-auto"
           />
           <figcaption className="border-t border-line px-4 py-3 text-sm text-muted">
-            Login hero — anatomy illustration provided by the team. Licence to be confirmed.
+            Login hero and app logo — taken from the team's Figma design. Original source and licence to be confirmed.
           </figcaption>
         </figure>
         <p className="text-sm text-muted">

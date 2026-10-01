@@ -48,32 +48,33 @@ export default function Login() {
   const domain = config.data?.allowedStudentDomain || "lamduan.mfu.ac.th";
 
   return (
-    <AuthShell>
-      <div className="mb-5">
-        {joinCode ? (
-          joinClass.data ? (
-            <CardChip>
-              <span className="size-1.5 rounded-full bg-success" aria-hidden="true" />
-              {classLabel(joinClass.data)} · via QR
-            </CardChip>
-          ) : joinClass.notFound ? (
-            <p className="rounded-xl bg-danger-soft px-3 py-2 text-xs font-medium text-red-800">
-              The join code <span className="font-mono">{joinCode}</span> isn't valid anymore. Ask your instructor for your
-              section's QR code — you can still sign in.
-            </p>
-          ) : (
-            <CardChip>Join code {joinCode}</CardChip>
-          )
-        ) : (
-          <p className="flex items-start gap-2 text-xs text-muted">
-            <InfoIcon size={16} className="mt-px shrink-0" />
-            Scan your section's QR code to join your class.
+    <AuthShell
+      below={config.data?.devLogin ? <DevLoginForm as="student" joinCode={joinCode} onSuccess={onSuccess} /> : undefined}
+    >
+      {joinCode ? (
+        joinClass.data ? (
+          <CardChip>{classLabel(joinClass.data)} · via QR</CardChip>
+        ) : joinClass.notFound ? (
+          <p className="rounded-xl bg-danger-soft px-3 py-2 text-xs font-medium text-red-800">
+            The join code <span className="font-mono">{joinCode}</span> isn't valid anymore. Ask your instructor for your
+            section's QR code — you can still sign in.
           </p>
-        )}
-      </div>
+        ) : (
+          <CardChip>Join code {joinCode}</CardChip>
+        )
+      ) : (
+        <p className="flex items-start gap-2 text-xs text-muted">
+          <InfoIcon size={16} className="mt-px shrink-0" />
+          Scan your section's QR code to join your class.
+        </p>
+      )}
 
-      <h2 className="text-[28px] font-bold tracking-tight">Sign in</h2>
-      <p className="mt-1.5 text-[15px] text-muted">Use your MFU student Google account to continue.</p>
+      <h2 className="mt-3 text-[22px] font-semibold leading-7 text-ink">Sign in</h2>
+      <p className="mt-2 text-[15px] leading-[22px] text-muted">
+        Use your MFU student Google account
+        <br />
+        to continue.
+      </p>
 
       {me.data?.role === "admin" && (
         <p className="mt-4 rounded-xl bg-zinc-100 px-3 py-2 text-xs text-zinc-700">
@@ -84,7 +85,7 @@ export default function Login() {
         </p>
       )}
 
-      <div className="mt-6">
+      <div className="mt-4">
         <GoogleSignInButton
           as="student"
           joinCode={joinCode}
@@ -94,8 +95,10 @@ export default function Login() {
         />
       </div>
 
-      <p className="mt-3 flex items-center gap-2 text-sm text-muted">
-        <CheckIcon size={16} className="shrink-0 text-success" />
+      <p className="mt-4 flex items-center gap-[9px] text-[13px] leading-4 text-muted">
+        <span className="grid size-4 shrink-0 place-items-center rounded-full bg-faint text-white" aria-hidden="true">
+          <CheckIcon size={10} />
+        </span>
         Only @{domain} accounts
       </p>
 
@@ -110,18 +113,12 @@ export default function Login() {
         </div>
       )}
 
-      <hr className="my-6 border-line" />
+      <hr className="mt-[15px] border-line" />
 
-      <p className="text-sm text-muted">We only store your Student ID and first name.</p>
-      <Link to="/privacy" className="mt-1 inline-block rounded text-sm font-semibold text-ink hover:underline">
+      <p className="mt-3 text-[12px] leading-[18px] text-muted">We only store your Student ID and first name.</p>
+      <Link to="/privacy" className="mt-[3px] inline-block rounded text-[12px] font-semibold leading-[18px] text-gray-800 hover:underline">
         Read the privacy notice →
       </Link>
-
-      {config.data?.devLogin && (
-        <div className="mt-6">
-          <DevLoginForm as="student" joinCode={joinCode} onSuccess={onSuccess} />
-        </div>
-      )}
     </AuthShell>
   );
 }

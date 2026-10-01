@@ -18,17 +18,17 @@ function base({ size = 18, ...rest }: IconProps) {
   };
 }
 
+/* Sidebar icons follow the Figma admin frames: graduation cap · checklist tile · bar chart · people · sun-style gear. */
 export const IconClasses = (p: IconProps) => (
   <svg {...base(p)}>
-    <rect x="3" y="4" width="18" height="16" rx="3" />
-    <path d="M7 9h10M7 13h6" />
+    <path d="M21.4 10.9a1 1 0 0 0 0-1.8L12.8 5.2a2 2 0 0 0-1.6 0L2.6 9.1a1 1 0 0 0 0 1.8l8.6 3.9a2 2 0 0 0 1.6 0Z" />
+    <path d="M22 10v6M6 12.5V16a6 3 0 0 0 12 0v-3.5" />
   </svg>
 );
 export const IconTests = (p: IconProps) => (
   <svg {...base(p)}>
-    <path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z" />
-    <path d="M8 6H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2" />
-    <path d="m9 13 2 2 4-4" />
+    <rect x="3.5" y="3.5" width="17" height="17" rx="3" />
+    <path d="m7 9 1.5 1.5L11 8M13.5 9.5H17M7 15l1.5 1.5L11 14M13.5 15.5H17" />
   </svg>
 );
 export const IconResults = (p: IconProps) => (
@@ -45,8 +45,8 @@ export const IconStudents = (p: IconProps) => (
 );
 export const IconSettings = (p: IconProps) => (
   <svg {...base(p)}>
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />
+    <circle cx="12" cy="12" r="3.5" />
+    <path d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.6 5.6l1.1 1.1M17.3 17.3l1.1 1.1M5.6 18.4l1.1-1.1M17.3 6.7l1.1-1.1" />
   </svg>
 );
 export const IconMenu = (p: IconProps) => (

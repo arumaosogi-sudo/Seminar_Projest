@@ -3,10 +3,11 @@ import { Link, useNavigate, useParams } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AdminAssignment, AdminClass, AdminTestDetail, ScorePolicy } from "@shared/contract";
 import { api } from "@/lib/api";
-import { Badge, Button, Card, cx, DraftBadge, EmptyState, ErrorNote, PageHeader, PageLoader } from "@/components/ui";
+import { Button, Card, cx, DraftBadge, EmptyState, ErrorNote, PageHeader, PageLoader } from "@/components/ui";
 import { useAdminClass } from "@/components/admin/adminClass";
 import { defaultForm, formFromAssignment, pickSettings, sameSettings, toSettings, type AssignForm } from "@/components/admin/assign";
 import { CardTitle, QueryError, Segmented, SettingRow, Switch } from "@/components/admin/controls";
+import { IconCheck } from "@/components/admin/icons";
 import { errorMessage, formatDateTime, isApiStatus } from "@/components/admin/format";
 import { adminKeys } from "@/components/admin/keys";
 import { useToast } from "@/components/admin/toastContext";
@@ -179,10 +180,15 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
         actions={
           <>
             <DraftBadge />
-            <Button variant="outline" onClick={() => navigate(-1)} disabled={saving}>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              disabled={saving}
+              className="h-[43px] w-[87px] rounded-[11.5px] border border-line bg-surface text-[15px] font-semibold text-ink hover:bg-zinc-50 disabled:opacity-50"
+            >
               Cancel
-            </Button>
-            <Button accent="tests" onClick={() => void saveAll()} loading={saving} disabled={classes.length === 0}>
+            </button>
+            <Button accent="tests" size="lg" className="w-[150px] whitespace-nowrap rounded-xl px-0" onClick={() => void saveAll()} loading={saving} disabled={classes.length === 0}>
               Save &amp; publish
             </Button>
           </>
@@ -202,10 +208,10 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
           Create a section first, then assign this test to it.
         </EmptyState>
       ) : (
-        <div className="grid items-start gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
-          <Card className="p-5">
+        <div className="grid items-start gap-[25px] lg:grid-cols-[239px_minmax(0,1fr)]">
+          <Card className="px-[19px] pb-[19px] pt-[22px]">
             <CardTitle>Sections</CardTitle>
-            <ul className="mt-3 space-y-1.5">
+            <ul className="mt-[14px] space-y-2.5">
               {classes.map((c) => {
                 const a = byClass.get(c.id);
                 const s = statusLine(a, now);
@@ -213,29 +219,33 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
                 const pending = isChecked && !a ? "Will be assigned" : !isChecked && a ? "Will be unassigned" : null;
                 return (
                   <li key={c.id}>
-                    <div className={cx("flex items-start gap-3 rounded-xl border p-3 transition-colors", selectedId === c.id ? "border-ink bg-zinc-50" : "border-line hover:bg-zinc-50", errors[c.id] && "border-red-300")}>
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => {
-                          toggle(c.id);
-                          setSelectedId(c.id);
-                        }}
-                        className="mt-0.5 size-4 accent-tests"
-                        aria-label={`Assign to ${c.name}`}
-                      />
+                    <div
+                      className={cx(
+                        "flex min-h-[60px] items-center gap-[14px] rounded-xl px-[13px] py-2 transition-colors",
+                        selectedId === c.id ? "bg-tests-soft" : "hover:bg-zinc-50",
+                        errors[c.id] && "ring-1 ring-red-300",
+                      )}
+                    >
+                      <span className="relative grid size-[18px] shrink-0 place-items-center">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {
+                            toggle(c.id);
+                            setSelectedId(c.id);
+                          }}
+                          className="peer size-[18px] cursor-pointer appearance-none rounded-[5px] border border-zinc-300 bg-surface checked:border-tests checked:bg-tests"
+                          aria-label={`Assign to ${c.name}`}
+                        />
+                        <IconCheck size={12} strokeWidth={3} className="pointer-events-none absolute hidden text-white peer-checked:block" />
+                      </span>
                       <button type="button" className="min-w-0 flex-1 text-left" onClick={() => setSelectedId(c.id)} aria-pressed={selectedId === c.id}>
-                        <span className="block text-sm font-semibold">{c.name}</span>
-                        <span
-                          className={cx(
-                            "mt-0.5 block text-xs",
-                            s.tone === "open" ? "text-success" : s.tone === "scheduled" ? "text-tests" : "text-muted",
-                          )}
-                        >
-                          {s.text}
+                        <span className="block truncate text-[13px] font-semibold leading-[18px] text-ink">{c.name}</span>
+                        <span className="block text-[12px] leading-4 text-muted" title={s.text}>
+                          {s.tone === "open" ? "Open" : s.tone === "scheduled" ? "Scheduled" : s.tone === "closed" ? "Closed" : "Not assigned"}
                         </span>
-                        {pending && <span className="mt-0.5 block text-xs font-semibold text-amber-700">{pending}</span>}
-                        {errors[c.id] && <span className="mt-1 block text-xs text-danger">{errors[c.id]}</span>}
+                        {pending && <span className="block text-[12px] font-semibold text-amber-700">{pending}</span>}
+                        {errors[c.id] && <span className="mt-1 block text-[12px] text-danger">{errors[c.id]}</span>}
                       </button>
                     </div>
                   </li>
@@ -245,20 +255,20 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
           </Card>
 
           {selected && form && (
-            <Card className="p-6">
+            <Card className="px-[30px] pb-6 pt-[26px]">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-bold">{selected.name} settings</h2>
-                  <p className="text-xs text-muted">
-                    {checked.has(selected.id) ? "Assigned to this section" : "Not assigned — tick the section on the left to assign it"}
-                  </p>
+                  <h2 className="text-[22px] font-semibold leading-8 text-ink">{selected.name.split(" · ").pop()} settings</h2>
+                  {!checked.has(selected.id) && <p className="text-[12px] text-muted">Not assigned — tick the section on the left to assign it</p>}
                 </div>
-                <div className="flex items-center gap-2">
-                  {serverSel?.currentlyOpen && <Badge tone="success">Open now</Badge>}
+                <div className="flex items-center gap-2 pt-1">
                   {checked.size > 1 && (
                     <Button size="sm" variant="outline" onClick={copyToAll}>
                       Copy to all selected
                     </Button>
+                  )}
+                  {serverSel?.currentlyOpen && (
+                    <span className="inline-flex h-[25px] items-center rounded-full bg-tests px-3 text-[12px] font-semibold text-white">Open now</span>
                   )}
                 </div>
               </div>
@@ -275,7 +285,7 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
                     ]}
                   />
                   {form.timeMode === "limited" && (
-                    <span className="flex items-center gap-1.5 text-sm">
+                    <span className="flex items-center gap-3 text-[13px] text-muted">
                       <input
                         id={minutesId}
                         type="number"
@@ -283,7 +293,7 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
                         max={600}
                         value={form.minutes}
                         onChange={(e) => setForm({ minutes: e.target.value })}
-                        className="h-9 w-20 rounded-lg border border-line px-2 tabular-nums outline-none focus:border-ink"
+                        className="h-[43px] w-[89px] rounded-[11.5px] border border-line bg-surface text-center text-[14px] tabular-nums outline-none focus:border-gray-800"
                       />
                       min
                     </span>
@@ -301,7 +311,7 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
                     ]}
                   />
                   {form.attemptsMode === "retakes" && (
-                    <span className="flex items-center gap-1.5 text-sm">
+                    <span className="flex items-center gap-3 text-[13px] text-muted">
                       <input
                         id={attemptsId}
                         type="number"
@@ -310,7 +320,7 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
                         placeholder="∞"
                         value={form.attempts}
                         onChange={(e) => setForm({ attempts: e.target.value })}
-                        className="h-9 w-20 rounded-lg border border-line px-2 tabular-nums outline-none focus:border-ink"
+                        className="h-[43px] w-[89px] rounded-[11.5px] border border-line bg-surface text-center text-[14px] tabular-nums outline-none focus:border-gray-800"
                         aria-describedby={`${attemptsId}-hint`}
                       />
                       times
@@ -335,7 +345,7 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
                 </SettingRow>
 
                 <SettingRow label="Availability" helper={form.availability === "manual" ? "Open or close it yourself" : "Opens and closes automatically (your local time)"}>
-                  <div className="flex flex-col items-stretch gap-3 sm:items-end">
+                  <div className="flex flex-wrap items-center justify-end gap-2.5">
                     <Segmented
                       label="Availability"
                       value={form.availability}
@@ -348,29 +358,12 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
                     {form.availability === "manual" ? (
                       <Switch checked={form.isOpen} onChange={(v) => setForm({ isOpen: v })} label={form.isOpen ? "Open" : "Closed"} showLabel accent="success" />
                     ) : (
-                      <div className="flex flex-wrap items-center gap-2 text-sm">
-                        <label htmlFor={opensId} className="sr-only">
-                          Opens at
-                        </label>
-                        <input
-                          id={opensId}
-                          type="datetime-local"
-                          value={form.opensLocal}
-                          onChange={(e) => setForm({ opensLocal: e.target.value })}
-                          className="h-9 rounded-lg border border-line px-2 outline-none focus:border-ink"
-                        />
-                        <span className="text-muted">→</span>
-                        <label htmlFor={closesId} className="sr-only">
-                          Closes at
-                        </label>
-                        <input
-                          id={closesId}
-                          type="datetime-local"
-                          value={form.closesLocal}
-                          min={form.opensLocal || undefined}
-                          onChange={(e) => setForm({ closesLocal: e.target.value })}
-                          className="h-9 rounded-lg border border-line px-2 outline-none focus:border-ink"
-                        />
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <DateField id={opensId} label="Opens at" value={form.opensLocal} onChange={(v) => setForm({ opensLocal: v })} />
+                        <span className="text-[13px] text-muted" aria-hidden="true">
+                          →
+                        </span>
+                        <DateField id={closesId} label="Closes at" value={form.closesLocal} min={form.opensLocal || undefined} onChange={(v) => setForm({ closesLocal: v })} />
                       </div>
                     )}
                   </div>
@@ -395,5 +388,41 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
         </div>
       )}
     </>
+  );
+}
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/**
+ * Figma date box: 139×43, "20 Oct, 09:00". A native datetime-local input stays underneath for
+ * keyboard / screen readers and opens the browser picker on click.
+ */
+function DateField({ id, label, value, min, onChange }: { id: string; label: string; value: string; min?: string; onChange: (v: string) => void }) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value);
+  const text = m ? `${Number(m[3])} ${MONTHS[Number(m[2]) - 1]}, ${m[4]}:${m[5]}` : "Pick date & time";
+  return (
+    <span className="relative flex h-[43px] w-[139px] items-center rounded-[11.5px] border border-line bg-surface px-[15px] text-[14px] focus-within:border-gray-800">
+      <span className={cx("truncate", m ? "text-ink" : "text-faint")} aria-hidden="true">
+        {text}
+      </span>
+      <label htmlFor={id} className="sr-only">
+        {label}
+      </label>
+      <input
+        id={id}
+        type="datetime-local"
+        value={value}
+        min={min}
+        onChange={(e) => onChange(e.target.value)}
+        onClick={(e) => {
+          try {
+            e.currentTarget.showPicker();
+          } catch {
+            /* older browsers: the focused input still accepts typing */
+          }
+        }}
+        className="absolute inset-0 size-full cursor-pointer opacity-0"
+      />
+    </span>
   );
 }

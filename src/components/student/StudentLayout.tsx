@@ -57,7 +57,8 @@ function Shell() {
       </a>
       <TopBar locked={locked} />
       <main id="main" tabIndex={-1} className="flex-1 outline-none">
-        <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6 lg:px-8 lg:pt-10">
+        {/* Figma content column: 1200 px on desktop (120 px gutters at 1440), 40 px gutters on tablet, 16 px on phone */}
+        <div className="mx-auto w-full max-w-[1280px] px-4 pb-28 pt-[15px] md:pb-10 md:px-10 md:pt-[26px] lg:pt-[42px]">
           <Outlet />
         </div>
       </main>
@@ -69,14 +70,14 @@ function Shell() {
 
 function TopBar({ locked }: { locked: boolean }) {
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/85">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6 md:h-16 lg:h-[72px] lg:px-8">
+    <header className="sticky top-0 z-30 bg-surface">
+      <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-4 px-4 md:h-[72px] md:px-10 lg:px-20">
         <Link to="/" className="shrink-0 rounded-lg" aria-label="Digital Muscle — Home">
-          <Logo size={30} />
+          <Logo size={31} textClassName="text-[17px] font-semibold lg:text-[18px]" />
         </Link>
 
         <nav aria-label="Main" className="hidden flex-1 justify-center md:flex">
-          <ul className="flex items-stretch gap-1 lg:gap-2">
+          <ul className="flex items-stretch gap-6 lg:gap-14">
             {NAV.map((item) => (
               <li key={item.to} className="flex">
                 {locked && item.lockable ? (
@@ -85,31 +86,33 @@ function TopBar({ locked }: { locked: boolean }) {
                     aria-disabled="true"
                     aria-label={`${item.label} (${LOCKED_HINT})`}
                     title={LOCKED_HINT}
-                    className="relative flex h-16 items-center gap-1.5 rounded-md px-3 text-[15px] font-medium text-faint lg:h-[72px] lg:px-4"
+                    className="relative flex h-[72px] items-center gap-1.5 rounded-md text-[15px] text-faint"
                   >
                     <LockIcon size={14} />
                     <span className="hidden lg:inline">{item.label}</span>
                     <span className="lg:hidden">{item.short}</span>
                   </Link>
                 ) : (
-                <NavLink
-                  to={item.to}
-                  end={item.end}
-                  className={({ isActive }) =>
-                    cx(
-                      "relative flex h-16 items-center rounded-md px-3 text-[15px] transition-colors lg:h-[72px] lg:px-4",
-                      isActive ? "font-bold text-ink" : "font-medium text-muted hover:text-ink",
-                    )
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      <span className="hidden lg:inline">{item.label}</span>
-                      <span className="lg:hidden">{item.short}</span>
-                      {isActive && <span aria-hidden="true" className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-ink lg:inset-x-4" />}
-                    </>
-                  )}
-                </NavLink>
+                  <NavLink
+                    to={item.to}
+                    end={item.end}
+                    className={({ isActive }) =>
+                      cx(
+                        "relative flex h-[72px] items-center rounded-md text-[15px] transition-colors",
+                        isActive ? "font-semibold text-gray-800" : "text-muted hover:text-ink",
+                      )
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <span className="hidden lg:inline">{item.label}</span>
+                        <span className="lg:hidden">{item.short}</span>
+                        {isActive && (
+                          <span aria-hidden="true" className="absolute bottom-0.5 left-1/2 h-[3px] w-[34px] -translate-x-1/2 rounded-full bg-gray-800" />
+                        )}
+                      </>
+                    )}
+                  </NavLink>
                 )}
               </li>
             ))}
@@ -136,7 +139,8 @@ function UserMenu() {
 
   const firstName = me.student.firstName ?? me.student.studentCode;
   const initial = (me.student.firstName?.trim()[0] ?? "S").toUpperCase();
-  const className = me.enrollment?.className ?? "No class yet";
+  // Figma top bar shows "Section 1 · 2569/1" (section first); className is "2569/1 · Section 1".
+  const className = me.enrollment ? me.enrollment.className.split(" · ").reverse().join(" · ") : "No class yet";
 
   useEffect(() => {
     if (!open) return;
@@ -165,9 +169,9 @@ function UserMenu() {
 
   return (
     <div ref={wrapRef} className="relative flex items-center gap-3">
-      <div className="hidden text-right leading-tight lg:block">
-        <p className="max-w-[12rem] truncate text-sm font-bold">{firstName}</p>
-        <p className="max-w-[12rem] truncate text-xs text-muted">{className}</p>
+      <div className="hidden text-right md:block">
+        <p className="max-w-[12rem] truncate text-[14px] font-semibold leading-5 text-ink">{firstName}</p>
+        <p className="max-w-[12rem] truncate text-[12px] leading-4 text-muted">{className}</p>
       </div>
       <button
         ref={buttonRef}
@@ -177,7 +181,7 @@ function UserMenu() {
         aria-controls={open ? menuId : undefined}
         aria-label={`Account menu for ${firstName}`}
         onClick={() => setOpen((o) => !o)}
-        className="grid size-9 place-items-center rounded-full bg-ink text-sm font-bold text-white transition-shadow hover:ring-4 hover:ring-zinc-200 lg:size-10"
+        className="grid size-9 place-items-center rounded-full bg-[#e9eaee] text-[14px] font-semibold text-gray-800 transition-shadow hover:ring-4 hover:ring-zinc-200"
       >
         {initial}
       </button>
@@ -204,6 +208,15 @@ function UserMenu() {
           >
             {logout.isPending ? "Signing out…" : "Sign out"}
           </button>
+          {/* The phone layout has no footer (Figma) — keep Credits / Privacy reachable from here. */}
+          <div className="border-t border-line md:hidden">
+            <Link to="/credits" role="menuitem" className="block px-4 py-2.5 text-sm text-muted hover:bg-zinc-50">
+              Credits
+            </Link>
+            <Link to="/privacy" role="menuitem" className="block px-4 py-2.5 text-sm text-muted hover:bg-zinc-50">
+              Privacy notice
+            </Link>
+          </div>
           {logout.isError && (
             <p role="alert" className="px-4 pb-2.5 text-xs text-danger">
               Couldn't sign out. Check your connection and try again.
@@ -230,7 +243,7 @@ function BottomTabs({ locked }: { locked: boolean }) {
                 aria-disabled="true"
                 aria-label={`${label} (${LOCKED_HINT})`}
                 title={LOCKED_HINT}
-                className="relative flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-semibold text-faint opacity-70"
+                className="relative flex h-[75px] flex-col items-center justify-center gap-1.5 text-[11.5px] font-semibold text-faint opacity-70"
               >
                 <span className="relative">
                   <Icon size={22} />
@@ -246,8 +259,8 @@ function BottomTabs({ locked }: { locked: boolean }) {
               end={end}
               className={({ isActive }) =>
                 cx(
-                  "flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors",
-                  isActive ? "text-ink" : "text-faint hover:text-muted",
+                  "flex h-[75px] flex-col items-center justify-center gap-1.5 text-[11.5px] font-semibold transition-colors",
+                  isActive ? "text-gray-800" : "text-faint hover:text-muted",
                 )
               }
             >
@@ -265,8 +278,8 @@ function BottomTabs({ locked }: { locked: boolean }) {
 function Footer() {
   return (
     // Extra bottom padding on phones so the fixed tab bar never covers the footer or page content.
-    <footer className="border-t border-line bg-app pb-24 md:pb-0">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-2 gap-y-1 px-4 py-5 text-xs text-muted sm:px-6 lg:px-8">
+    <footer className="hidden bg-app md:block">
+      <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-4 pb-[30px] pt-5 text-[13px] text-muted md:px-10">
         <Link to="/credits" className="rounded hover:text-ink hover:underline">
           Credits
         </Link>

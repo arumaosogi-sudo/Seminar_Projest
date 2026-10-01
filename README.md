@@ -47,6 +47,7 @@ npm run dev                         # เปิด http://localhost:5173
 ```
 docs/plan/            ⚖️ ข้อบังคับ + requirement + stack + แผนงาน (อ่านก่อนเริ่มงาน)
 docs/ARCHITECTURE.md  สัญญา API, กติกา auth/ข้อสอบ, endpoint ทั้งหมด
+docs/DESIGN_NOTES.md  ค่าจาก Figma (สี ขนาด ฟอนต์ layout) + ข้อแตกต่างที่ตั้งใจ — อ่านก่อนทำหน้าใหม่
 docs/TEAMMATE_GUIDE.md คู่มือสำหรับเพื่อนในทีมที่รับทำหน้า Games / 3D / Tests
 shared/contract.ts    type + zod schema ที่ frontend และ API ใช้ร่วมกัน
 migrations/           schema ของ D1

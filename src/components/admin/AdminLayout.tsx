@@ -119,7 +119,7 @@ function AdminShell({ me }: { me: AdminMe }) {
             >
               <IconMenu size={20} />
             </button>
-            <Logo size={28} sub="Admin" />
+            <Logo size={29} sub="Admin" textClassName="text-[15px] font-semibold" />
           </header>
 
           {navOpen && <div className="fixed inset-0 z-40 bg-zinc-950/30 lg:hidden" aria-hidden="true" onClick={() => setNavOpen(false)} />}
@@ -127,7 +127,7 @@ function AdminShell({ me }: { me: AdminMe }) {
           <aside
             id="admin-sidebar"
             className={cx(
-              "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-line bg-surface transition-transform lg:sticky lg:top-0 lg:z-auto lg:h-dvh lg:w-60 lg:shrink-0 lg:translate-x-0",
+              "fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col bg-surface transition-transform lg:sticky lg:top-0 lg:z-auto lg:h-dvh lg:shrink-0 lg:translate-x-0",
               navOpen ? "translate-x-0 shadow-xl" : "-translate-x-full max-lg:invisible",
             )}
             aria-label="Admin navigation"
@@ -135,8 +135,9 @@ function AdminShell({ me }: { me: AdminMe }) {
             <Sidebar me={me} ctx={ctx} classesError={classesQ.isError} onClose={() => setNavOpen(false)} />
           </aside>
 
-          <main id="admin-main" className="min-w-0 flex-1 px-4 py-6 sm:px-8 lg:px-12 lg:py-10">
-            <div className="mx-auto max-w-[1200px]">
+          {/* Figma admin frames: 248 px sidebar, 40 px gutters, title block starts 26 px from the top */}
+          <main id="admin-main" className="min-w-0 flex-1 px-4 py-6 sm:px-8 lg:px-10 lg:pb-10 lg:pt-[26px]">
+            <div className="mx-auto max-w-[1360px]">
               <Suspense fallback={<PageLoader />}>
                 <Outlet />
               </Suspense>
@@ -158,14 +159,14 @@ function Sidebar({ me, ctx, classesError, onClose }: { me: AdminMe; ctx: AdminCl
 
   return (
     <>
-      <div className="flex items-center justify-between px-5 pt-6 pb-5">
-        <Logo sub="Admin" />
+      <div className="flex items-center justify-between px-6 pt-[26px]">
+        <Logo size={29} sub="Admin" textClassName="text-[15px] font-semibold" />
         <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-muted hover:bg-zinc-100 lg:hidden" aria-label="Close navigation">
           <IconClose />
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3" aria-label="Admin sections">
+      <nav className="mt-[31px] flex-1 overflow-y-auto px-4" aria-label="Admin sections">
         <ul className="space-y-1">
           {NAV.map(({ to, label, Icon }) => (
             <li key={to}>
@@ -173,12 +174,12 @@ function Sidebar({ me, ctx, classesError, onClose }: { me: AdminMe; ctx: AdminCl
                 to={to}
                 className={({ isActive }) =>
                   cx(
-                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
-                    isActive ? "bg-zinc-100 font-bold text-ink" : "font-medium text-zinc-600 hover:bg-zinc-50 hover:text-ink",
+                    "flex h-11 items-center gap-[13px] rounded-xl px-3 text-[15px] transition-colors",
+                    isActive ? "bg-[#e9eaee] font-semibold text-gray-800" : "text-muted hover:bg-zinc-50 hover:text-ink",
                   )
                 }
               >
-                <Icon size={18} />
+                <Icon size={20} />
                 {label}
               </NavLink>
             </li>
@@ -186,23 +187,25 @@ function Sidebar({ me, ctx, classesError, onClose }: { me: AdminMe; ctx: AdminCl
         </ul>
       </nav>
 
-      <div className="space-y-3 border-t border-line p-3">
-        <div className="rounded-2xl border border-line bg-app p-3">
-          <label htmlFor={selectId} className="block text-[10px] font-semibold tracking-wider text-muted uppercase">
+      <div className="px-4 pb-6">
+        <div className="rounded-xl bg-app px-3 py-[13px]">
+          <label htmlFor={selectId} className="block text-[12px] uppercase leading-4 text-faint">
             Current class
           </label>
           {ctx.loading ? (
-            <p className="mt-1.5 text-sm text-muted">Loading…</p>
+            <p className="mt-1 text-[13px] text-muted">Loading…</p>
           ) : classesError ? (
-            <p className="mt-1.5 text-xs text-danger">Couldn’t load classes.</p>
+            <p className="mt-1 text-xs text-danger">Couldn’t load classes.</p>
           ) : ctx.classes.length === 0 ? (
-            <p className="mt-1.5 text-sm text-muted">No active classes</p>
+            <p className="mt-1 text-[13px] text-muted">No active classes</p>
           ) : (
+            // Looks like plain text (Figma) but stays a native select so the instructor can switch class.
             <select
               id={selectId}
               value={ctx.classId ?? ""}
               onChange={(e) => ctx.setClassId(Number(e.target.value))}
-              className="mt-1.5 h-9 w-full rounded-lg border border-line bg-surface px-2 text-sm font-semibold outline-none focus:border-ink"
+              title="Change the current class"
+              className="mt-1 w-full cursor-pointer appearance-none truncate rounded bg-transparent p-0 text-[13px] font-semibold leading-5 text-ink outline-none focus-visible:ring-2 focus-visible:ring-tests"
             >
               {ctx.classes.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -213,19 +216,19 @@ function Sidebar({ me, ctx, classesError, onClose }: { me: AdminMe; ctx: AdminCl
           )}
         </div>
 
-        <div className="flex items-center gap-3 px-1">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-ink text-sm font-bold text-white" aria-hidden="true">
+        <div className="mt-[14px] flex items-center gap-[11px] px-2">
+          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#e9eaee] text-[13px] font-semibold text-gray-800" aria-hidden="true">
             {initial}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold" title={me.admin.email}>
-              {me.admin.email}
+            <p className="truncate text-[13px] font-semibold leading-[18px]" title={me.admin.email}>
+              {me.admin.name || me.admin.email}
             </p>
-            <p className="text-xs text-muted">admin · {method === "dev" ? "dev" : "Google"}</p>
+            <p className="text-[12px] leading-4 text-muted">admin · {method === "dev" ? "dev" : "Google"}</p>
           </div>
           <button
             type="button"
-            className="rounded-lg p-2 text-muted hover:bg-zinc-100 hover:text-ink disabled:opacity-50"
+            className="rounded-lg p-1.5 text-faint hover:bg-zinc-100 hover:text-ink disabled:opacity-50"
             aria-label="Sign out"
             title="Sign out"
             disabled={logout.isPending}

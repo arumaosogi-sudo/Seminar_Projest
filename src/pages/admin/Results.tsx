@@ -3,10 +3,10 @@ import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import type { AdminClass, AdminResults, AdminTestSummary, TestKind } from "@shared/contract";
 import { api } from "@/lib/api";
-import { Badge, Button, Card, cx, DraftBadge, EmptyState, PageHeader, PageLoader, Select } from "@/components/ui";
+import { Button, Card, cx, DraftBadge, EmptyState, PageHeader, PageLoader } from "@/components/ui";
 import { useAdminClass } from "@/components/admin/adminClass";
-import { GroupedBarChart, PercentBars, type BarSeries } from "@/components/admin/charts";
-import { CardTitle, QueryError, SearchBox, StatCard } from "@/components/admin/controls";
+import { PairedBars, PercentBars, type BarSeries } from "@/components/admin/charts";
+import { FilterSelect, QueryError, SearchBox, StatCard, StatusChip } from "@/components/admin/controls";
 import { defaultTestIds, distributionCounts, distributionMaxX, exportResultsToExcel, prePost, rowChange } from "@/components/admin/exportResults";
 import { errorMessage, fmtNum, signed } from "@/components/admin/format";
 import { IconChevronDown, IconDownload } from "@/components/admin/icons";
@@ -17,7 +17,7 @@ type StatusFilter = "active" | "all";
 const MAX_PICKED_TESTS = 20;
 
 const SERIES_STYLE: Record<TestKind, { fill: string; swatch: string }[]> = {
-  pretest: [{ fill: "fill-zinc-400", swatch: "bg-zinc-400" }],
+  pretest: [{ fill: "fill-[#c4c4cc]", swatch: "bg-[#c4c4cc]" }],
   posttest: [{ fill: "fill-tests", swatch: "bg-tests" }],
   other: [
     { fill: "fill-games", swatch: "bg-games" },
@@ -36,7 +36,6 @@ export default function Results() {
   const [picked, setPicked] = useState<number[] | null>(null); // null = defaults
   const [status, setStatus] = useState<StatusFilter>("active");
   const [search, setSearch] = useState("");
-  const [missingOnly, setMissingOnly] = useState(false);
   const [exporting, setExporting] = useState(false);
 
   const classValue = classSel ?? (currentId ? String(currentId) : "all");
@@ -65,9 +64,8 @@ export default function Results() {
     return data.rows
       .filter((r) => status === "all" || r.enrollmentStatus === "active") // server already filters; keep as a guard
       .filter((r) => !term || r.studentCode.includes(term) || (r.firstName ?? "").toLowerCase().includes(term))
-      .filter((r) => !missingOnly || data.tests.some((t) => r.scores[String(t.testId)] === null || r.scores[String(t.testId)] === undefined))
       .sort((a, b) => a.className.localeCompare(b.className) || a.studentCode.localeCompare(b.studentCode));
-  }, [data, search, status, missingOnly]);
+  }, [data, search, status]);
 
   async function onExport() {
     if (!data) return;
@@ -98,6 +96,11 @@ export default function Results() {
   const itemTest = pp?.post ?? data?.tests[0] ?? null;
   const items = itemTest ? (data?.itemAnalysis.find((i) => i.testId === itemTest.testId)?.items ?? []) : [];
 
+  // Figma 4th card: how many students are still missing the posttest (falls back to the last selected test).
+  const missingTest = pp?.post ?? data?.tests[data.tests.length - 1] ?? null;
+  const notTaken = data && missingTest ? data.rows.filter((r) => r.scores[String(missingTest.testId)] == null).length : null;
+  const statusLabel = status === "active" ? "Active only" : "Include withdrawn";
+
   return (
     <>
       <PageHeader
@@ -106,49 +109,52 @@ export default function Results() {
         actions={
           <>
             <DraftBadge />
-            <Button accent="success" onClick={() => void onExport()} loading={exporting} disabled={!data || resultsQ.isFetching}>
-              <IconDownload size={16} /> Export Excel
+            <Button
+              accent="success"
+              size="lg"
+              className="w-[156px] whitespace-nowrap rounded-xl px-0"
+              onClick={() => void onExport()}
+              loading={exporting}
+              disabled={!data || resultsQ.isFetching}
+            >
+              <IconDownload size={18} /> Export Excel
             </Button>
           </>
         }
       />
 
-      {/* Filters */}
-      <Card className="mb-6 flex flex-wrap items-end gap-4 p-4">
-        <div className="w-full sm:w-60">
-          <Select name="results-class" label="Class" value={classValue} onChange={(e) => setClassSel(e.target.value)}>
-            <option value="all">All classes</option>
-            <optgroup label="Active">
+      {/* Filters (Figma: three white fields, no card) */}
+      <div className="mb-[25px] flex flex-wrap items-center gap-[13px]">
+        <FilterSelect label="Class" value={classValue} onChange={setClassSel} display={classLabel} className="w-full sm:w-[239px]">
+          <option value="all">All classes</option>
+          <optgroup label="Active">
+            {classes
+              .filter((c) => c.status === "active")
+              .map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+          </optgroup>
+          {classes.some((c) => c.status === "archived") && (
+            <optgroup label="Archived">
               {classes
-                .filter((c) => c.status === "active")
+                .filter((c) => c.status === "archived")
                 .map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>
                 ))}
             </optgroup>
-            {classes.some((c) => c.status === "archived") && (
-              <optgroup label="Archived">
-                {classes
-                  .filter((c) => c.status === "archived")
-                  .map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-              </optgroup>
-            )}
-          </Select>
-        </div>
+          )}
+        </FilterSelect>
         <TestPicker tests={tests} selected={testIds} onChange={setPicked} />
-        <div className="w-full sm:w-52">
-          <Select name="results-status" label="Status" value={status} onChange={(e) => setStatus(e.target.value as StatusFilter)}>
-            <option value="active">Active only</option>
-            <option value="all">Include withdrawn</option>
-          </Select>
-        </div>
-        {resultsQ.isFetching && data && <span className="pb-2.5 text-xs text-muted">Updating…</span>}
-      </Card>
+        <FilterSelect label="Status" value={status} onChange={(v) => setStatus(v as StatusFilter)} display={statusLabel} className="w-full sm:w-[199px]">
+          <option value="active">Active only</option>
+          <option value="all">Include withdrawn</option>
+        </FilterSelect>
+        {resultsQ.isFetching && data && <span className="text-xs text-muted">Updating…</span>}
+      </div>
 
       {testsQ.isPending || classesQ.isPending ? (
         <PageLoader />
@@ -165,43 +171,63 @@ export default function Results() {
       ) : resultsQ.isError ? (
         <QueryError error={resultsQ.error} onRetry={() => void resultsQ.refetch()} what="results" />
       ) : data ? (
-        <div className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="space-y-[25px]">
+          <div className="grid gap-[17px] sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               label="Pretest mean ± SD"
               value={pp?.pre ? `${fmtNum(pp.pre.stats.mean)} ± ${fmtNum(pp.pre.stats.sd)}` : "—"}
-              sub={pp?.pre ? `n = ${pp.pre.stats.n} · out of ${pp.pre.maxScore}` : "No pretest selected"}
+              sub={pp?.pre ? statLine(pp.pre.stats) : "No pretest selected"}
             />
             <StatCard
               label="Posttest mean ± SD"
               tone="tests"
               value={pp?.post ? `${fmtNum(pp.post.stats.mean)} ± ${fmtNum(pp.post.stats.sd)}` : "—"}
-              sub={pp?.post ? `n = ${pp.post.stats.n} · out of ${pp.post.maxScore}` : "No posttest selected"}
+              sub={pp?.post ? statLine(pp.post.stats) : "No posttest selected"}
             />
             <StatCard
-              label="Mean gain"
+              label="Mean change"
               tone="success"
               value={data.paired ? signed(data.paired.meanGain) : "—"}
               sub={data.paired ? `paired, n = ${data.paired.n}` : "Select one pretest and one posttest"}
             />
-            <StatCard label="Improved" value={data.paired ? data.paired.improved : "—"} sub={data.paired ? `of ${data.paired.n} students who took both` : " "} />
+            <StatCard
+              label="Not taken yet"
+              value={notTaken ?? "—"}
+              sub={missingTest ? `${missingTest.kind === "posttest" ? "posttest" : missingTest.title} · list below` : " "}
+            />
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-2">
-            <Card className="p-5">
-              <CardTitle>Score distribution</CardTitle>
-              <div className="mt-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-[18px] xl:grid-cols-[minmax(0,612fr)_minmax(0,482fr)]">
+            <Card className="px-6 pb-6 pt-[22px]">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-[17px] font-semibold leading-6 text-ink">Score distribution</h2>
+                <div className="flex flex-wrap gap-4 text-[12px] text-muted">
+                  {series.map((s) => (
+                    <span key={s.id} className="inline-flex items-center gap-[7px]" title={s.label}>
+                      <span className={cx("size-2.5 rounded-[3px]", s.swatchClass)} aria-hidden="true" />
+                      {shortKind(data.tests.find((t) => String(t.testId) === s.id))}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-[50px] overflow-x-auto">
                 {data.tests.every((t) => t.stats.n === 0) ? (
                   <p className="py-12 text-center text-sm text-muted">No submissions yet.</p>
                 ) : (
-                  <GroupedBarChart series={series} maxX={maxX} />
+                  <PairedBars series={series} maxX={maxX} />
                 )}
               </div>
             </Card>
-            <Card className="p-5">
-              <CardTitle>Item analysis · {itemTest?.kind === "posttest" ? "posttest" : (itemTest?.title ?? "—")}</CardTitle>
-              <p className="mt-1 text-xs text-muted">% of students who answered each question correctly (latest version). Red = below 60%.</p>
-              <div className="mt-4 max-h-[320px] overflow-y-auto pr-1">
+            <Card className="px-6 pb-6 pt-[22px]">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-[17px] font-semibold leading-6 text-ink">
+                  Item analysis · {itemTest?.kind === "posttest" ? "posttest" : (itemTest?.title ?? "—")}
+                </h2>
+                <span className="text-[12px] text-muted" title="% of students who answered each question correctly (latest version). Red = below 60%.">
+                  % correct
+                </span>
+              </div>
+              <div className="mt-[13px] max-h-[280px] overflow-y-auto pr-1">
                 {items.length === 0 ? (
                   <p className="py-12 text-center text-sm text-muted">No answers to analyse yet.</p>
                 ) : (
@@ -215,37 +241,37 @@ export default function Results() {
             </Card>
           </div>
 
-          <Card className="overflow-hidden">
-            <div className="flex flex-wrap items-center justify-between gap-3 p-5 pb-3">
-              <CardTitle>
-                Scores <span className="ml-1 normal-case tracking-normal text-faint">({rows.length})</span>
-              </CardTitle>
-              <div className="flex flex-wrap items-center gap-3">
-                <label className="inline-flex items-center gap-2 text-sm">
-                  <input type="checkbox" className="size-4 accent-ink" checked={missingOnly} onChange={(e) => setMissingOnly(e.target.checked)} />
-                  Missing a test
-                </label>
-                <div className="w-64">
-                  <SearchBox value={search} onChange={setSearch} placeholder="Student ID or name" label="Search students" />
-                </div>
+          <Card className="overflow-hidden pb-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 pl-5 pr-[18px] pt-[17px]">
+              <h2 className="text-[17px] font-semibold leading-6 text-ink">Scores</h2>
+              <div className="w-full sm:w-[239px]">
+                <SearchBox value={search} onChange={setSearch} placeholder="Search student ID..." label="Search by student ID or name" />
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-sm">
+            <div className="relative mt-[28px] overflow-x-auto">
+              <table className="w-full min-w-[760px] table-fixed text-[14px]">
                 <caption className="sr-only">Scores per student</caption>
+                <colgroup>
+                  <col className="w-[224px]" />
+                  <col className="w-[223px]" />
+                  <col className="w-[160px]" />
+                  {data.tests.map((t) => (
+                    <col key={t.testId} className="w-[160px]" />
+                  ))}
+                  {pp?.paired && <col />}
+                </colgroup>
                 <thead>
-                  <tr className="border-y border-line text-left text-[11px] tracking-wider text-muted uppercase">
-                    <th scope="col" className="px-5 py-2.5 font-semibold">Student ID</th>
-                    <th scope="col" className="px-3 py-2.5 font-semibold">First name</th>
-                    <th scope="col" className="px-3 py-2.5 font-semibold">Section</th>
+                  <tr className="text-left text-[12px] uppercase text-faint">
+                    <th scope="col" className="pb-[14px] pl-5 font-semibold">Student ID</th>
+                    <th scope="col" className="pb-[14px] font-semibold">First name</th>
+                    <th scope="col" className="pb-[14px] font-semibold">Section</th>
                     {data.tests.map((t) => (
-                      <th key={t.testId} scope="col" className="px-3 py-2.5 text-right font-semibold" title={t.title}>
-                        <span className="block max-w-[160px] truncate">{t.title}</span>
-                        <span className="font-normal normal-case">/{t.maxScore}</span>
+                      <th key={t.testId} scope="col" className="truncate pb-[14px] pr-3 font-semibold" title={`${t.title} (out of ${t.maxScore})`}>
+                        {t.kind === "other" ? t.title : t.kind}
                       </th>
                     ))}
                     {pp?.paired && (
-                      <th scope="col" className="px-5 py-2.5 text-right font-semibold">
+                      <th scope="col" className="pb-[14px] pr-5 font-semibold">
                         Change
                       </th>
                     )}
@@ -255,37 +281,38 @@ export default function Results() {
                   {rows.length === 0 ? (
                     <tr>
                       <td colSpan={3 + data.tests.length + (pp?.paired ? 1 : 0)} className="px-5 py-10 text-center text-muted">
-                        {data.rows.length === 0 ? "No students in this selection." : "No students match the filters."}
+                        {data.rows.length === 0 ? "No students in this selection." : "No students match the search."}
                       </td>
                     </tr>
                   ) : (
                     rows.map((r) => {
                       const change = pp?.paired ? rowChange(r, pp.pre?.testId, pp.post?.testId) : null;
+                      const missing = data.tests.some((t) => r.scores[String(t.testId)] == null);
                       return (
-                        <tr key={`${r.className}-${r.studentCode}`} className={cx("border-b border-line last:border-b-0", r.enrollmentStatus === "withdrawn" && "text-muted")}>
-                          <td className="px-5 py-2.5 font-mono text-[13px]">{r.studentCode}</td>
-                          <td className="px-3 py-2.5">
+                        <tr key={`${r.className}-${r.studentCode}`} className={cx("h-[49px]", r.enrollmentStatus === "withdrawn" ? "text-muted" : "text-ink")}>
+                          <td className="pl-5 tabular-nums">{r.studentCode}</td>
+                          <td className="truncate pr-3">
                             {r.firstName ?? <span className="text-faint">—</span>}
-                            {r.enrollmentStatus === "withdrawn" && <Badge className="ml-2">Withdrawn</Badge>}
+                            {r.enrollmentStatus === "withdrawn" && <StatusChip tone="neutral">Withdrawn</StatusChip>}
                           </td>
-                          <td className="px-3 py-2.5 whitespace-nowrap">{r.className}</td>
+                          <td className="whitespace-nowrap">{shortSection(r.className)}</td>
                           {data.tests.map((t) => {
                             const v = r.scores[String(t.testId)];
                             return (
-                              <td key={t.testId} className="px-3 py-2.5 text-right tabular-nums">
-                                {v === null || v === undefined ? <Badge className="bg-zinc-100 font-medium text-muted">Not taken</Badge> : v}
+                              <td key={t.testId} className="tabular-nums">
+                                {v == null ? "—" : v}
                               </td>
                             );
                           })}
                           {pp?.paired && (
-                            <td
-                              className={cx(
-                                "px-5 py-2.5 text-right font-semibold tabular-nums",
-                                change !== null && change > 0 && "text-success",
-                                change !== null && change < 0 && "text-danger",
+                            <td className="pr-5 font-semibold tabular-nums">
+                              {change !== null ? (
+                                <span className={cx(change > 0 && "text-success", change < 0 && "text-danger")}>{signed(change, 0)}</span>
+                              ) : missing ? (
+                                <span className="inline-flex h-[25px] items-center rounded-full bg-[#e9eaee] px-3 text-[12px] font-semibold text-gray-800">Not taken</span>
+                              ) : (
+                                <span className="font-normal text-faint">—</span>
                               )}
-                            >
-                              {change === null ? <span className="font-normal text-faint">—</span> : signed(change, 0)}
                             </td>
                           )}
                         </tr>
@@ -300,6 +327,22 @@ export default function Results() {
       ) : null}
     </>
   );
+}
+
+/** "n = 46 · min 2 · max 10" (Figma stat-card note). */
+function statLine(s: { n: number; min?: number | null; max?: number | null }) {
+  return s.min != null && s.max != null ? `n = ${s.n} · min ${s.min} · max ${s.max}` : `n = ${s.n}`;
+}
+
+/** "2569/1 · Section 1" → "Sec 1" (Figma scores table). */
+function shortSection(className: string) {
+  const m = /Section\s+(\d+)/.exec(className);
+  return m ? `Sec ${m[1]}` : className;
+}
+
+function shortKind(t: { kind: TestKind; title: string } | undefined) {
+  if (!t) return "";
+  return t.kind === "pretest" ? "Pretest" : t.kind === "posttest" ? "Posttest" : t.title;
 }
 
 /* ───────── Tests multi-select (disclosure + checkbox list) ───────── */
@@ -329,12 +372,21 @@ function TestPicker({ tests, selected, onChange }: { tests: AdminTestSummary[]; 
     };
   }, [open]);
 
-  const names = tests.filter((t) => selected.includes(t.id)).map((t) => t.title);
-  const summary = names.length === 0 ? "None" : names.length <= 2 ? names.join(", ") : `${names.length} tests`;
+  const chosen = tests.filter((t) => selected.includes(t.id));
+  const kinds = chosen.map((t) => t.kind);
+  // Figma shows "Pretest + Posttest" for the default pair; otherwise list titles or a count.
+  const summary =
+    chosen.length === 0
+      ? "None"
+      : chosen.length === 2 && kinds.includes("pretest") && kinds.includes("posttest")
+        ? "Pretest + Posttest"
+        : chosen.length <= 2
+          ? chosen.map((t) => t.title).join(", ")
+          : `${chosen.length} tests`;
 
   return (
-    <div ref={ref} className="relative w-full sm:w-72">
-      <span id={labelId} className="mb-1.5 block text-sm font-semibold">
+    <div ref={ref} className="relative w-full sm:w-[279px]">
+      <span id={labelId} className="sr-only">
         Tests
       </span>
       <button
@@ -345,12 +397,13 @@ function TestPicker({ tests, selected, onChange }: { tests: AdminTestSummary[]; 
         aria-labelledby={labelId}
         aria-describedby={`${listId}-sum`}
         onClick={() => setOpen((o) => !o)}
-        className="flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-line bg-surface px-3 text-left text-sm outline-none focus:border-ink"
+        className="relative flex h-[43px] w-full items-center gap-1.5 rounded-[11.5px] border border-line bg-surface pl-4 pr-9 text-left outline-none focus:border-gray-800"
       >
-        <span id={`${listId}-sum`} className="truncate">
+        <span className="text-[13px] text-muted">Tests:</span>
+        <span id={`${listId}-sum`} className="truncate text-[14px] font-semibold text-ink">
           {summary}
         </span>
-        <IconChevronDown size={16} className="shrink-0 text-muted" />
+        <IconChevronDown size={12} strokeWidth={3} className="absolute right-3.5 shrink-0 text-faint" />
       </button>
       {open && (
         <div id={listId} className="absolute z-20 mt-1 max-h-72 w-full min-w-64 overflow-y-auto rounded-xl border border-line bg-surface p-1.5 shadow-lg">

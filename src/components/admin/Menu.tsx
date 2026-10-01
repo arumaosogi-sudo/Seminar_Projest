@@ -10,7 +10,7 @@ export interface MenuItem {
 }
 
 /** "⋯" row menu: button + role="menu" popup, arrow-key navigation, Esc / outside click to close. */
-export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) {
+export function RowMenu({ label, items, active = false }: { label: string; items: MenuItem[]; /** Figma: the selected row's ⋯ button sits on a grey tile. */ active?: boolean }) {
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
@@ -66,9 +66,9 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
             setOpen(true);
           }
         }}
-        className="rounded-lg p-1.5 text-muted hover:bg-zinc-100 hover:text-ink"
+        className={cx("grid size-[26px] place-items-center rounded-lg hover:bg-[#f0f0f2] hover:text-ink", active || open ? "bg-[#f0f0f2] text-ink" : "text-muted")}
       >
-        <IconMore />
+        <IconMore size={18} />
       </button>
       {open && (
         <div id={menuId} role="menu" aria-label={label} onKeyDown={onMenuKey} className="absolute right-0 z-20 mt-1 w-48 rounded-xl border border-line bg-surface p-1 shadow-lg">

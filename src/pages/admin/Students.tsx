@@ -3,37 +3,31 @@ import { Link } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AdminClass, AdminStudentRow } from "@shared/contract";
 import { api } from "@/lib/api";
-import { Badge, Button, Card, cx, DraftBadge, EmptyState, ErrorNote, PageHeader, PageLoader, Select } from "@/components/ui";
+import { Button, Card, cx, DraftBadge, EmptyState, ErrorNote, PageHeader, PageLoader, Spinner } from "@/components/ui";
 import { useAdminClass } from "@/components/admin/adminClass";
-import { CardTitle, QueryError, SearchBox } from "@/components/admin/controls";
+import { FilterPills, QueryError, SearchBox, StatusChip } from "@/components/admin/controls";
 import { MAX_ROSTER_ENTRIES, parseRosterCsv, type RosterParseResult } from "@/components/admin/csv";
 import { exportWholeClass } from "@/components/admin/exportResults";
 import { findOtherEnrollments } from "@/components/admin/students";
-import { errorMessage, formatDate, formatDateTime, relativeTime } from "@/components/admin/format";
-import { IconUpload } from "@/components/admin/icons";
+import { errorMessage, formatDateTime } from "@/components/admin/format";
 import { adminKeys } from "@/components/admin/keys";
 import { RowMenu } from "@/components/admin/Menu";
 import { ConfirmDialog, Modal } from "@/components/admin/Modal";
 import { useToast } from "@/components/admin/toastContext";
 
+// The section comes from the sidebar's "Current class" (Figma has no class picker on this page).
 type Filter = "active" | "withdrawn" | "not_joined" | "all";
-const FILTERS: { value: Filter; label: string }[] = [
-  { value: "active", label: "Active" },
-  { value: "withdrawn", label: "Withdrawn" },
-  { value: "not_joined", label: "Not joined" },
-  { value: "all", label: "All" },
-];
 
 const rowKey = (r: AdminStudentRow) => (r.enrollmentId !== null ? `e${r.enrollmentId}` : `r${r.studentCode}`);
 
 function StatusBadge({ status }: { status: AdminStudentRow["status"] }) {
-  if (status === "active") return <Badge tone="success">Active</Badge>;
-  if (status === "withdrawn") return <Badge>Withdrawn</Badge>;
-  return <Badge className="border border-line bg-transparent text-muted">Not joined</Badge>;
+  if (status === "active") return <StatusChip tone="success">Active</StatusChip>;
+  if (status === "withdrawn") return <StatusChip tone="neutral">Withdrawn</StatusChip>;
+  return <StatusChip tone="neutral">Not joined</StatusChip>;
 }
 
 export default function Students() {
-  const { classes, classId, currentClass, setClassId, loading } = useAdminClass();
+  const { classes, classId, currentClass, loading } = useAdminClass();
 
   if (loading) return <PageLoader />;
   if (!classId || !currentClass)
@@ -45,10 +39,10 @@ export default function Students() {
         </EmptyState>
       </>
     );
-  return <StudentsForClass key={classId} cls={currentClass} classes={classes} onClassChange={setClassId} />;
+  return <StudentsForClass key={classId} cls={currentClass} classes={classes} />;
 }
 
-function StudentsForClass({ cls, classes, onClassChange }: { cls: AdminClass; classes: AdminClass[]; onClassChange: (id: number) => void }) {
+function StudentsForClass({ cls, classes }: { cls: AdminClass; classes: AdminClass[] }) {
   const qc = useQueryClient();
   const toast = useToast();
   const q = useQuery({
@@ -62,6 +56,7 @@ function StudentsForClass({ cls, classes, onClassChange }: { cls: AdminClass; cl
   const [exported, setExported] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [danger, setDanger] = useState<null | "anonymize" | "delete">(null);
+  const [removeOpen, setRemoveOpen] = useState(false);
   const [checkingDelete, setCheckingDelete] = useState(false);
   const [deleteBlockedBy, setDeleteBlockedBy] = useState<AdminStudentRow[] | null>(null);
 
@@ -135,6 +130,13 @@ function StudentsForClass({ cls, classes, onClassChange }: { cls: AdminClass; cl
   }
 
   const withdrawn = counts.withdrawn;
+  const pills: { value: Filter; label: string }[] = [
+    { value: "active", label: `Active (${counts.active})` },
+    { value: "withdrawn", label: `Withdrawn (${withdrawn})` },
+    // Not in the Figma frame; only shown when roster students haven't joined yet so they stay reachable.
+    ...(counts.not_joined > 0 ? [{ value: "not_joined" as Filter, label: `Not joined (${counts.not_joined})` }] : []),
+  ];
+
   return (
     <>
       <PageHeader
@@ -143,45 +145,23 @@ function StudentsForClass({ cls, classes, onClassChange }: { cls: AdminClass; cl
         actions={
           <>
             <DraftBadge />
-            <Button variant="outline" onClick={() => setImportOpen(true)}>
-              <IconUpload size={16} /> Import roster (CSV)
-            </Button>
+            <button
+              type="button"
+              onClick={() => setImportOpen(true)}
+              className="h-[43px] whitespace-nowrap rounded-[11.5px] border border-line bg-surface px-5 text-[15px] font-semibold text-ink hover:bg-zinc-50"
+            >
+              Import roster (CSV)
+            </button>
           </>
         }
       />
 
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <Card className="min-w-0 p-5">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter by status">
-              {FILTERS.map((f) => (
-                <button
-                  key={f.value}
-                  type="button"
-                  aria-pressed={filter === f.value}
-                  onClick={() => setFilter(f.value)}
-                  className={cx(
-                    "rounded-full px-3 py-1.5 text-sm font-semibold transition-colors",
-                    filter === f.value ? "bg-ink text-white" : "bg-zinc-100 text-zinc-600 hover:text-ink",
-                  )}
-                >
-                  {f.label} <span className="font-normal opacity-70">{counts[f.value]}</span>
-                </button>
-              ))}
-            </div>
-            <div className="flex w-full flex-wrap gap-2 sm:w-auto">
-              <div className="w-full sm:w-52">
-                <Select name="students-class" aria-label="Class" value={cls.id} onChange={(e) => onClassChange(Number(e.target.value))}>
-                  {classes.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <div className="w-full sm:w-56">
-                <SearchBox value={search} onChange={setSearch} placeholder="Student ID, name, e-mail" label="Search students" />
-              </div>
+      <div className="grid items-start gap-[25px] xl:grid-cols-[minmax(0,1fr)_339px]">
+        <Card className="min-w-0 px-[19px] pb-[15px] pt-[17px]">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <FilterPills<Filter> label="Filter by status" value={filter} onChange={setFilter} options={pills} />
+            <div className="w-full sm:w-[239px]">
+              <SearchBox value={search} onChange={setSearch} placeholder="Search ID or name..." label="Search by student ID, name or e-mail" />
             </div>
           </div>
 
@@ -200,16 +180,23 @@ function StudentsForClass({ cls, classes, onClassChange }: { cls: AdminClass; cl
           ) : rows.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted">No students match.</p>
           ) : (
-            <div className="-mx-5 mt-4 overflow-x-auto">
-              <table className="w-full min-w-[560px] text-sm">
+            <div className="relative -mx-[19px] mt-[28px] overflow-x-auto">
+              <table className="w-full min-w-[640px] table-fixed text-[14px]">
                 <caption className="sr-only">Students in {cls.name}</caption>
+                <colgroup>
+                  <col className="w-[167px]" />
+                  <col className="w-[167px]" />
+                  <col className="w-[199px]" />
+                  <col />
+                  <col className="w-[64px]" />
+                </colgroup>
                 <thead>
-                  <tr className="border-b border-line text-left text-[11px] tracking-wider text-muted uppercase">
-                    <th scope="col" className="px-5 py-2.5 font-semibold">Student ID</th>
-                    <th scope="col" className="px-3 py-2.5 font-semibold">First name</th>
-                    <th scope="col" className="px-3 py-2.5 font-semibold">Joined</th>
-                    <th scope="col" className="px-3 py-2.5 font-semibold">Status</th>
-                    <th scope="col" className="w-12 px-5 py-2.5">
+                  <tr className="text-left text-[12px] uppercase text-faint">
+                    <th scope="col" className="pb-[14px] pl-5 font-semibold">Student ID</th>
+                    <th scope="col" className="pb-[14px] font-semibold">First name</th>
+                    <th scope="col" className="pb-[14px] font-semibold">Joined</th>
+                    <th scope="col" className="pb-[14px] font-semibold">Status</th>
+                    <th scope="col" className="pb-[14px] pr-5">
                       <span className="sr-only">Actions</span>
                     </th>
                   </tr>
@@ -230,27 +217,40 @@ function StudentsForClass({ cls, classes, onClassChange }: { cls: AdminClass; cl
                             setSelectedKey(k);
                           }
                         }}
-                        className={cx("cursor-pointer border-b border-line outline-none last:border-b-0 focus-visible:bg-zinc-50", isSel ? "bg-zinc-100" : "hover:bg-zinc-50")}
+                        className="h-[52.5px] cursor-pointer text-ink outline-none transition-colors hover:bg-zinc-50 focus-visible:bg-zinc-50"
                       >
-                        <td className="px-5 py-2.5 font-mono text-[13px]">{r.studentCode}</td>
-                        <td className="px-3 py-2.5">{r.firstName ?? <span className="text-faint">—</span>}</td>
-                        <td className="px-3 py-2.5 text-muted" title={formatDateTime(r.joinedAt)}>
-                          {r.joinedAt ? formatDate(r.joinedAt) : "—"}
+                        <td className="pl-5 tabular-nums">{r.studentCode}</td>
+                        <td className="truncate pr-3">{r.firstName ?? <span className="text-faint">—</span>}</td>
+                        <td className="tabular-nums" title={formatDateTime(r.joinedAt)}>
+                          {joinedLabel(r.joinedAt)}
                         </td>
-                        <td className="px-3 py-2.5">
+                        <td>
                           <StatusBadge status={r.status} />
                         </td>
-                        <td className="px-5 py-1.5 text-right">
+                        <td className="pr-5 text-right">
                           <RowMenu
                             label={`Actions for ${r.studentCode}`}
+                            active={isSel}
                             items={[
-                              { label: "View details", onSelect: () => setSelectedKey(k) },
+                              { label: "Select", onSelect: () => setSelectedKey(k) },
                               ...(r.status === "active"
                                 ? [{ label: "Withdraw", onSelect: () => setStatus.mutate({ r, status: "withdrawn" }) }]
                                 : r.status === "withdrawn"
                                   ? [{ label: "Reactivate", onSelect: () => setStatus.mutate({ r, status: "active" }) }]
                                   : []),
                               ...(r.enrollmentId !== null ? [{ label: "Move to section…", onSelect: () => setSelectedKey(k) }] : []),
+                              ...(r.studentId !== null
+                                ? [
+                                    {
+                                      label: "Delete / anonymize…",
+                                      danger: true,
+                                      onSelect: () => {
+                                        setSelectedKey(k);
+                                        setRemoveOpen(true);
+                                      },
+                                    },
+                                  ]
+                                : []),
                             ]}
                           />
                         </td>
@@ -263,80 +263,86 @@ function StudentsForClass({ cls, classes, onClassChange }: { cls: AdminClass; cl
           )}
         </Card>
 
-        <div className="space-y-6">
-          {selected ? (
-            <SelectedStudent
-              key={rowKey(selected)}
-              r={selected}
-              cls={cls}
-              classes={classes}
-              busy={setStatus.isPending}
-              onStatus={(status) => setStatus.mutate({ r: selected, status })}
-              onMoved={() => {
-                setSelectedKey(null);
-                invalidate();
-              }}
-            />
-          ) : (
-            <Card className="p-5">
-              <CardTitle>Selected student</CardTitle>
-              <p className="mt-2 text-sm text-muted">Select a row to move, withdraw or reactivate a student.</p>
-            </Card>
-          )}
+        <div className="space-y-[17px]">
+          <StudentActions
+            key={selected ? rowKey(selected) : "none"}
+            r={selected}
+            cls={cls}
+            classes={classes}
+            busy={setStatus.isPending}
+            onStatus={(status) => selected && setStatus.mutate({ r: selected, status })}
+            onMoved={() => {
+              setSelectedKey(null);
+              invalidate();
+            }}
+          />
 
-          <Card className="border-red-300 p-5">
-            <CardTitle>Data retention</CardTitle>
-            <ol className="mt-3 space-y-3 text-sm">
-              <li>
-                <p className="font-semibold">1 · Withdraw</p>
-                <p className="text-xs text-muted">Hides the student from results and blocks sign-in. Data is kept — reversible any time.</p>
-              </li>
-              <li>
-                <p className="font-semibold">2 · Archive class</p>
-                <p className="text-xs text-muted">
-                  End of semester: the whole section becomes read-only and hidden, still exportable. Do it from{" "}
-                  <Link to="/admin/classes" className="underline">
-                    Classes
-                  </Link>
-                  .
-                </p>
-              </li>
-              <li>
-                <p className="font-semibold text-danger">3 · Delete / Anonymize</p>
-                <p className="text-xs text-muted">
-                  Irreversible. <strong>Anonymize</strong> removes the ID, name and e-mail but keeps scores; <strong>Delete</strong> removes the student and all their
-                  attempts. Export the class first.
-                </p>
-              </li>
+          <section className="rounded-[20px] border border-red-200 bg-surface px-[21px] pb-6 pt-6" aria-labelledby="retention-title">
+            <h2 id="retention-title" className="text-[12px] font-semibold uppercase leading-4 text-red-700">
+              Data retention
+            </h2>
+            <ol className="mt-[17px] space-y-[13px]">
+              {[
+                { n: 1, title: "Withdraw", sub: "Per student · reversible" },
+                { n: 2, title: "Archive class", sub: "Whole section read-only · reversible" },
+                { n: 3, title: "Delete / anonymize", sub: "Export required first · type the student ID to confirm · not reversible", danger: true },
+              ].map((s) => (
+                <li key={s.n} className="flex gap-3">
+                  <span
+                    className={cx(
+                      "mt-0.5 grid size-6 shrink-0 place-items-center rounded-full text-[12px] font-semibold",
+                      s.danger ? "bg-danger-soft text-red-700" : "bg-[#f0f0f2] text-muted",
+                    )}
+                  >
+                    {s.n}
+                  </span>
+                  <span>
+                    <span className={cx("block text-[13px] font-semibold leading-5", s.danger ? "text-red-700" : "text-ink")}>{s.title}</span>
+                    <span className="block text-[12px] leading-[17px] text-muted">{s.sub}</span>
+                  </span>
+                </li>
+              ))}
             </ol>
-            <div className="mt-4 space-y-2">
-              <Button block variant={exported ? "outline" : "solid"} accent="success" loading={exporting} onClick={() => void onExport()}>
-                {exported ? "✓ Exported — export again" : "Export this class first"}
-              </Button>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  disabled={!exported || !selected?.studentId}
-                  onClick={() => setDanger("anonymize")}
-                  title={!exported ? "Export the class first" : !selected?.studentId ? "Select a student who has signed in" : undefined}
-                >
-                  Anonymize
-                </Button>
-                <Button
-                  accent="danger"
-                  disabled={!exported || !selected?.studentId}
-                  loading={checkingDelete}
-                  onClick={() => selected && void requestDelete(selected)}
-                  title={!exported ? "Export the class first" : !selected?.studentId ? "Select a student who has signed in" : undefined}
-                >
-                  Delete
-                </Button>
-              </div>
-              {exported && !selected?.studentId && <p className="text-xs text-muted">Select a student who has signed in to anonymize or delete them.</p>}
-            </div>
-          </Card>
+            <p className="mt-[17px] text-[12px] leading-[17px] text-muted">Every move / withdraw / delete is written to the audit log.</p>
+          </section>
         </div>
       </div>
+
+      {/* Step 3 flow — export first, then anonymize or delete (opened from the row menu) */}
+      <Modal
+        open={removeOpen && !!selected}
+        onClose={() => setRemoveOpen(false)}
+        title={selected ? `Delete or anonymize ${selected.studentCode}` : "Delete or anonymize"}
+        size="sm"
+        footer={
+          <Button variant="outline" onClick={() => setRemoveOpen(false)}>
+            Close
+          </Button>
+        }
+      >
+        <div className="space-y-4 text-sm text-zinc-700">
+          <p>
+            Irreversible. <strong>Anonymize</strong> removes the ID, name and e-mail but keeps the scores; <strong>Delete</strong> removes the student and all their attempts.
+          </p>
+          <Button block variant={exported ? "outline" : "solid"} accent="success" loading={exporting} onClick={() => void onExport()}>
+            {exported ? "✓ Exported — export again" : `1 · Export ${cls.name} first`}
+          </Button>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="outline" disabled={!exported} onClick={() => setDanger("anonymize")} title={!exported ? "Export the class first" : undefined}>
+              Anonymize
+            </Button>
+            <Button
+              accent="danger"
+              disabled={!exported}
+              loading={checkingDelete}
+              onClick={() => selected && void requestDelete(selected)}
+              title={!exported ? "Export the class first" : undefined}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         open={deleteBlockedBy !== null}
@@ -411,9 +417,19 @@ function StudentsForClass({ cls, classes, onClassChange }: { cls: AdminClass; cl
   );
 }
 
-/* ───────────────────────── Selected student ───────────────────────── */
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+/** Figma: "24 Sep 2026, 13:02" (local time). */
+function joinedLabel(iso: string | null) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}, ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
 
-function SelectedStudent({
+/* ───────────────────────── Actions panel (Figma "Actions · NAME (ID)") ───────────────────────── */
+
+function StudentActions({
   r,
   cls,
   classes,
@@ -421,7 +437,7 @@ function SelectedStudent({
   onStatus,
   onMoved,
 }: {
-  r: AdminStudentRow;
+  r: AdminStudentRow | null;
   cls: AdminClass;
   classes: AdminClass[];
   busy: boolean;
@@ -429,74 +445,91 @@ function SelectedStudent({
   onMoved: () => void;
 }) {
   const toast = useToast();
+  const moveSelectRef = useRef<HTMLSelectElement>(null);
   const others = classes.filter((c) => c.id !== cls.id);
   const [target, setTarget] = useState<string>(others[0] ? String(others[0].id) : "");
   const move = useMutation({
-    mutationFn: () => api.post<unknown>(`/admin/enrollments/${r.enrollmentId}/move`, { classId: Number(target) }),
+    mutationFn: () => api.post<unknown>(`/admin/enrollments/${r?.enrollmentId}/move`, { classId: Number(target) }),
     onSuccess: () => {
       const to = classes.find((c) => c.id === Number(target));
-      toast.show(`${r.studentCode} moved to ${to?.name ?? "the new section"} (scores moved too)`, "success");
+      toast.show(`${r?.studentCode} moved to ${to?.name ?? "the new section"} (scores moved too)`, "success");
       onMoved();
     },
   });
 
-  return (
-    <Card className="p-5">
-      <CardTitle right={<StatusBadge status={r.status} />}>Selected student</CardTitle>
-      <p className="mt-2 text-xl font-bold">{r.firstName ?? <span className="text-faint">No name yet</span>}</p>
-      <p className="font-mono text-sm">{r.studentCode}</p>
-      {r.email && <p className="truncate text-sm text-muted">{r.email}</p>}
-      <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
-        <div>
-          <dt className="text-muted">Joined</dt>
-          <dd className="font-semibold">{formatDate(r.joinedAt)}</dd>
-        </div>
-        <div>
-          <dt className="text-muted">Last sign-in</dt>
-          <dd className="font-semibold" title={formatDateTime(r.lastLoginAt)}>
-            {relativeTime(r.lastLoginAt)}
-          </dd>
-        </div>
-      </dl>
+  const tile = "block w-full rounded-[10px] bg-app px-3 py-[9px] text-left transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50";
 
-      {r.enrollmentId === null ? (
-        <p className="mt-4 rounded-xl bg-app p-3 text-sm text-muted">On the roster but hasn’t joined yet. They’ll appear as active after scanning this section’s QR code.</p>
+  return (
+    <section className="rounded-[20px] border border-line bg-surface px-[21px] pb-[21px] pt-6" aria-labelledby="student-actions-title">
+      <h2 id="student-actions-title" className="truncate text-[12px] font-semibold uppercase leading-4 text-faint">
+        {r ? `Actions · ${r.firstName ?? "No name"} (${r.studentCode})` : "Actions"}
+      </h2>
+
+      {!r ? (
+        <p className="mt-3 text-[13px] text-muted">Select a student in the table to move, withdraw or reactivate them.</p>
+      ) : r.enrollmentId === null ? (
+        <p className="mt-3 rounded-[10px] bg-app p-3 text-[13px] text-muted">
+          On the roster but hasn’t joined yet. They’ll appear as active after scanning this section’s QR code.
+        </p>
       ) : (
         <>
-          <div className="mt-5 border-t border-line pt-4">
-            {others.length === 0 ? (
-              <p className="text-xs text-muted">There’s no other active section to move to.</p>
-            ) : (
-              <div className="space-y-2">
-                <Select name="move-target" label="Move to section" value={target} onChange={(e) => setTarget(e.target.value)}>
+          <div className="mt-[14px] space-y-1">
+            <button type="button" className={tile} disabled={others.length === 0} onClick={() => moveSelectRef.current?.focus()}>
+              <span className="block text-[13px] font-semibold leading-5 text-ink">Move to another section</span>
+              <span className="block text-[12px] leading-4 text-muted">Scores move with the student</span>
+            </button>
+            <button type="button" className={tile} disabled={busy} onClick={() => onStatus(r.status === "active" ? "withdrawn" : "active")}>
+              <span className="block text-[13px] font-semibold leading-5 text-ink">{r.status === "active" ? "Withdraw" : "Reactivate"}</span>
+              <span className="block text-[12px] leading-4 text-muted">
+                {r.status === "active" ? "Hidden from dashboard, can't log in · reversible" : "Shows in results again and can sign in"}
+              </span>
+            </button>
+          </div>
+
+          {others.length === 0 ? (
+            <p className="mt-4 text-[12px] text-muted">There’s no other active section to move to.</p>
+          ) : (
+            <>
+              <label htmlFor="move-target" className="mt-[18px] block text-[13px] font-semibold leading-5 text-ink">
+                Move to
+              </label>
+              <div className="relative mt-2">
+                <select
+                  ref={moveSelectRef}
+                  id="move-target"
+                  value={target}
+                  onChange={(e) => setTarget(e.target.value)}
+                  className="h-[43px] w-full cursor-pointer appearance-none rounded-[11.5px] border border-line bg-surface pl-[15px] pr-9 text-[14px] text-ink outline-none focus:border-gray-800"
+                >
                   {others.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
                     </option>
                   ))}
-                </Select>
-                <Button block onClick={() => move.mutate()} loading={move.isPending} disabled={!target}>
-                  Move student
-                </Button>
-                <p className="text-xs text-muted">Attempts and scores move with the student.</p>
-                {move.isError && <ErrorNote>{errorMessage(move.error)}</ErrorNote>}
+                </select>
+                <svg className="pointer-events-none absolute right-3.5 top-1/2 size-3 -translate-y-1/2 text-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
               </div>
-            )}
-          </div>
-          <div className="mt-4 border-t border-line pt-4">
-            {r.status === "active" ? (
-              <Button block variant="outline" loading={busy} onClick={() => onStatus("withdrawn")}>
-                Withdraw
-              </Button>
-            ) : (
-              <Button block variant="outline" loading={busy} onClick={() => onStatus("active")}>
-                Reactivate
-              </Button>
-            )}
-          </div>
+              <button
+                type="button"
+                onClick={() => move.mutate()}
+                disabled={!target || move.isPending}
+                className="mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-ink text-[15px] font-semibold text-white hover:bg-zinc-700 disabled:opacity-50"
+              >
+                {move.isPending && <Spinner className="size-4" />}
+                Move student
+              </button>
+              {move.isError && (
+                <div className="mt-2">
+                  <ErrorNote>{errorMessage(move.error)}</ErrorNote>
+                </div>
+              )}
+            </>
+          )}
         </>
       )}
-    </Card>
+    </section>
   );
 }
 

@@ -1,44 +1,30 @@
 import type { ReactNode } from "react";
-import { Card, DraftBadge, Logo } from "@/components/ui";
+import { DraftBadge, Logo } from "@/components/ui";
 
 /**
- * Shared shell for /login and /onboarding (Figma "Login" frames).
- *   ≥1024px: two halves — hero (image + product pitch) | grey panel with the centered card
- *   <1024px: hero image as a top band, the card overlaps it, grey panel below
+ * Shared shell for /login and /onboarding — Figma frames "Login 1 – Sign in" / "Login 2 – First name".
+ *   Phone  (<768)    : 300 px hero band (logo · title · tagline), card overlaps it at y = 226
+ *   Tablet (768–1023): 440 px hero band, 480 px card overlaps it at y = 330
+ *   Desktop (≥1024)  : left half = full-bleed anatomy image with the pitch · right half = grey panel, card centred
+ * Measurements come straight from the Figma SVG export (see docs/DESIGN_NOTES.md).
  */
-export function AuthShell({ children }: { children: ReactNode }) {
+export function AuthShell({ children, below }: { children: ReactNode; below?: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col bg-login-panel lg:grid lg:grid-cols-2">
       <DesktopHero />
       <CompactHero />
 
-      <main className="relative flex flex-1 flex-col items-center px-4 pb-10 sm:px-6 lg:justify-center lg:py-12">
-        <div className="absolute right-4 top-4 hidden lg:block">
+      <main className="relative flex flex-1 flex-col items-center px-4 lg:justify-center lg:px-10 lg:py-12">
+        <div className="absolute right-10 top-8 hidden lg:block">
           <DraftBadge />
         </div>
-        <Card className="relative z-10 -mt-20 w-full max-w-[440px] p-6 shadow-xl shadow-zinc-900/10 sm:-mt-24 sm:p-8 lg:mt-0">
-          {children}
-        </Card>
-        <p className="mt-6 text-center text-xs text-zinc-800 lg:hidden">Mae Fah Luang University · Key Point Book</p>
+        <div className="relative z-10 -mt-[74px] w-full md:-mt-[110px] md:w-[480px] lg:mt-0 lg:w-[440px]">
+          <section className="rounded-[20px] border border-line bg-surface p-6">{children}</section>
+          {below && <div className="mt-4">{below}</div>}
+        </div>
+        <p className="mt-auto pb-6 pt-10 text-center text-[13px] text-muted lg:hidden">Mae Fah Luang University · Key Point Book</p>
       </main>
     </div>
-  );
-}
-
-function HeroPicture({ className, sizes }: { className: string; sizes: string }) {
-  return (
-    <picture>
-      <source type="image/webp" srcSet="/images/login-hero-560.webp 560w, /images/login-hero-960.webp 960w" sizes={sizes} />
-      <img
-        src="/images/login-hero-960.webp"
-        width={960}
-        height={931}
-        alt="Three anatomical figures running: muscles, muscles over the skeleton, and the skeleton"
-        fetchPriority="high"
-        decoding="async"
-        className={className}
-      />
-    </picture>
   );
 }
 
@@ -48,36 +34,46 @@ const FEATURES = [
   { title: "Pretest & posttest", detail: "Instant results for you and your teacher" },
 ];
 
+const HERO_ALT = "Three anatomical figures running: muscles, muscles over the skeleton, and the skeleton";
+
 function DesktopHero() {
   return (
-    <aside className="sticky top-0 hidden h-dvh min-h-[640px] flex-col overflow-hidden bg-white px-12 py-10 lg:flex xl:px-16">
-      <div className="relative z-10">
-        <Logo size={44} withText={false} />
-        <h1 className="mt-6 text-5xl font-extrabold tracking-tight text-ink">Digital Muscle</h1>
-        <p className="mt-3 max-w-md whitespace-pre-line text-lg leading-snug text-muted">
-          {"Learn the muscular system,\nfrom whole muscle to sarcomere."}
+    <aside className="sticky top-0 hidden h-dvh min-h-[760px] overflow-hidden bg-white lg:block">
+      <picture>
+        <source type="image/webp" srcSet="/images/login-hero-desktop-720.webp 720w, /images/login-hero-desktop-1440.webp 1440w" sizes="50vw" />
+        <img
+          src="/images/login-hero-desktop-720.webp"
+          width={720}
+          height={1024}
+          alt={HERO_ALT}
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 size-full object-cover object-center"
+        />
+      </picture>
+
+      <div className="relative flex h-full flex-col px-12 py-24 xl:px-24">
+        <Logo variant="hero" size={56} withText={false} />
+        <h1 className="mt-[131px] text-[56px] font-black leading-[62px] tracking-[-0.02em] text-ink">Digital Muscle</h1>
+        <p className="mt-[29px] text-[20.5px] font-medium leading-8 text-ink">
+          Learn the muscular system,
+          <br />
+          from whole muscle to sarcomere.
         </p>
-      </div>
-
-      <div className="relative -mx-6 my-4 min-h-0 flex-1">
-        <HeroPicture sizes="50vw" className="absolute inset-0 size-full object-contain" />
-      </div>
-
-      <div className="relative z-10">
-        <ol className="space-y-3">
+        <ol className="mt-[75px] space-y-[31px]">
           {FEATURES.map((f, i) => (
-            <li key={f.title} className="flex items-center gap-3">
-              <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-line bg-white text-sm font-bold shadow-sm">
+            <li key={f.title} className="flex items-center gap-4">
+              <span className="grid size-[45px] shrink-0 place-items-center rounded-xl border border-line bg-white/85 text-[15px] font-semibold text-ink">
                 {i + 1}
               </span>
-              <span className="text-[15px]">
-                <span className="font-semibold">{f.title}</span>
-                <span className="text-muted"> — {f.detail}</span>
+              <span className="leading-tight">
+                <span className="block text-[16.5px] font-bold text-ink">{f.title}</span>
+                <span className="mt-0.5 block text-[14px] text-ink">{f.detail}</span>
               </span>
             </li>
           ))}
         </ol>
-        <p className="mt-8 text-xs font-medium text-faint">Mae Fah Luang University · Key Point Book</p>
+        <p className="mt-auto text-[12px] font-medium text-ink">Mae Fah Luang University · Key Point Book</p>
       </div>
     </aside>
   );
@@ -85,16 +81,32 @@ function DesktopHero() {
 
 function CompactHero() {
   return (
-    <header className="relative h-[40vh] min-h-[260px] max-h-[420px] overflow-hidden bg-white lg:hidden">
-      <HeroPicture sizes="100vw" className="absolute inset-0 size-full object-cover object-[50%_30%] opacity-60" />
-      <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/40 to-white/80" aria-hidden="true" />
-      <div className="absolute right-3 top-3">
+    <header className="relative h-[300px] shrink-0 overflow-hidden bg-white md:h-[440px] lg:hidden">
+      <picture>
+        <source media="(min-width: 768px)" type="image/webp" srcSet="/images/login-hero-tablet-834.webp 834w, /images/login-hero-tablet-1668.webp 1668w" sizes="100vw" />
+        <source type="image/webp" srcSet="/images/login-hero-phone-390.webp 390w, /images/login-hero-phone-780.webp 780w" sizes="100vw" />
+        <img
+          src="/images/login-hero-phone-390.webp"
+          width={390}
+          height={300}
+          alt={HERO_ALT}
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 size-full object-cover object-top"
+        />
+      </picture>
+      <div className="absolute right-4 top-4">
         <DraftBadge />
       </div>
-      <div className="relative flex h-full flex-col items-center pt-8 text-center sm:pt-12">
-        <Logo size={40} withText={false} />
-        <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Digital Muscle</h1>
-        <p className="mt-1 text-sm font-medium text-zinc-700 sm:text-base">Interactive muscular tissue learning</p>
+      <div className="relative flex flex-col items-center pt-12 text-center md:pt-[70px]">
+        <span className="md:hidden">
+          <Logo variant="hero" size={51} withText={false} />
+        </span>
+        <span className="hidden md:inline-flex">
+          <Logo variant="hero" size={75} withText={false} />
+        </span>
+        <h1 className="mt-[19px] text-[28px] font-bold leading-[34px] text-ink md:text-[38px] md:leading-[46px]">Digital Muscle</h1>
+        <p className="mt-4 text-[14.5px] leading-5 text-ink md:mt-[18px] md:text-[20px] md:leading-7">Interactive muscular tissue learning</p>
       </div>
     </header>
   );
@@ -103,7 +115,7 @@ function CompactHero() {
 /** Small pill shown at the top of the card ("Section 1 · 2569/1 · via QR", "Step 2 of 2"). */
 export function CardChip({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-700">
+    <span className="inline-flex h-[25px] items-center gap-1.5 rounded-full bg-[#e9eaee] px-3 text-[12px] font-medium text-gray-800">
       {children}
     </span>
   );

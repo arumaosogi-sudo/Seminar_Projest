@@ -3,11 +3,11 @@ import { Link } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClassBody, type AdminClass } from "@shared/contract";
 import { api } from "@/lib/api";
-import { Badge, Button, Card, cx, DraftBadge, EmptyState, ErrorNote, Input, PageHeader, PageLoader, Select, Spinner } from "@/components/ui";
+import { Button, Card, cx, DraftBadge, EmptyState, ErrorNote, Input, PageHeader, PageLoader, Select, Spinner } from "@/components/ui";
 import { useAdminClass } from "@/components/admin/adminClass";
-import { CardTitle, QueryError, SearchBox, Segmented, Switch } from "@/components/admin/controls";
+import { CardTitle, FilterPills, QueryError, SearchBox, StatusChip, Switch } from "@/components/admin/controls";
 import { copyText, errorMessage, formatDate } from "@/components/admin/format";
-import { IconCopy, IconDownload, IconPlus } from "@/components/admin/icons";
+import { IconDownload, IconPlus } from "@/components/admin/icons";
 import { adminKeys } from "@/components/admin/keys";
 import { ConfirmDialog, Modal } from "@/components/admin/Modal";
 import { downloadDataUrl, useQrDataUrl } from "@/components/admin/qr";
@@ -18,9 +18,9 @@ type Tab = "active" | "archived";
 const joinUrl = (code: string) => `${window.location.origin}/join/${encodeURIComponent(code)}`;
 
 function StatusBadge({ c }: { c: AdminClass }) {
-  if (c.status === "archived") return <Badge>Archived</Badge>;
-  if (c.studentCount === 0) return <Badge className="bg-zinc-100 text-muted">Waiting (0 students)</Badge>;
-  return <Badge tone="success">Active</Badge>;
+  if (c.status === "archived") return <StatusChip tone="neutral">Archived</StatusChip>;
+  if (c.studentCount === 0) return <StatusChip tone="neutral">Waiting</StatusChip>;
+  return <StatusChip tone="success">Active</StatusChip>;
 }
 
 export default function Classes() {
@@ -65,8 +65,8 @@ export default function Classes() {
         actions={
           <>
             <DraftBadge />
-            <Button onClick={() => setCreateOpen(true)}>
-              <IconPlus size={16} /> New class
+            <Button size="lg" className="w-[140px] whitespace-nowrap rounded-xl px-0" onClick={() => setCreateOpen(true)}>
+              <IconPlus size={18} /> New class
             </Button>
           </>
         }
@@ -81,10 +81,10 @@ export default function Classes() {
           Each class is one section of one semester. Students join it by scanning its QR code.
         </EmptyState>
       ) : (
-        <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <Card className="min-w-0 p-5">
+        <div className="grid items-start gap-[25px] xl:grid-cols-[minmax(0,1fr)_339px]">
+          <Card className="min-w-0 px-[19px] pb-[15px] pt-[17px]">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <Segmented<Tab>
+              <FilterPills<Tab>
                 label="Class status"
                 value={tab}
                 onChange={(t) => {
@@ -96,30 +96,41 @@ export default function Classes() {
                   { value: "archived", label: `Archived (${counts.archived})` },
                 ]}
               />
-              <div className="w-full sm:w-64">
-                <SearchBox value={search} onChange={setSearch} placeholder="Search class or code" label="Search classes" />
+              <div className="w-full sm:w-[259px]">
+                <SearchBox value={search} onChange={setSearch} placeholder="Search class..." label="Search classes or join codes" />
               </div>
             </div>
 
             {rows.length === 0 ? (
               <p className="py-10 text-center text-sm text-muted">{search ? "No classes match your search." : tab === "active" ? "No active classes." : "No archived classes."}</p>
             ) : (
-              <div className="-mx-5 mt-4 overflow-x-auto">
-                <table className="w-full min-w-[720px] text-sm">
+              <div className="relative -mx-[19px] mt-[28px] overflow-x-auto">
+                <table className="w-full min-w-[700px] table-fixed text-[14px]">
                   <caption className="sr-only">Classes — select a row to see its QR code</caption>
+                  <colgroup>
+                    <col className="w-[196px]" />
+                    <col className="w-[130px]" />
+                    <col className="w-[95px]" />
+                    <col className="w-[107px]" />
+                    <col className="w-[106px]" />
+                    <col />
+                  </colgroup>
                   <thead>
-                    <tr className="border-b border-line text-left text-[11px] tracking-wider text-muted uppercase">
-                      <th scope="col" className="px-5 py-2.5 font-semibold">Class</th>
-                      <th scope="col" className="px-3 py-2.5 font-semibold">Join code</th>
-                      <th scope="col" className="px-3 py-2.5 text-right font-semibold">Students</th>
-                      <th scope="col" className="px-3 py-2.5 text-right font-semibold">Pretest</th>
-                      <th scope="col" className="px-3 py-2.5 text-right font-semibold">Posttest</th>
-                      <th scope="col" className="px-5 py-2.5 font-semibold">Status</th>
+                    <tr className="text-left text-[12px] uppercase text-faint">
+                      <th scope="col" className="pb-[14px] pl-5 font-semibold">Class</th>
+                      <th scope="col" className="pb-[14px] font-semibold">Join code</th>
+                      <th scope="col" className="pb-[14px] font-semibold">Students</th>
+                      <th scope="col" className="pb-[14px] font-semibold">Pretest</th>
+                      <th scope="col" className="pb-[14px] font-semibold">Posttest</th>
+                      <th scope="col" className="pb-[14px] pr-5 font-semibold">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rows.map((c) => {
                       const isSel = selected?.id === c.id;
+                      const archived = c.status === "archived";
+                      // Figma: "46 / 48"; an em dash while nobody has taken that test yet.
+                      const dash = (n: number) => (c.studentCount === 0 ? "—" : `${n} / ${c.studentCount}`);
                       return (
                         <tr
                           key={c.id}
@@ -127,18 +138,17 @@ export default function Classes() {
                           aria-selected={isSel}
                           onClick={() => select(c)}
                           onKeyDown={(e) => onRowKey(e, c)}
-                          className={cx("cursor-pointer border-b border-line last:border-b-0 outline-none focus-visible:bg-zinc-50", isSel ? "bg-zinc-100" : "hover:bg-zinc-50")}
+                          className={cx(
+                            "h-[52px] cursor-pointer outline-none transition-colors hover:bg-zinc-50 focus-visible:bg-zinc-50",
+                            archived ? "text-muted" : "text-ink",
+                          )}
                         >
-                          <td className="px-5 py-3 font-semibold">{c.name}</td>
-                          <td className="px-3 py-3 font-mono text-[13px]">{c.joinCode}</td>
-                          <td className="px-3 py-3 text-right tabular-nums">{c.studentCount}</td>
-                          <td className="px-3 py-3 text-right tabular-nums">
-                            {c.pretestSubmitted}/{c.studentCount}
-                          </td>
-                          <td className="px-3 py-3 text-right tabular-nums">
-                            {c.posttestSubmitted}/{c.studentCount}
-                          </td>
-                          <td className="px-5 py-3">
+                          <td className={cx("pl-5", !archived && "font-semibold")}>{c.name}</td>
+                          <td className={cx("text-[13.5px]", archived && "text-faint")}>{c.joinCode}</td>
+                          <td className="tabular-nums">{c.studentCount}</td>
+                          <td className="tabular-nums">{dash(c.pretestSubmitted)}</td>
+                          <td className="tabular-nums">{c.posttestSubmitted === 0 ? "—" : dash(c.posttestSubmitted)}</td>
+                          <td className="pr-5">
                             <StatusBadge c={c} />
                           </td>
                         </tr>
@@ -188,75 +198,71 @@ function SelectedClass({ c }: { c: AdminClass }) {
   });
 
   return (
-    <Card className="p-6 xl:sticky xl:top-6">
+    <Card className="p-[25px] xl:sticky xl:top-6">
       <CardTitle>Selected</CardTitle>
-      <h2 className="mt-1 text-xl font-bold">{c.name}</h2>
-      <p className="mt-0.5 text-xs text-muted">
-        Created {formatDate(c.createdAt)}
-        {c.archivedAt && ` · archived ${formatDate(c.archivedAt)}`}
-      </p>
+      <h2 className="mt-1.5 text-[22px] font-semibold leading-7 text-ink">{c.name}</h2>
 
       {c.status === "archived" ? (
-        <div className="mt-5 rounded-2xl bg-zinc-100 p-4 text-sm text-zinc-700">
-          This class is archived: it’s read-only, hidden from the class selector, and its QR code no longer works. Results can still be viewed and exported.
+        <div className="mt-[17px] rounded-2xl bg-zinc-100 p-4 text-sm text-zinc-700">
+          This class is archived (since {formatDate(c.archivedAt ?? c.createdAt)}): it’s read-only, hidden from the class selector, and its QR code no longer works.
+          Results can still be viewed and exported.
         </div>
       ) : (
         <>
-          <div className="mt-5 grid place-items-center rounded-2xl border border-line bg-white p-4">
+          <div className="mx-auto mt-[17px] grid size-[239px] place-items-center rounded-2xl border border-line bg-white">
             {qr.url ? (
-              <img src={qr.url} alt={`QR code that opens ${url}`} className="aspect-square w-full max-w-[240px]" width={240} height={240} />
+              <img src={qr.url} alt={`QR code that opens ${url}`} className="size-[210px]" width={210} height={210} />
             ) : qr.error ? (
-              <p className="py-16 text-sm text-danger">{qr.error}</p>
+              <p className="px-4 text-center text-sm text-danger">{qr.error}</p>
             ) : (
-              <div className="grid aspect-square w-full max-w-[240px] place-items-center text-muted">
-                <Spinner />
-              </div>
+              <Spinner />
             )}
           </div>
-          <p className="mt-4 text-center font-mono text-3xl font-bold tracking-wider">{c.joinCode}</p>
-          <p className="mt-1 truncate text-center text-xs text-muted" title={url}>
-            {url}
+          <p className="mt-5 text-center text-[22px] font-bold leading-7 text-ink">{c.joinCode}</p>
+          <p className="mt-1.5 truncate text-center text-[12px] text-muted" title={url}>
+            {url.replace(/^https?:\/\//, "")}
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <Button
-              variant="outline"
+          <div className="mt-4 grid grid-cols-[136fr_143fr] gap-2.5">
+            <button
+              type="button"
+              className="h-[43px] rounded-xl border border-line bg-surface text-[15px] font-semibold text-ink hover:bg-zinc-50"
               onClick={async () => {
                 const ok = await copyText(url);
                 toast.show(ok ? "Join link copied" : "Couldn’t copy — select the link manually", ok ? "info" : "error");
               }}
             >
-              <IconCopy size={16} /> Copy link
-            </Button>
-            <Button variant="outline" disabled={!qr.url} onClick={() => qr.url && downloadDataUrl(qr.url, `QR-${c.joinCode}.png`)}>
-              <IconDownload size={16} /> QR (PNG)
-            </Button>
+              Copy link
+            </button>
+            <button
+              type="button"
+              disabled={!qr.url}
+              onClick={() => qr.url && downloadDataUrl(qr.url, `QR-${c.joinCode}.png`)}
+              className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-gray-800 text-[15px] font-semibold text-white hover:bg-gray-700 disabled:opacity-50"
+            >
+              <IconDownload size={18} /> QR (PNG)
+            </button>
           </div>
-          <p className="mt-3 text-xs text-muted">Students who scan this QR are added to this section automatically — they can’t pick a section themselves.</p>
-          <dl className="mt-4 grid grid-cols-2 gap-3 rounded-2xl bg-app p-3 text-xs">
-            <div>
-              <dt className="text-muted">Roster</dt>
-              <dd className="font-semibold">{c.rosterCount} students</dd>
-            </div>
-            <div>
-              <dt className="text-muted">Who can join</dt>
-              <dd className="font-semibold">{c.restrictToRoster ? "Roster only" : "Anyone with the QR"}</dd>
-            </div>
-          </dl>
+          <p className="mt-4 text-center text-[12px] leading-[18px] text-muted">
+            Students who scan this QR are added to this section automatically — they can’t pick a section themselves.
+          </p>
         </>
       )}
 
-      <div className="mt-5 flex flex-wrap gap-2 border-t border-line pt-5">
-        {c.status === "active" && (
-          <Button variant="outline" onClick={() => setEditOpen(true)}>
+      <div className="mt-[35px] grid grid-cols-2 gap-[11px]">
+        {c.status === "active" ? (
+          <button type="button" onClick={() => setEditOpen(true)} className="h-[37px] rounded-xl border border-line bg-surface text-[13px] font-semibold text-ink hover:bg-zinc-50">
             Edit
-          </Button>
+          </button>
+        ) : (
+          <span />
         )}
-        <Button variant={c.status === "active" ? "ghost" : "solid"} onClick={() => setArchiveOpen(true)}>
+        <button
+          type="button"
+          onClick={() => setArchiveOpen(true)}
+          className="h-[37px] rounded-xl border border-line bg-surface text-[13px] font-semibold text-ink hover:bg-zinc-50"
+        >
           {c.status === "active" ? "Archive class" : "Unarchive"}
-        </Button>
-        <Link to="/admin/students" className="ml-auto self-center text-sm font-semibold text-muted hover:text-ink">
-          Students →
-        </Link>
+        </button>
       </div>
 
       {editOpen && <EditClassModal c={c} onClose={() => setEditOpen(false)} />}

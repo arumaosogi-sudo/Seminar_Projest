@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type ComponentType, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import type { StudentStatus } from "@shared/contract";
 import { cx, DraftBadge } from "@/components/ui";
@@ -6,14 +6,14 @@ import { useStudentMe } from "@/components/student/RequireStudent";
 import { joinNoticeStore } from "@/components/student/authHelpers";
 import { useStudentStatus } from "@/components/student/queries";
 import { useDocumentTitle } from "@/components/student/useDocumentTitle";
-import { BalloonIcon, ChecklistIcon, CubeIcon, InfoIcon, LockIcon } from "@/components/student/icons";
+import { InfoIcon, LockIcon } from "@/components/student/icons";
 
 type Accent = "games" | "explore" | "tests";
 
-const tone: Record<Accent, { soft: string; icon: string; button: string }> = {
-  games: { soft: "bg-games-soft", icon: "text-games", button: "bg-games hover:bg-violet-700" },
-  explore: { soft: "bg-explore-soft", icon: "text-explore", button: "bg-explore hover:bg-teal-700" },
-  tests: { soft: "bg-tests-soft", icon: "text-tests", button: "bg-tests hover:bg-blue-700" },
+const tone: Record<Accent, { soft: string; text: string; button: string }> = {
+  games: { soft: "bg-games-soft", text: "text-games", button: "md:bg-games md:hover:bg-violet-700" },
+  explore: { soft: "bg-explore-soft", text: "text-explore", button: "md:bg-explore md:hover:bg-teal-700" },
+  tests: { soft: "bg-tests-soft", text: "text-tests", button: "md:bg-tests md:hover:bg-blue-700" },
 };
 
 export default function Home() {
@@ -40,15 +40,15 @@ export default function Home() {
     <div>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-[40px] sm:leading-tight">
+          <h1 className="text-[26px] font-bold leading-8 text-ink md:text-[33px] md:leading-10 lg:text-[41px] lg:leading-[48px]">
             Hi, {me.student.firstName ?? "there"}
           </h1>
-          <p className="mt-1 text-[15px] text-muted">
+          <p className="mt-1 text-[13px] leading-[18px] text-muted md:mt-1.5 md:text-[15px] md:leading-[22px] lg:mt-2.5 lg:text-[16px] lg:leading-6">
             {me.student.studentCode}
-            {me.enrollment && ` · ${me.enrollment.className}`}
+            {me.enrollment && ` · ${sectionLabel(me.enrollment.className)}`}
           </p>
         </div>
-        <DraftBadge />
+        <DraftBadge className="mt-[5px] shrink-0 md:mt-1.5" />
       </div>
 
       <div className="mt-6 space-y-3 empty:hidden">
@@ -90,14 +90,14 @@ export default function Home() {
         )}
       </div>
 
-      <h2 className="mb-4 mt-8 text-xl font-bold">Start learning</h2>
-      <ul className="grid gap-4 lg:grid-cols-3 lg:gap-5">
+      <h2 className="mt-[35px] text-[17px] font-semibold leading-6 text-ink md:mt-[47px] md:text-[22px] md:leading-7 lg:mt-[62px]">Start learning</h2>
+      <ul className="mt-4 grid gap-[13px] md:mt-[23px] md:gap-[21px] lg:mt-[26px] lg:grid-cols-3 lg:gap-[25px]">
         <MenuCard
           accent="games"
-          icon={BalloonIcon}
+          image="/images/menu-games.png"
           title="Games"
           subtitle="Practice with quick 2D games"
-          chips={["Balloon Pop", "Group Sort", "Diameter"]}
+          chips={["Balloon Pop", "Group Sort", "Diameter"].map((label) => ({ label, tone: "games" }))}
           lo="OL1–OL3"
           action="Play"
           to="/games"
@@ -107,10 +107,11 @@ export default function Home() {
         />
         <MenuCard
           accent="explore"
-          icon={CubeIcon}
+          image="/images/menu-explore.png"
           title="3D Explore"
           subtitle="Zoom from muscle to sarcomere"
-          chips={["Muscle", "Fascicle", "Fiber", "Myofibril", "Sarcomere"]}
+          chips={["Muscle", "Fascicle", "Fiber", "Myofibril", "Sarcomere"].map((label) => ({ label, tone: "explore" }))}
+          compactChips="path"
           lo="OL2–OL5"
           action="Explore"
           to="/explore"
@@ -120,7 +121,7 @@ export default function Home() {
         />
         <MenuCard
           accent="tests"
-          icon={ChecklistIcon}
+          image="/images/menu-tests.png"
           title="Tests"
           subtitle="Pretest and posttest"
           chips={testChips(status.data, enrolled, status.isPending)}
@@ -133,25 +134,50 @@ export default function Home() {
   );
 }
 
-function testChips(s: StudentStatus | undefined, enrolled: boolean, pending: boolean): string[] {
-  if (!enrolled) return ["Join a class to see tests"];
-  if (pending || !s) return ["Loading…"];
-  const chips: string[] = [];
+/** "2569/1 · Section 1" → "Section 1 (2569/1)" (Figma greeting line). */
+function sectionLabel(className: string) {
+  const m = /^(\d{4}\/\d)\s*·\s*(.+)$/.exec(className);
+  return m ? `${m[2]} (${m[1]})` : className;
+}
+
+type ChipTone = "games" | "explore" | "done" | "neutral";
+type Chip = { label: string; tone: ChipTone };
+
+const chipTone: Record<ChipTone, string> = {
+  games: "bg-games-soft text-games-ink",
+  explore: "bg-explore-soft text-explore",
+  done: "bg-[#e8f5ec] text-success",
+  neutral: "bg-[#f0f0f2] text-muted",
+};
+
+function testChips(s: StudentStatus | undefined, enrolled: boolean, pending: boolean): Chip[] {
+  const neutral = (label: string): Chip => ({ label, tone: "neutral" });
+  if (!enrolled) return [neutral("Join a class to see tests")];
+  if (pending || !s) return [neutral("Loading…")];
+  const chips: Chip[] = [];
   const done = (score: number | null, max: number | null) => (score !== null && max !== null ? `Done ${score}/${max}` : "Done");
-  if (s.pretest) chips.push(`Pretest · ${s.pretest.submitted ? done(s.pretest.score, s.pretest.maxScore) : "Not done"}`);
+  if (s.pretest) {
+    const p = s.pretest;
+    chips.push({ label: `Pretest · ${p.submitted ? done(p.score, p.maxScore) : "Not done"}`, tone: p.submitted ? "done" : "neutral" });
+  }
   if (s.posttest) {
     const p = s.posttest;
-    chips.push(`Posttest · ${p.submitted ? done(p.score, p.maxScore) : p.isOpen ? "Open" : "Not open yet"}`);
+    chips.push({
+      label: `Posttest · ${p.submitted ? done(p.score, p.maxScore) : p.isOpen ? "Open" : "Not open yet"}`,
+      tone: p.submitted ? "done" : "neutral",
+    });
   }
-  return chips.length ? chips : ["No tests assigned yet"];
+  return chips.length ? chips : [neutral("No tests assigned yet")];
 }
 
 type MenuCardProps = {
   accent: Accent;
-  icon: ComponentType<{ size?: number; className?: string }>;
+  image: string;
   title: string;
   subtitle: string;
-  chips: string[];
+  chips: Chip[];
+  /** Phone only: show the chips as one "A › B › C" line instead (Figma 3D Explore card). */
+  compactChips?: "path";
   lo: string;
   action: string;
   to: string;
@@ -160,61 +186,90 @@ type MenuCardProps = {
   pending?: boolean;
 };
 
-function MenuCard({ accent, icon: Icon, title, subtitle, chips, lo, action, to, locked = false, lockHint = "Finish the Pretest first", pending = false }: MenuCardProps) {
+/*
+ * Figma "Home" menu card.
+ *   Phone  : 48 px tile + title row, chips below, "Action →" text link
+ *   Tablet : 88 px tile on the left, everything else in the right column, 132×44 button
+ *   Desktop: 180 px tinted cover with an 84 px icon, body below, 132×44 button pinned to the bottom
+ */
+function MenuCard({
+  accent,
+  image,
+  title,
+  subtitle,
+  chips,
+  compactChips,
+  lo,
+  action,
+  to,
+  locked = false,
+  lockHint = "Finish the Pretest first",
+  pending = false,
+}: MenuCardProps) {
   const t = tone[accent];
   const lockHintId = useId();
   const inactive = locked || pending;
+  const art = (size: string) => (
+    <img src={image} alt="" width={168} height={168} draggable={false} className={cx(size, locked && "opacity-50 grayscale")} />
+  );
 
   return (
-    <li
-      className={cx(
-        "flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface md:flex-row lg:flex-col",
-        locked && "bg-zinc-50",
-      )}
-    >
-      {/* Cover: band on phone · square tile on tablet · 160px cover on desktop */}
-      <div
-        className={cx(
-          "relative flex h-24 items-center justify-center md:m-4 md:mr-0 md:h-auto md:w-28 md:shrink-0 md:rounded-2xl lg:m-0 lg:h-40 lg:w-auto lg:rounded-none",
-          locked ? "bg-zinc-100 text-faint" : cx(t.soft, t.icon),
-        )}
-      >
-        <span className="lg:hidden">
-          <Icon size={44} />
-        </span>
-        <span className="hidden lg:block">
-          <Icon size={72} />
-        </span>
-        {locked && (
-          <span className="absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-surface text-muted shadow-sm">
-            <LockIcon size={16} />
-            <span className="sr-only">Locked</span>
-          </span>
-        )}
+    <li className="flex flex-col overflow-hidden rounded-[20px] border border-line bg-surface lg:min-h-[453px]">
+      {/* Desktop cover */}
+      <div className={cx("relative hidden h-[180px] shrink-0 items-center justify-center lg:flex", locked ? "bg-zinc-100" : t.soft)}>
+        {art("size-[84px]")}
+        {locked && <LockBadge />}
       </div>
 
-      <div className="flex flex-1 flex-col p-5 md:flex-row md:items-center md:gap-6 lg:flex-col lg:items-stretch lg:gap-0">
-        <div className="min-w-0 flex-1">
-          <h3 className={cx("text-xl font-bold", locked && "text-muted")}>{title}</h3>
-          <p className="mt-0.5 text-sm text-muted">{subtitle}</p>
-          <ul className="mt-3 flex flex-wrap gap-1.5" aria-label={`${title} includes`}>
-            {chips.map((c) => (
-              <li key={c} className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700">
-                {c}
-              </li>
-            ))}
-          </ul>
+      <div className="grid flex-1 grid-cols-[48px_1fr] gap-x-[15px] px-[17px] pb-4 pt-4 md:grid-cols-[88px_1fr] md:gap-x-[29px] md:p-7 lg:flex lg:flex-col lg:gap-x-0">
+        {/* Phone / tablet tile */}
+        <div
+          className={cx(
+            "relative col-start-1 row-start-1 grid size-12 place-items-center rounded-[14px] md:row-span-3 md:size-[88px] md:rounded-[20px] lg:hidden",
+            locked ? "bg-zinc-100" : t.soft,
+          )}
+        >
+          {art("size-7 md:size-12")}
+          {locked && <LockBadge small />}
         </div>
 
-        <div className="mt-5 flex items-center justify-between gap-3 md:mt-0 md:flex-col md:items-end lg:mt-auto lg:flex-row lg:items-center lg:pt-6">
-          <span className="text-xs font-semibold uppercase tracking-wide text-faint">{lo}</span>
+        <div className="col-start-2 row-start-1 min-w-0 self-center md:self-start">
+          <h3 className={cx("text-[17px] font-semibold leading-[22px] md:text-[22px] md:leading-7 lg:text-[26px] lg:leading-8", locked ? "text-muted" : "text-ink")}>
+            {title}
+          </h3>
+          <p className="mt-0.5 text-[12px] leading-4 text-muted md:mt-[7px] md:text-[13px] md:leading-[18px] lg:mt-[9px] lg:text-[15px] lg:leading-[22px]">
+            {subtitle}
+          </p>
+        </div>
+
+        {compactChips === "path" && (
+          <p className={cx("col-span-2 mt-3 text-[12px] font-semibold leading-4 md:hidden", locked ? "text-muted" : "text-explore")}>
+            {chips.map((c) => c.label).join(" › ")}
+          </p>
+        )}
+        <ul
+          className={cx(
+            "col-span-2 mt-3 flex flex-wrap gap-x-2 gap-y-2 md:col-span-1 md:col-start-2 md:mt-3.5 lg:mt-[17px]",
+            compactChips === "path" && "hidden md:flex",
+          )}
+          aria-label={`${title} includes`}
+        >
+          {chips.map((c) => (
+            <li key={c.label} className={cx("inline-flex h-[25px] items-center rounded-full px-3 text-[12px] font-semibold", locked ? "bg-zinc-100 text-muted" : chipTone[c.tone])}>
+              {c.label}
+            </li>
+          ))}
+        </ul>
+
+        <div className="col-span-2 mt-4 flex items-center justify-between gap-3 md:col-span-1 md:col-start-2 md:mt-[21px] lg:mt-auto lg:pt-[35px]">
+          <span className="text-[12px] font-semibold text-faint lg:text-[13px]">{lo}</span>
           {inactive ? (
             <span className="flex flex-col items-end" title={locked ? lockHint : undefined}>
               <button
                 type="button"
                 disabled
                 aria-describedby={locked ? lockHintId : undefined}
-                className="inline-flex h-10 cursor-not-allowed items-center gap-1.5 rounded-xl bg-zinc-200 px-5 text-sm font-semibold text-muted"
+                className="inline-flex cursor-not-allowed items-center gap-1.5 text-[14px] font-semibold text-muted md:h-11 md:w-[132px] md:justify-center md:rounded-xl md:bg-zinc-200 md:text-[15px]"
               >
                 {locked && <LockIcon size={14} />}
                 {action}
@@ -229,14 +284,35 @@ function MenuCard({ accent, icon: Icon, title, subtitle, chips, lo, action, to, 
             <Link
               to={to}
               aria-label={`${action} — ${title}`}
-              className={cx("inline-flex h-10 items-center rounded-xl px-5 text-sm font-semibold text-white transition-colors", t.button)}
+              className={cx(
+                "inline-flex items-center text-[15px] font-semibold transition-colors md:h-11 md:w-[132px] md:justify-center md:rounded-xl md:text-[15px] md:text-white",
+                t.text,
+                t.button,
+              )}
             >
               {action}
+              <span aria-hidden="true" className="ml-1 md:hidden">
+                →
+              </span>
             </Link>
           )}
         </div>
       </div>
     </li>
+  );
+}
+
+function LockBadge({ small }: { small?: boolean }) {
+  return (
+    <span
+      className={cx(
+        "absolute grid place-items-center rounded-full bg-surface text-muted shadow-sm",
+        small ? "-right-1.5 -top-1.5 size-6" : "right-3 top-3 size-8",
+      )}
+    >
+      <LockIcon size={small ? 12 : 16} />
+      <span className="sr-only">Locked</span>
+    </span>
   );
 }
 
