@@ -35,6 +35,7 @@ export default function TakeTest() {
               "Time up (TEST-4): stop editing and call GET /api/attempts/:id — the server auto-submits with the saved answers; then go to the result",
               "Review screen before submit: list unanswered/required questions → “Submit” (confirm dialog) → POST /api/attempts/:id/submit",
               "After submit → /tests/result/:attemptId (replace history so Back doesn't return to the test)",
+              "The submit response has `review: null` while attempts remain and the test is open — tell the student: “Answers will be shown after your last attempt or when the test closes”",
               "Warn on tab close while a save is pending (beforeunload)",
               "Errors: 409/410 (closed, no attempts left, already submitted) → friendly message + link to /tests",
             ]}

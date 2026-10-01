@@ -49,7 +49,10 @@ public/images/            login-hero-{560,960}.webp
   (c) the student already has an **active** enrollment in another class of the **same academic year + semester**
   (then they stay where they are and get `joinNotice`; the instructor can move them).
 - A student whose enrollments are all `withdrawn` cannot log in (403 `withdrawn`).
-- Anonymized students cannot log in.
+- Anonymized students cannot log in: anonymizing stores HMAC-SHA256(e-mail / student code, `SESSION_SECRET`) in
+  `anonymized_identities` and login checks it (rotating `SESSION_SECRET` invalidates these hashes).
+- Dev login also requires the request host to be localhost / 127.0.0.1 / [::1].
+- Security headers for the SPA: `public/_headers` (CSP, frame-ancestors none, …). Body limit 64 KB (1 MB for tests/roster).
 
 ## 4. Test engine rules (server-side only)
 
@@ -62,6 +65,9 @@ public/images/            login-hero-{560,960}.webp
 - An assignment is open when: availability = manual → `is_open = 1`; scheduled → `opens_at <= now < closes_at`. Archived classes are never open.
 - Counted score per student = highest / latest / first **submitted** attempt (score_policy).
 - Grading: single = exact option id; multi = exact set match (all-or-nothing); truefalse = boolean; short = case/space-insensitive match against any accepted answer.
+- Answer review (`show_answers = 1`) is returned only after the student's **last allowed attempt** or once the test is
+  **closed** — otherwise students could read the answers and retake for a higher score.
+- Submit is two-step (claim `submitted_at`, then re-read answers and grade) so a late autosave can't change the graded answers.
 - `required_first = 1` on an open assignment → Home menus (Games, 3D) are locked until the student submits it.
 
 ## 5. Endpoints

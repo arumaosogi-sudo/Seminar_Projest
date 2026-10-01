@@ -16,16 +16,22 @@ const page = (load: () => Promise<{ default: React.ComponentType }>) => ({
 const studentRoutes: RouteObject[] = [
   { index: true, ...page(() => import("./pages/Home")) },
 
-  // 🧩 Games (teammate)
-  { path: "games", ...page(() => import("./pages/games/GamesHub")) },
-  { path: "games/balloon-pop", ...page(() => import("./pages/games/BalloonPop")) },
-  { path: "games/group-sort", ...page(() => import("./pages/games/GroupSort")) },
-  { path: "games/diameter", ...page(() => import("./pages/games/Diameter")) },
-  { path: "games/result", ...page(() => import("./pages/games/GameResult")) },
+  // Games and 3D stay locked until required tests (e.g. the Pretest) are submitted — see RequireUnlocked.
+  {
+    ...page(() => import("./components/student/RequireUnlocked")),
+    children: [
+      // 🧩 Games (teammate)
+      { path: "games", ...page(() => import("./pages/games/GamesHub")) },
+      { path: "games/balloon-pop", ...page(() => import("./pages/games/BalloonPop")) },
+      { path: "games/group-sort", ...page(() => import("./pages/games/GroupSort")) },
+      { path: "games/diameter", ...page(() => import("./pages/games/Diameter")) },
+      { path: "games/result", ...page(() => import("./pages/games/GameResult")) },
 
-  // 🧩 3D Explore (teammate)
-  { path: "explore", ...page(() => import("./pages/explore/Explore3D")) },
-  { path: "explore/sarcomere", ...page(() => import("./pages/explore/Sarcomere")) },
+      // 🧩 3D Explore (teammate)
+      { path: "explore", ...page(() => import("./pages/explore/Explore3D")) },
+      { path: "explore/sarcomere", ...page(() => import("./pages/explore/Sarcomere")) },
+    ],
+  },
 
   // 🧩 Tests (teammate UI, API ready)
   { path: "tests", ...page(() => import("./pages/tests/TestsList")) },

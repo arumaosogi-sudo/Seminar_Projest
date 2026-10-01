@@ -131,13 +131,20 @@ export function questionAnswer(q: DraftQuestion): QuestionInput["answer"] {
   }
 }
 
-export function toSaveBody(d: DraftTest): SaveTestBody {
+export const MAX_QUESTIONS = 200;
+
+/**
+ * Build the PUT body. `serverIds` = question ids that currently belong to the test on the server;
+ * any other id (e.g. a deleted question restored with Undo after an autosave) is stripped so the
+ * question is re-created instead of failing with "Question id N does not belong to this test".
+ */
+export function toSaveBody(d: DraftTest, serverIds?: ReadonlySet<number>): SaveTestBody {
   return {
     title: d.title.trim(),
     description: d.description,
     kind: d.kind,
     questions: d.questions.map((q) => ({
-      ...(q.id ? { id: q.id } : {}),
+      ...(q.id && (!serverIds || serverIds.has(q.id)) ? { id: q.id } : {}),
       type: q.type,
       prompt: q.prompt.trim(),
       imageUrl: q.imageUrl,
@@ -151,6 +158,8 @@ export function toSaveBody(d: DraftTest): SaveTestBody {
 
 export interface ValidationResult {
   title?: string;
+  /** Test-level problems (e.g. too many questions). */
+  general: string[];
   byQuestion: Record<string, string[]>;
   count: number;
 }
@@ -160,9 +169,13 @@ export function validateDraft(d: DraftTest): ValidationResult {
   let count = 0;
   const title = d.title.trim() ? undefined : "The test needs a title.";
   if (title) count++;
+  const general: string[] = [];
+  if (d.questions.length > MAX_QUESTIONS) general.push(`A test can have at most ${MAX_QUESTIONS} questions.`);
+  count += general.length;
   for (const q of d.questions) {
     const errs: string[] = [];
     if (!q.prompt.trim()) errs.push("Write the question.");
+    if (q.imageUrl && !/^(https:\/\/|\/images\/)\S+$/.test(q.imageUrl)) errs.push("Image URL must start with https:// or /images/.");
     if (!Number.isInteger(q.points) || q.points < 0 || q.points > 100) errs.push("Points must be a whole number from 0 to 100.");
     if (q.type === "single" || q.type === "multi") {
       if (q.options.length < 1) errs.push("Add at least one option.");
@@ -178,7 +191,7 @@ export function validateDraft(d: DraftTest): ValidationResult {
       count += errs.length;
     }
   }
-  return { title, byQuestion, count };
+  return { title, general, byQuestion, count };
 }
 
 export const maxScoreOf = (d: DraftTest) => d.questions.reduce((s, q) => s + (Number.isFinite(q.points) ? q.points : 0), 0);

@@ -7,13 +7,14 @@ import { Badge, Button, Card, cx, DraftBadge, EmptyState, PageHeader, PageLoader
 import { useAdminClass } from "@/components/admin/adminClass";
 import { GroupedBarChart, PercentBars, type BarSeries } from "@/components/admin/charts";
 import { CardTitle, QueryError, SearchBox, StatCard } from "@/components/admin/controls";
-import { defaultTestIds, exportResultsToExcel, prePost, rowChange } from "@/components/admin/exportResults";
+import { defaultTestIds, distributionCounts, distributionMaxX, exportResultsToExcel, prePost, rowChange } from "@/components/admin/exportResults";
 import { errorMessage, fmtNum, signed } from "@/components/admin/format";
 import { IconChevronDown, IconDownload } from "@/components/admin/icons";
 import { adminKeys } from "@/components/admin/keys";
 import { useToast } from "@/components/admin/toastContext";
 
 type StatusFilter = "active" | "all";
+const MAX_PICKED_TESTS = 20;
 
 const SERIES_STYLE: Record<TestKind, { fill: string; swatch: string }[]> = {
   pretest: [{ fill: "fill-zinc-400", swatch: "bg-zinc-400" }],
@@ -43,7 +44,7 @@ export default function Results() {
   const tests = useMemo(() => testsQ.data ?? [], [testsQ.data]);
   const testIds = useMemo(() => {
     const ids = picked ?? defaultTestIds(tests);
-    return [...ids].filter((id) => tests.some((t) => t.id === id)).sort((a, b) => a - b);
+    return [...ids].filter((id) => tests.some((t) => t.id === id)).sort((a, b) => a - b).slice(0, MAX_PICKED_TESTS);
   }, [picked, tests]);
 
   const resultsQ = useQuery({
@@ -88,11 +89,11 @@ export default function Results() {
       const styles = SERIES_STYLE[t.kind];
       const st = styles[Math.min(used[t.kind]++, styles.length - 1)];
       const bins = data.distribution.find((d) => d.testId === t.testId)?.bins ?? [];
-      const counts = Array.from({ length: t.maxScore + 1 }, (_, i) => bins.find((b) => b.score === i)?.count ?? 0);
+      const counts = distributionCounts(t.maxScore, bins);
       return { id: String(t.testId), label: t.title, fillClass: st.fill, swatchClass: st.swatch, counts };
     });
   }, [data]);
-  const maxX = data ? Math.max(0, ...data.tests.map((t) => t.maxScore)) : 0;
+  const maxX = data ? distributionMaxX(data) : 0;
 
   const itemTest = pp?.post ?? data?.tests[0] ?? null;
   const items = itemTest ? (data?.itemAnalysis.find((i) => i.testId === itemTest.testId)?.items ?? []) : [];
@@ -354,13 +355,15 @@ function TestPicker({ tests, selected, onChange }: { tests: AdminTestSummary[]; 
       {open && (
         <div id={listId} className="absolute z-20 mt-1 max-h-72 w-full min-w-64 overflow-y-auto rounded-xl border border-line bg-surface p-1.5 shadow-lg">
           <fieldset>
-            <legend className="sr-only">Tests to include</legend>
+            <legend className="sr-only">Tests to include (up to {MAX_PICKED_TESTS})</legend>
+            {selected.length >= MAX_PICKED_TESTS && <p className="px-2.5 py-1.5 text-xs text-muted">Up to {MAX_PICKED_TESTS} tests at a time.</p>}
             {tests.map((t) => (
               <label key={t.id} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm hover:bg-zinc-50">
                 <input
                   type="checkbox"
                   className="size-4 accent-tests"
                   checked={selected.includes(t.id)}
+                  disabled={!selected.includes(t.id) && selected.length >= MAX_PICKED_TESTS}
                   onChange={(e) => onChange(e.target.checked ? [...selected, t.id] : selected.filter((id) => id !== t.id))}
                 />
                 <span className="min-w-0 flex-1 truncate">{t.title}</span>

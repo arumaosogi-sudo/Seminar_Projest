@@ -104,3 +104,21 @@ export async function exportWholeClass(classId: number, classLabel: string): Pro
   if (results.tests.length === 0) return null; // no tests assigned → no scores to lose
   return exportResultsToExcel(results, { classLabel, includeWithdrawn: true });
 }
+
+type Bins = AdminResults["distribution"][number]["bins"];
+
+/** Highest score shown on the histogram x-axis: older versions may have had a higher max score. */
+export function binsMax(maxScore: number, bins: Bins): number {
+  return bins.reduce((m, b) => (Number.isFinite(b.score) && b.score > m ? Math.floor(b.score) : m), Math.max(0, maxScore));
+}
+
+/** Count per score 0..binsMax(maxScore, bins). */
+export function distributionCounts(maxScore: number, bins: Bins): number[] {
+  const counts = new Array<number>(binsMax(maxScore, bins) + 1).fill(0);
+  for (const b of bins) if (b.score >= 0 && Number.isFinite(b.score)) counts[Math.floor(b.score)] += b.count;
+  return counts;
+}
+
+export function distributionMaxX(results: Pick<AdminResults, "tests" | "distribution">): number {
+  return results.tests.reduce((m, t) => Math.max(m, binsMax(t.maxScore, results.distribution.find((d) => d.testId === t.testId)?.bins ?? [])), 0);
+}

@@ -16,7 +16,9 @@ export default function TestResult() {
         "GET /api/attempts/:attemptId → AttemptResult (if it is still in progress, redirect to /tests/:assignmentId/take)",
         "Score card: “7 / 10”, submitted time, “Submitted automatically when time ran out” when autoSubmitted",
         "Pre → post comparison when both are done, e.g. “Pretest 7 → Posttest 8” (from GET /api/me/status)",
-        "Review list only when `review` is not null (the instructor decides — TEST-5): your answer, correct answer, ✓ / ✕, points earned",
+        "Review list only when `review` is not null: your answer, correct answer, ✓ / ✕, points earned (TEST-5)",
+        "`review` stays null until you have used all your attempts or the assignment has closed (and only if the instructor enabled answers) — when it is null show: “Answers will be shown after your last attempt or when the test closes”",
+        "Never cache or reconstruct answers on the client — always re-fetch GET /api/attempts/:id to see whether the review is available yet",
         "“Try again” when attemptsLeft > 0 (or null = unlimited) and the assignment is still open; “Back to tests”",
         "After a pretest is submitted, invalidate [\"me\"] queries so Home unlocks Games and 3D Explore",
       ]}

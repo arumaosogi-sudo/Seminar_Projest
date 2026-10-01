@@ -167,7 +167,10 @@ export interface AttemptResult {
   maxScore: number;
   attemptNumber: number;
   attemptsLeft: number | null;
-  /** Only when the assignment has show_answers = 1 */
+  /**
+   * Only when the assignment has show_answers = 1 AND (the student has no attempts left OR the test is closed).
+   * Otherwise null — the UI should say "Answers will be shown after your last attempt or when the test closes".
+   */
   review: {
     questionId: number;
     position: number;

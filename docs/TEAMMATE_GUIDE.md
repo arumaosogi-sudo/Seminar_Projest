@@ -16,7 +16,7 @@ npm run dev                        # เปิด http://localhost:5173 (Vite + 
   - นักศึกษา: พิมพ์อีเมลรูปแบบ `6531501111@lamduan.mfu.ac.th` (ตัวเลข 8–12 หลัก = Student ID)
   - อาจารย์: `instructor@mfu.ac.th` ที่ `/admin/login` (ตรงกับ `ADMIN_EMAILS`)
 - อยากเข้า Section: เปิด `/join/<JOIN-CODE>` ก่อน login (ดู join code ได้ที่ `/admin/classes`)
-- Pretest ที่ตั้ง "required first" จะล็อกเมนู Games / 3D ที่หน้า Home จนกว่าจะส่ง
+- Pretest ที่ตั้ง "required first" จะล็อกเมนู Games / 3D (ทั้งการ์ดที่ Home, nav และ route `/games/*`, `/explore/*` ผ่าน `RequireUnlocked`) จนกว่าจะส่ง
 
 ## 2. หน้าไหนเป็นของใคร
 
@@ -69,7 +69,7 @@ npm run dev                        # เปิด http://localhost:5173 (Vite + 
 | POST | `/api/attempts` `{ assignmentId }` | เริ่ม **หรือ resume** attempt → `AttemptInProgress` (มี `questions`, `answers`, `deadlineAt`, `serverNow`) |
 | GET | `/api/attempts/:id` | `AttemptInProgress` หรือ `AttemptResult` (ถ้าหมดเวลา server จะ auto-submit ให้) |
 | PUT | `/api/attempts/:id/answers` `{ answers }` | autosave แบบ merge → `{ savedAt }` · ส่งเฉพาะข้อที่เปลี่ยน debounce ~1 วินาที |
-| POST | `/api/attempts/:id/submit` | ส่งข้อสอบ → `AttemptResult` (`review` เป็น `null` ถ้าอาจารย์ไม่เปิดเฉลย) |
+| POST | `/api/attempts/:id/submit` | ส่งข้อสอบ → `AttemptResult` (`review` เป็น `null` จนกว่าจะใช้ครบทุก attempt หรือข้อสอบปิดแล้ว และอาจารย์เปิดเฉลย — UI ต้องแสดง "Answers will be shown after your last attempt or when the test closes") |
 
 ```ts
 import type { AttemptInProgress } from "@shared/contract";

@@ -2,8 +2,9 @@ import { useEffect, useId, useRef, useState, type ComponentType } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { useLogout } from "@/lib/auth";
 import { cx, Logo } from "@/components/ui";
+import { useStudentStatus } from "./queries";
 import { RequireStudent, useStudentMe } from "./RequireStudent";
-import { BalloonIcon, ChecklistIcon, CubeIcon, HouseIcon } from "./icons";
+import { BalloonIcon, ChecklistIcon, CubeIcon, HouseIcon, LockIcon } from "./icons";
 
 type NavItem = {
   to: string;
@@ -11,12 +12,16 @@ type NavItem = {
   short: string; // tablet + phone tab bar
   icon: ComponentType<{ size?: number }>;
   end?: boolean;
+  /** Locked (links to /tests instead) while required-first tests are pending. */
+  lockable?: boolean;
 };
+
+const LOCKED_HINT = "Locked — finish the Pretest first";
 
 const NAV: NavItem[] = [
   { to: "/", label: "Home", short: "Home", icon: HouseIcon, end: true },
-  { to: "/games", label: "Games", short: "Games", icon: BalloonIcon },
-  { to: "/explore", label: "3D Explore", short: "3D", icon: CubeIcon },
+  { to: "/games", label: "Games", short: "Games", icon: BalloonIcon, lockable: true },
+  { to: "/explore", label: "3D Explore", short: "3D", icon: CubeIcon, lockable: true },
   { to: "/tests", label: "Tests", short: "Tests", icon: ChecklistIcon },
 ];
 
@@ -31,7 +36,11 @@ export default function StudentLayout() {
 
 function Shell() {
   const { pathname } = useLocation();
-
+  const me = useStudentMe();
+  const enrolled = me.enrollment?.status === "active";
+  const status = useStudentStatus(enrolled);
+  // Fail-closed: an unreadable status locks the menus too (RequireUnlocked guards the routes themselves).
+  const locked = enrolled && (status.data?.menusLocked === true || status.isError);
 
   // Scroll to top on page change (SPA navigation keeps the old scroll position otherwise).
   useEffect(() => {
@@ -46,19 +55,19 @@ function Shell() {
       >
         Skip to content
       </a>
-      <TopBar />
+      <TopBar locked={locked} />
       <main id="main" tabIndex={-1} className="flex-1 outline-none">
         <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-6 sm:px-6 lg:px-8 lg:pt-10">
           <Outlet />
         </div>
       </main>
       <Footer />
-      <BottomTabs />
+      <BottomTabs locked={locked} />
     </div>
   );
 }
 
-function TopBar() {
+function TopBar({ locked }: { locked: boolean }) {
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/85">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6 md:h-16 lg:h-[72px] lg:px-8">
@@ -70,6 +79,19 @@ function TopBar() {
           <ul className="flex items-stretch gap-1 lg:gap-2">
             {NAV.map((item) => (
               <li key={item.to} className="flex">
+                {locked && item.lockable ? (
+                  <Link
+                    to="/tests"
+                    aria-disabled="true"
+                    aria-label={`${item.label} (${LOCKED_HINT})`}
+                    title={LOCKED_HINT}
+                    className="relative flex h-16 items-center gap-1.5 rounded-md px-3 text-[15px] font-medium text-faint lg:h-[72px] lg:px-4"
+                  >
+                    <LockIcon size={14} />
+                    <span className="hidden lg:inline">{item.label}</span>
+                    <span className="lg:hidden">{item.short}</span>
+                  </Link>
+                ) : (
                 <NavLink
                   to={item.to}
                   end={item.end}
@@ -88,6 +110,7 @@ function TopBar() {
                     </>
                   )}
                 </NavLink>
+                )}
               </li>
             ))}
           </ul>
@@ -181,21 +204,43 @@ function UserMenu() {
           >
             {logout.isPending ? "Signing out…" : "Sign out"}
           </button>
+          {logout.isError && (
+            <p role="alert" className="px-4 pb-2.5 text-xs text-danger">
+              Couldn't sign out. Check your connection and try again.
+            </p>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-function BottomTabs() {
+function BottomTabs({ locked }: { locked: boolean }) {
   return (
     <nav
       aria-label="Main"
       className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
     >
       <ul className="grid grid-cols-4">
-        {NAV.map(({ to, short, icon: Icon, end }) => (
+        {NAV.map(({ to, label, short, icon: Icon, end, lockable }) => (
           <li key={to}>
+            {locked && lockable ? (
+              <Link
+                to="/tests"
+                aria-disabled="true"
+                aria-label={`${label} (${LOCKED_HINT})`}
+                title={LOCKED_HINT}
+                className="relative flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-semibold text-faint opacity-70"
+              >
+                <span className="relative">
+                  <Icon size={22} />
+                  <span className="absolute -right-2 -top-1 grid size-4 place-items-center rounded-full bg-surface">
+                    <LockIcon size={12} />
+                  </span>
+                </span>
+                {short}
+              </Link>
+            ) : (
             <NavLink
               to={to}
               end={end}
@@ -209,6 +254,7 @@ function BottomTabs() {
               <Icon size={22} />
               {short}
             </NavLink>
+            )}
           </li>
         ))}
       </ul>

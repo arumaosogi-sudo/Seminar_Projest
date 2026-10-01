@@ -83,7 +83,9 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
               tabIndex={-1}
               disabled={it.disabled}
               onClick={() => {
-                close(false);
+                // Focus the trigger first so a dialog opened by onSelect records it as the opener
+                // (and returns focus there when it closes).
+                close(true);
                 it.onSelect();
               }}
               className={cx(

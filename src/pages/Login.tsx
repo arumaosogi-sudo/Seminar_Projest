@@ -7,6 +7,7 @@ import { ErrorNote, PageLoader } from "@/components/ui";
 import { AuthShell, CardChip } from "@/components/student/AuthShell";
 import { GoogleSignInButton } from "@/components/student/GoogleSignInButton";
 import { DevLoginForm } from "@/components/student/DevLoginForm";
+import { useDocumentTitle } from "@/components/student/useDocumentTitle";
 import { CheckIcon, InfoIcon } from "@/components/student/icons";
 import { describeAuthError, joinNoticeStore, safeRedirect } from "@/components/student/authHelpers";
 import { classLabel, normalizeJoinCode, useClassByCode } from "@/components/student/useClassByCode";
@@ -18,6 +19,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState<string | null>(null);
+  useDocumentTitle("Sign in");
 
   const from = safeRedirect((location.state as { from?: unknown } | null)?.from);
   const [joinCode] = useState(() => normalizeJoinCode(joinCodeStore.get()) || undefined);
@@ -26,6 +28,8 @@ export default function Login() {
   const onSuccess = (next: Me) => {
     setError(null);
     joinCodeStore.clear();
+    // Drop every cached query from a previous session (status, tests, …) before storing the new identity.
+    qc.removeQueries();
     qc.setQueryData(meKey, next);
     if (next.role !== "student") {
       navigate("/admin", { replace: true });

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { Badge, Card, cx, DraftBadge } from "@/components/ui";
 import { ArrowLeftIcon, CheckIcon } from "./icons";
+import { useDocumentTitle } from "./useDocumentTitle";
 
 type Accent = "games" | "explore" | "tests";
 
@@ -55,6 +56,7 @@ export function Placeholder({
   description,
 }: PlaceholderProps) {
   const tone = accentTone[accent];
+  useDocumentTitle(title);
   return (
     <div>
       <div className="mb-6 flex items-start justify-between gap-4">

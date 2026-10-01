@@ -3,14 +3,16 @@ import type { AdminQuestion, AdminResults, AdminTestDetail } from "@shared/contr
 import { saveTestBody } from "@shared/contract";
 import { resolveCurrentClass } from "./adminClass";
 import { defaultForm, formFromAssignment, sameSettings, toSettings } from "./assign";
-import { blankQuestion, changeType, draftFromServer, duplicateQuestion, nextOptionId, toSaveBody, validateDraft } from "./builder";
+import { MAX_QUESTIONS, blankQuestion, changeType, draftFromServer, duplicateQuestion, nextOptionId, toSaveBody, validateDraft } from "./builder";
 import { parseCsv, parseRosterCsv } from "./csv";
-import { buildScoresSheet, buildSummarySheet, defaultTestIds, resultsFileName, rowChange } from "./exportResults";
+import { buildScoresSheet, buildSummarySheet, defaultTestIds, distributionCounts, distributionMaxX, resultsFileName, rowChange } from "./exportResults";
+import { otherEnrollments } from "./students";
+import type { AdminStudentRow } from "@shared/contract";
 import { isoToLocalInput, localInputToIso, relativeTime, signed, slugify } from "./format";
 
 describe("csv", () => {
   it("parses quotes, escaped quotes, CRLF and BOM", () => {
-    expect(parseCsv('﻿a,"b, c","d ""q"""\r\n1,2,3\n')).toEqual([
+    expect(parseCsv('\uFEFFa,"b, c","d ""q"""\r\n1,2,3\n')).toEqual([
       ["a", "b, c", 'd "q"'],
       ["1", "2", "3"],
     ]);
@@ -209,5 +211,81 @@ describe("results export", () => {
       ({ id, kind, updatedAt }) as Parameters<typeof defaultTestIds>[0][number];
     expect(defaultTestIds([t(1, "pretest", "2026-01-01"), t(2, "pretest", "2026-02-01"), t(3, "posttest", "2026-01-15"), t(4, "other", "2026-03-01")])).toEqual([2, 3]);
     expect(defaultTestIds([t(4, "other", "2026-03-01")])).toEqual([4]);
+  });
+});
+
+describe("QA fixes", () => {
+  it("H1: strips question ids that no longer belong to the test", () => {
+    const keep = { ...blankQuestion(), id: 11, prompt: "a", single: "a" };
+    const restored = { ...blankQuestion(), id: 12, prompt: "b", single: "a" }; // deleted on the server, restored by Undo
+    const fresh = { ...blankQuestion(), prompt: "c", single: "a" };
+    const body = toSaveBody({ title: "t", description: "", kind: "other", questions: [keep, restored, fresh] }, new Set([11]));
+    expect(body.questions.map((q) => q.id)).toEqual([11, undefined, undefined]);
+    expect("id" in body.questions[1]).toBe(false);
+    // without a server-id set everything is kept (initial behaviour)
+    expect(toSaveBody({ title: "t", description: "", kind: "other", questions: [restored] }).questions[0].id).toBe(12);
+  });
+
+  it("M1: validates question count and image URLs", () => {
+    const ok = { ...blankQuestion(), prompt: "p", single: "a" };
+    const many = Array.from({ length: MAX_QUESTIONS + 1 }, () => ({ ...ok, key: Math.random().toString(36) }));
+    const v = validateDraft({ title: "t", description: "", kind: "other", questions: many });
+    expect(v.general).toHaveLength(1);
+    expect(v.count).toBe(1);
+    const img = (imageUrl: string) => validateDraft({ title: "t", description: "", kind: "other", questions: [{ ...ok, imageUrl }] }).count;
+    expect(img("https://example.com/a.png")).toBe(0);
+    expect(img("/images/sarcomere.webp")).toBe(0);
+    expect(img("http://insecure.test/a.png")).toBe(1);
+    expect(img("javascript:alert(1)")).toBe(1);
+  });
+
+  it("M3: histogram covers bins above the current max score", () => {
+    expect(distributionCounts(5, [{ score: 2, count: 1 }, { score: 8, count: 3 }])).toEqual([0, 0, 1, 0, 0, 0, 0, 0, 3]);
+    expect(distributionCounts(3, [])).toEqual([0, 0, 0, 0]);
+    expect(
+      distributionMaxX({
+        tests: [
+          { testId: 1, title: "a", kind: "pretest", maxScore: 5, stats: { n: 0, mean: null, sd: null, min: null, max: null, maxScore: 5 } },
+          { testId: 2, title: "b", kind: "posttest", maxScore: 4, stats: { n: 0, mean: null, sd: null, min: null, max: null, maxScore: 4 } },
+        ],
+        distribution: [{ testId: 2, bins: [{ score: 9, count: 1 }] }],
+      }),
+    ).toBe(9);
+  });
+
+  it("M5: Thai headers, other column orders, whitespace in names", () => {
+    const th = parseRosterCsv("ลำดับ,ชื่อ,รหัสนักศึกษา\n1,สมชาย,6531501234\n2,\"สม\n หญิง\",6531501235");
+    expect(th.headerDetected).toBe(true);
+    expect(th.invalid).toHaveLength(0);
+    expect(th.entries).toEqual([
+      { studentCode: "6531501234", firstName: "สมชาย" },
+      { studentCode: "6531501235", firstName: "สม หญิง" },
+    ]);
+    const order = parseRosterCsv("No,Name,Code\n1,Ann,6531501234\n2,Bob,6531501235");
+    expect(order.entries).toEqual([
+      { studentCode: "6531501234", firstName: "Ann" },
+      { studentCode: "6531501235", firstName: "Bob" },
+    ]);
+    // unknown header: falls back to the column that looks like student IDs
+    const unknown = parseRosterCsv("seq,who,sid\n1,Ann,6531501234");
+    expect(unknown.entries).toEqual([{ studentCode: "6531501234", firstName: "Ann" }]);
+  });
+
+  it("M10: finds the student's enrollments in other classes", () => {
+    const row = (classId: number, studentId: number | null, enrollmentId: number | null): AdminStudentRow => ({
+      enrollmentId,
+      studentId,
+      studentCode: "6531501234",
+      firstName: null,
+      email: null,
+      classId,
+      className: `C${classId}`,
+      status: enrollmentId ? "active" : "not_joined",
+      joinedAt: null,
+      lastLoginAt: null,
+    });
+    const rows = [row(1, 7, 10), row(2, 7, 11), row(3, 8, 12), row(4, null, null)];
+    expect(otherEnrollments(rows, 7, 1).map((r) => r.classId)).toEqual([2]);
+    expect(otherEnrollments(rows, 7, 2).map((r) => r.classId)).toEqual([1]);
   });
 });

@@ -1,10 +1,12 @@
 import { Link, useLocation } from "react-router";
 import { useMe } from "@/lib/auth";
 import { Logo } from "@/components/ui";
+import { useDocumentTitle } from "@/components/student/useDocumentTitle";
 
 export default function NotFound() {
   const { pathname } = useLocation();
   const me = useMe();
+  useDocumentTitle("Page not found");
   const home = me.data?.role === "admin" ? { to: "/admin", label: "Go to the dashboard" } : me.data ? { to: "/", label: "Go Home" } : { to: "/login", label: "Go to sign in" };
 
   return (

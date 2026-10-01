@@ -8,6 +8,7 @@ import { useAdminClass } from "@/components/admin/adminClass";
 import { CardTitle, QueryError, SearchBox } from "@/components/admin/controls";
 import { MAX_ROSTER_ENTRIES, parseRosterCsv, type RosterParseResult } from "@/components/admin/csv";
 import { exportWholeClass } from "@/components/admin/exportResults";
+import { findOtherEnrollments } from "@/components/admin/students";
 import { errorMessage, formatDate, formatDateTime, relativeTime } from "@/components/admin/format";
 import { IconUpload } from "@/components/admin/icons";
 import { adminKeys } from "@/components/admin/keys";
@@ -61,6 +62,23 @@ function StudentsForClass({ cls, classes, onClassChange }: { cls: AdminClass; cl
   const [exported, setExported] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [danger, setDanger] = useState<null | "anonymize" | "delete">(null);
+  const [checkingDelete, setCheckingDelete] = useState(false);
+  const [deleteBlockedBy, setDeleteBlockedBy] = useState<AdminStudentRow[] | null>(null);
+
+  /** Delete wipes attempts in every section, but the export covers only this one → block when enrolled elsewhere. */
+  async function requestDelete(r: AdminStudentRow) {
+    if (r.studentId === null) return;
+    setCheckingDelete(true);
+    try {
+      const others = await findOtherEnrollments({ studentId: r.studentId, studentCode: r.studentCode }, cls.id);
+      if (others.length > 0) setDeleteBlockedBy(others);
+      else setDanger("delete");
+    } catch (e) {
+      toast.show(`Couldn’t check the student’s other sections: ${errorMessage(e)}`, "error");
+    } finally {
+      setCheckingDelete(false);
+    }
+  }
 
   const all = useMemo(() => q.data ?? [], [q.data]);
   const counts = useMemo(() => {
@@ -307,7 +325,8 @@ function StudentsForClass({ cls, classes, onClassChange }: { cls: AdminClass; cl
                 <Button
                   accent="danger"
                   disabled={!exported || !selected?.studentId}
-                  onClick={() => setDanger("delete")}
+                  loading={checkingDelete}
+                  onClick={() => selected && void requestDelete(selected)}
                   title={!exported ? "Export the class first" : !selected?.studentId ? "Select a student who has signed in" : undefined}
                 >
                   Delete
@@ -318,6 +337,42 @@ function StudentsForClass({ cls, classes, onClassChange }: { cls: AdminClass; cl
           </Card>
         </div>
       </div>
+
+      <Modal
+        open={deleteBlockedBy !== null}
+        onClose={() => setDeleteBlockedBy(null)}
+        title="Can’t delete this student here"
+        size="sm"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setDeleteBlockedBy(null)}>
+              Close
+            </Button>
+            <Button
+              onClick={() => {
+                setDeleteBlockedBy(null);
+                setDanger("anonymize");
+              }}
+            >
+              Anonymize instead
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3 text-sm text-zinc-700">
+          <p>
+            Deleting removes this student’s attempts in <strong>every</strong> section, but your export only covers {cls.name}. They’re also enrolled in:
+          </p>
+          <ul className="list-disc pl-5">
+            {(deleteBlockedBy ?? []).map((r) => (
+              <li key={r.enrollmentId ?? r.classId}>
+                {r.className} <span className="text-muted">({r.status === "active" ? "active" : "withdrawn"})</span>
+              </li>
+            ))}
+          </ul>
+          <p>Use <strong>Anonymize</strong> instead: it removes the student’s ID, name and e-mail everywhere and keeps the scores, so nothing in those sections is lost.</p>
+        </div>
+      </Modal>
 
       <ImportRosterModal open={importOpen} onClose={() => setImportOpen(false)} cls={cls} onImported={invalidate} />
 

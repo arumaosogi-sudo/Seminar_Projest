@@ -21,16 +21,32 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     timers.current.delete(id);
   }, []);
 
-  const show = useCallback(
-    (message: ReactNode, tone: ToastTone = "info") => {
-      const id = nextId.current++;
-      setItems((list) => [...list.slice(-3), { id, message, tone }]);
+  const schedule = useCallback(
+    (id: number, tone: ToastTone) => {
+      const old = timers.current.get(id);
+      if (old) clearTimeout(old);
       timers.current.set(
         id,
         setTimeout(() => dismiss(id), tone === "error" ? 7000 : 4500),
       );
     },
     [dismiss],
+  );
+
+  /** Pause auto-dismiss while the toast is hovered or focused (e.g. reaching an Undo button). */
+  const pause = useCallback((id: number) => {
+    const t = timers.current.get(id);
+    if (t) clearTimeout(t);
+    timers.current.delete(id);
+  }, []);
+
+  const show = useCallback(
+    (message: ReactNode, tone: ToastTone = "info") => {
+      const id = nextId.current++;
+      setItems((list) => [...list.slice(-3), { id, message, tone }]);
+      schedule(id, tone);
+    },
+    [schedule],
   );
 
   useEffect(() => {
@@ -47,6 +63,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {items.map((t) => (
           <div
             key={t.id}
+            onMouseEnter={() => pause(t.id)}
+            onMouseLeave={(e) => {
+              if (!e.currentTarget.contains(document.activeElement)) schedule(t.id, t.tone);
+            }}
+            onFocus={() => pause(t.id)}
+            onBlur={(e) => {
+              if (!e.currentTarget.contains(e.relatedTarget as Node | null) && !e.currentTarget.matches(":hover")) schedule(t.id, t.tone);
+            }}
             className={cx(
               "pointer-events-auto flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-lg",
               t.tone === "success" && "border-green-200 bg-success-soft text-green-900",

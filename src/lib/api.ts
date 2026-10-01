@@ -19,8 +19,23 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
-  if (!res.ok) throw new ApiRequestError(res.status, (data ?? { error: res.statusText }) as ApiError);
+  let data: unknown = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    // Non-JSON body (e.g. an HTML error page from the edge). Keep the status; use a generic message.
+    if (res.ok) throw new ApiRequestError(res.status, { error: "Unexpected response from the server.", code: "bad_response" });
+  }
+  if (!res.ok) {
+    const fallback: ApiError =
+      res.status === 413
+        ? { error: "That's too large to send. Try fewer or shorter items.", code: "payload_too_large" }
+        : res.status === 429
+          ? { error: "Too many requests — please wait a moment and try again.", code: "rate_limited" }
+          : { error: `The server couldn't complete the request (${res.status}). Please try again.` };
+    const body = data && typeof data === "object" && "error" in data ? (data as ApiError) : fallback;
+    throw new ApiRequestError(res.status, body);
+  }
   return data as T;
 }
 

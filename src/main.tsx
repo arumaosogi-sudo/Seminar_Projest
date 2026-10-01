@@ -1,13 +1,28 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router";
 import { router } from "./router";
+import { ApiRequestError } from "./lib/api";
+import { meKey } from "./lib/auth";
 import "./index.css";
 
-const queryClient = new QueryClient({
+/**
+ * Any 401 from the API (expired or revoked session) marks the user as signed out, so the
+ * route guards (RequireStudent / AdminLayout) send them to the right login page.
+ * The /me query itself handles 401 by returning null, so it never loops here.
+ */
+function onApiError(error: unknown) {
+  if (error instanceof ApiRequestError && error.status === 401 && queryClient.getQueryData(meKey)) {
+    queryClient.setQueryData(meKey, null);
+  }
+}
+
+const queryClient: QueryClient = new QueryClient({
+  queryCache: new QueryCache({ onError: onApiError }),
+  mutationCache: new MutationCache({ onError: onApiError }),
   defaultOptions: {
-    queries: { retry: 1, refetchOnWindowFocus: false },
+    queries: { retry: (count, error) => !(error instanceof ApiRequestError && error.status < 500) && count < 1, refetchOnWindowFocus: false },
   },
 });
 

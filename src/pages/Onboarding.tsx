@@ -7,6 +7,7 @@ import { meKey } from "@/lib/auth";
 import { Button, ErrorNote, Input } from "@/components/ui";
 import { AuthShell, CardChip } from "@/components/student/AuthShell";
 import { RequireStudent, useStudentMe } from "@/components/student/RequireStudent";
+import { useDocumentTitle } from "@/components/student/useDocumentTitle";
 import { describeAuthError, safeRedirect } from "@/components/student/authHelpers";
 
 const MAX_NAME = 60;
@@ -21,6 +22,7 @@ export default function Onboarding() {
 
 function OnboardingForm() {
   const me = useStudentMe();
+  useDocumentTitle("Welcome");
   const qc = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();

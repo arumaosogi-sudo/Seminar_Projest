@@ -5,6 +5,7 @@ import { cx, DraftBadge } from "@/components/ui";
 import { useStudentMe } from "@/components/student/RequireStudent";
 import { joinNoticeStore } from "@/components/student/authHelpers";
 import { useStudentStatus } from "@/components/student/queries";
+import { useDocumentTitle } from "@/components/student/useDocumentTitle";
 import { BalloonIcon, ChecklistIcon, CubeIcon, InfoIcon, LockIcon } from "@/components/student/icons";
 
 type Accent = "games" | "explore" | "tests";
@@ -17,6 +18,7 @@ const tone: Record<Accent, { soft: string; icon: string; button: string }> = {
 
 export default function Home() {
   const me = useStudentMe();
+  useDocumentTitle("Home");
   const enrolled = !!me.enrollment && me.enrollment.status === "active";
 
   const status = useStudentStatus(enrolled);
@@ -27,7 +29,10 @@ export default function Home() {
     joinNoticeStore.clear();
   }, []);
 
-  const locked = enrolled && !!status.data?.menusLocked;
+  const pretestLocked = enrolled && status.data?.menusLocked === true;
+  // Fail-closed: if the status can't be loaded, keep Games / 3D locked until a retry succeeds.
+  const locked = pretestLocked || (enrolled && status.isError);
+  const lockHint = status.isError ? "Couldn't check your status" : "Finish the Pretest first";
   // Until the status is known we don't know if menus are locked — keep their buttons inactive briefly.
   const statusUnknown = enrolled && status.isPending;
 
@@ -58,13 +63,18 @@ export default function Home() {
           </Notice>
         )}
         {status.isError && (
-          <Notice tone="warning" title="We couldn't load your test status.">
-            <button type="button" className="font-semibold underline" onClick={() => void status.refetch()}>
-              Try again
+          <Notice tone="warning" title="We couldn't load your test status, so Games and 3D Explore are locked for now.">
+            <button
+              type="button"
+              className="font-semibold underline disabled:opacity-50"
+              disabled={status.isFetching}
+              onClick={() => void status.refetch()}
+            >
+              {status.isFetching ? "Retrying…" : "Retry"}
             </button>
           </Notice>
         )}
-        {locked && (
+        {pretestLocked && (
           <div className="flex flex-col gap-3 rounded-2xl border border-blue-200 bg-tests-soft px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
             <p className="flex items-start gap-2.5 text-[15px] font-medium text-tests-ink">
               <LockIcon size={20} className="mt-px shrink-0" />
@@ -92,6 +102,7 @@ export default function Home() {
           action="Play"
           to="/games"
           locked={locked}
+          lockHint={lockHint}
           pending={statusUnknown}
         />
         <MenuCard
@@ -104,6 +115,7 @@ export default function Home() {
           action="Explore"
           to="/explore"
           locked={locked}
+          lockHint={lockHint}
           pending={statusUnknown}
         />
         <MenuCard
@@ -144,10 +156,11 @@ type MenuCardProps = {
   action: string;
   to: string;
   locked?: boolean;
+  lockHint?: string;
   pending?: boolean;
 };
 
-function MenuCard({ accent, icon: Icon, title, subtitle, chips, lo, action, to, locked = false, pending = false }: MenuCardProps) {
+function MenuCard({ accent, icon: Icon, title, subtitle, chips, lo, action, to, locked = false, lockHint = "Finish the Pretest first", pending = false }: MenuCardProps) {
   const t = tone[accent];
   const lockHintId = useId();
   const inactive = locked || pending;
@@ -196,7 +209,7 @@ function MenuCard({ accent, icon: Icon, title, subtitle, chips, lo, action, to, 
         <div className="mt-5 flex items-center justify-between gap-3 md:mt-0 md:flex-col md:items-end lg:mt-auto lg:flex-row lg:items-center lg:pt-6">
           <span className="text-xs font-semibold uppercase tracking-wide text-faint">{lo}</span>
           {inactive ? (
-            <span className="flex flex-col items-end" title={locked ? "Finish the Pretest first" : undefined}>
+            <span className="flex flex-col items-end" title={locked ? lockHint : undefined}>
               <button
                 type="button"
                 disabled
@@ -208,7 +221,7 @@ function MenuCard({ accent, icon: Icon, title, subtitle, chips, lo, action, to, 
               </button>
               {locked && (
                 <span id={lockHintId} className="mt-1 text-[11px] text-muted">
-                  Finish the Pretest first
+                  {lockHint}
                 </span>
               )}
             </span>

@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from "react-router";
 import { joinCodeStore, useLogout, useMe } from "@/lib/auth";
 import { Button, ErrorNote, Spinner } from "@/components/ui";
 import { AuthShell, CardChip } from "@/components/student/AuthShell";
+import { useDocumentTitle } from "@/components/student/useDocumentTitle";
+import { ApiRequestError } from "@/lib/api";
 import { classLabel, normalizeJoinCode, useClassByCode } from "@/components/student/useClassByCode";
 
 /** How long "Joining Section 1 · 2569/1…" stays visible before moving on to /login. */
@@ -16,6 +18,7 @@ export default function Join() {
   const cls = useClassByCode(code || undefined);
   const logout = useLogout();
   const navigate = useNavigate();
+  useDocumentTitle("Join your class");
 
   const signedIn = !!me.data;
 
@@ -54,7 +57,7 @@ export default function Join() {
         <>
           <h2 className="text-2xl font-bold tracking-tight">Couldn't check your class</h2>
           <div className="mt-4">
-            <ErrorNote>We couldn't reach the server. Check your connection and try again.</ErrorNote>
+            <ErrorNote>{lookupErrorMessage(cls.error)}</ErrorNote>
           </div>
           <Button className="mt-6" block size="lg" onClick={() => void cls.refetch()} loading={cls.isFetching}>
             Try again
@@ -127,4 +130,14 @@ function InvalidCleanup() {
     joinCodeStore.clear();
   }, []);
   return null;
+}
+
+/** Tell rate limiting and server failures apart from a dropped connection. */
+function lookupErrorMessage(error: unknown): string {
+  if (error instanceof ApiRequestError) {
+    if (error.status === 429) return "Too many attempts right now. Please wait a minute and try again.";
+    if (error.status >= 500) return "The server had a problem checking your class. Please try again in a moment.";
+    return error.message || "We couldn't check this class code. Please try again.";
+  }
+  return "We couldn't reach the server. Check your internet connection and try again.";
 }

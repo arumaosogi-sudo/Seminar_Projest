@@ -2,10 +2,12 @@ import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { DraftBadge, Logo } from "@/components/ui";
 import { useMe } from "@/lib/auth";
+import { useDocumentTitle } from "./useDocumentTitle";
 
 /** Simple shell for public reading pages (/credits, /privacy, 404) — works signed in or out. */
 export function PublicPage({ title, intro, children }: { title: string; intro?: ReactNode; children: ReactNode }) {
   const me = useMe();
+  useDocumentTitle(title);
   const back = me.data?.role === "admin" ? { to: "/admin", label: "Dashboard" } : me.data ? { to: "/", label: "Home" } : { to: "/login", label: "Sign in" };
 
   return (

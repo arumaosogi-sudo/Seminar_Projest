@@ -139,6 +139,14 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
         failed[id] = errorMessage(r.reason);
       }
     });
+    // A failed unassign (e.g. 409 has_attempts) means the class is still assigned — reflect that in the checkboxes.
+    const stillAssigned = dels.filter((id) => id in failed);
+    if (stillAssigned.length)
+      setChecked((s) => {
+        const n = new Set(s);
+        stillAssigned.forEach((id) => n.add(id));
+        return n;
+      });
     void qc.invalidateQueries({ queryKey: adminKeys.tests });
     void qc.invalidateQueries({ queryKey: adminKeys.classesRoot });
     if (Object.keys(failed).length) {

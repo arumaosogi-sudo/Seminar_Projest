@@ -6,7 +6,7 @@ import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, v
 import { CSS } from "@dnd-kit/utilities";
 import { saveTestBody, type AdminTestDetail, type AdminTestSaveResult, type QuestionType, type TestKind } from "@shared/contract";
 import { api } from "@/lib/api";
-import { Badge, Button, Card, cx, DraftBadge, EmptyState, Input, PageLoader, Select } from "@/components/ui";
+import { Badge, Button, Card, cx, DraftBadge, EmptyState, ErrorNote, Input, PageLoader, Select } from "@/components/ui";
 import {
   TYPE_LABEL,
   blankQuestion,
@@ -16,6 +16,7 @@ import {
   maxScoreOf,
   nextOptionId,
   toSaveBody,
+  MAX_QUESTIONS,
   validateDraft,
   type DraftQuestion,
   type DraftTest,
@@ -37,9 +38,13 @@ export default function TestBuilder() {
     queryKey: adminKeys.test(id),
     queryFn: () => api.get<AdminTestDetail>(`/admin/tests/${id}`),
     enabled: valid,
-    staleTime: Infinity, // the builder owns this data while open
+    // Always refetch when the builder opens: versionLocked / questions may have changed since the cache was filled.
+    refetchOnMount: "always",
     refetchOnWindowFocus: false,
   });
+  // The draft is initialised once, so wait for data fetched after this mount (never seed it from stale cache).
+  const [mountedAt] = useState(() => Date.now());
+  const fresh = q.dataUpdatedAt >= mountedAt;
 
   if (!valid || isApiStatus(q.error, 404))
     return (
@@ -47,8 +52,8 @@ export default function TestBuilder() {
         It may have been deleted.
       </EmptyState>
     );
-  if (q.isPending) return <PageLoader />;
   if (q.isError) return <QueryError error={q.error} onRetry={() => void q.refetch()} what="the test" />;
+  if (q.isPending || !fresh) return <PageLoader />;
   return <Builder key={id} testId={id} initial={q.data} />;
 }
 
@@ -75,6 +80,8 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
   const savedRevRef = useRef(0);
   const draftRef = useRef(draft);
   const inFlight = useRef<Promise<boolean> | null>(null);
+  /** Question ids that belong to the test on the server right now (see toSaveBody). */
+  const serverIds = useRef<ReadonlySet<number>>(new Set(initial.questions.map((x) => x.id)));
   useEffect(() => {
     draftRef.current = draft;
   }, [draft]);
@@ -111,19 +118,23 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
         }
         return false;
       }
-      const body = saveTestBody.safeParse(toSaveBody(d));
+      const body = saveTestBody.safeParse(toSaveBody(d, serverIds.current));
       if (!body.success) {
-        if (manual) toast.show(body.error.issues[0]?.message ?? "The test has invalid fields.", "error");
+        const issue = body.error.issues[0];
+        const msg = `Can’t save: ${issue ? `${issue.path.join(".")} — ${issue.message}` : "the test has invalid fields."}`;
+        setSaveError(msg); // always visible in the header status, also for autosave
+        if (manual) toast.show(msg, "error");
         return false;
       }
       const run = (async () => {
         setSaving(true);
         setSaveError(null);
         try {
-          const res = await api.put<AdminTestSaveResult>(`/admin/tests/${testId}`, toSaveBody(d));
+          const res = await api.put<AdminTestSaveResult>(`/admin/tests/${testId}`, body.data);
           const serverQs = [...res.test.questions].sort((a, b) => a.position - b.position);
           const idByKey = new Map(d.questions.map((q, i) => [q.key, serverQs[i]?.id]));
           setDraft((cur) => ({ ...cur, questions: cur.questions.map((q) => (idByKey.get(q.key) ? { ...q, id: idByKey.get(q.key) } : q)) }));
+          serverIds.current = new Set(res.test.questions.map((x) => x.id));
           setServer(res.test);
           qc.setQueryData(adminKeys.test(testId), res.test);
           void qc.invalidateQueries({ queryKey: adminKeys.tests });
@@ -133,7 +144,7 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
             toast.show(`Saved as version ${res.test.currentVersion}. Earlier attempts keep version ${res.test.currentVersion - 1}.`, "success");
           return true;
         } catch (e) {
-          setSaveError(errorMessage(e, "Couldn’t save."));
+          setSaveError(`Couldn’t save: ${errorMessage(e)}`);
           if (manual) toast.show(errorMessage(e, "Couldn’t save."), "error");
           return false;
         } finally {
@@ -182,7 +193,12 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
     setFocusKey(null);
   }, [focusKey]);
 
+  const atMax = draft.questions.length >= MAX_QUESTIONS;
   const addQuestion = (type: QuestionType = "single") => {
+    if (draftRef.current.questions.length >= MAX_QUESTIONS) {
+      toast.show(`A test can have at most ${MAX_QUESTIONS} questions.`, "error");
+      return;
+    }
     const q = blankQuestion(type);
     update((d) => ({ ...d, questions: [...d.questions, q] }));
     setTab("questions");
@@ -240,7 +256,7 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
     <span className="text-muted">Saving…</span>
   ) : saveError ? (
     <span className="text-danger">
-      Couldn’t save.{" "}
+      {saveError}{" "}
       <button type="button" className="font-semibold underline" onClick={() => void save(true)}>
         Retry
       </button>
@@ -298,6 +314,12 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
           </Button>
         </div>
       </div>
+
+      {showErrors && validation.general.length > 0 && (
+        <div className="mb-5">
+          <ErrorNote>{validation.general.join(" ")}</ErrorNote>
+        </div>
+      )}
 
       {locked && (
         <div className="mb-5 flex gap-3 rounded-2xl border border-violet-200 bg-games-soft px-4 py-3 text-sm text-games-ink" role="note">
@@ -365,7 +387,7 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
             </Card>
 
             {draft.questions.length === 0 ? (
-              <EmptyState title="No questions yet" action={<Button onClick={() => addQuestion()}>+ Add question</Button>}>
+              <EmptyState title="No questions yet" action={<Button onClick={() => addQuestion()} disabled={atMax}>+ Add question</Button>}>
                 Add multiple-choice, checkbox, true/false or short-answer questions.
               </EmptyState>
             ) : (
@@ -380,6 +402,7 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
                       onChange={(fn) => updateQuestion(q.key, fn)}
                       onDuplicate={() =>
                         update((d) => {
+                          if (d.questions.length >= MAX_QUESTIONS) return d;
                           const qs = [...d.questions];
                           const idx = qs.findIndex((x) => x.key === q.key);
                           qs.splice(idx + 1, 0, duplicateQuestion(q));
@@ -394,7 +417,7 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
             )}
 
             <div className="flex justify-center lg:hidden">
-              <Button variant="outline" onClick={() => addQuestion()}>
+              <Button variant="outline" onClick={() => addQuestion()} disabled={atMax}>
                 <IconPlus size={16} /> Add question
               </Button>
             </div>
@@ -403,7 +426,14 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
           {/* Floating toolbar */}
           <div className="hidden w-12 shrink-0 lg:block">
             <div className="sticky top-6 flex flex-col items-center gap-1 rounded-2xl border border-line bg-surface p-1.5 shadow-sm" role="toolbar" aria-label="Question tools" aria-orientation="vertical">
-              <button type="button" onClick={() => addQuestion()} className="rounded-xl p-2 text-ink hover:bg-zinc-100" aria-label="Add question" title="Add question">
+              <button
+                type="button"
+                onClick={() => addQuestion()}
+                disabled={atMax}
+                className="rounded-xl p-2 text-ink hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label="Add question"
+                title={atMax ? `Maximum ${MAX_QUESTIONS} questions` : "Add question"}
+              >
                 <IconPlus />
               </button>
               <button type="button" disabled className="cursor-not-allowed rounded-xl p-2 text-faint" aria-label="Import CSV (coming soon)" title="Import CSV — coming soon">
