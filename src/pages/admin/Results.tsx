@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import type { AdminClass, AdminResults, AdminTestSummary, TestKind } from "@shared/contract";
 import { api } from "@/lib/api";
-import { Button, Card, cx, DraftBadge, EmptyState, PageHeader, PageLoader } from "@/components/ui";
+import { Button, Card, cx, EmptyState, PageHeader, PageLoader } from "@/components/ui";
 import { useAdminClass } from "@/components/admin/adminClass";
 import { PairedBars, PercentBars, type BarSeries } from "@/components/admin/charts";
 import { FilterSelect, QueryError, SearchBox, StatCard, StatusChip } from "@/components/admin/controls";
@@ -108,7 +108,6 @@ export default function Results() {
         subtitle="Pretest vs posttest · filtered by class"
         actions={
           <>
-            <DraftBadge />
             <Button
               accent="success"
               size="lg"

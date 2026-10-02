@@ -16,7 +16,7 @@ npm run dev                        # เปิด http://localhost:5173 (Vite + 
   - นักศึกษา: พิมพ์อีเมลรูปแบบ `6531501111@lamduan.mfu.ac.th` (ตัวเลข 8–12 หลัก = Student ID)
   - อาจารย์: `instructor@mfu.ac.th` ที่ `/admin/login` (ตรงกับ `ADMIN_EMAILS`)
 - อยากเข้า Section: เปิด `/join/<JOIN-CODE>` ก่อน login (ดู join code ได้ที่ `/admin/classes`)
-- Pretest ที่ตั้ง "required first" จะล็อกเมนู Games / 3D (ทั้งการ์ดที่ Home, nav และ route `/games/*`, `/explore/*` ผ่าน `RequireUnlocked`) จนกว่าจะส่ง
+- เมนู Games / 3D เปิดใช้ได้เสมอ — ไม่มีการล็อกด้วย Pretest แล้ว (เอาออกเมื่อ 2 ต.ค. 2026)
 
 ## 2. หน้าไหนเป็นของใคร
 
@@ -36,7 +36,7 @@ npm run dev                        # เปิด http://localhost:5173 (Vite + 
 - หน้าที่อยู่ใต้ `/` ถูกครอบด้วย `StudentLayout` แล้ว (มี guard login, top nav, bottom tab บนมือถือ, footer) — **ไม่ต้องเช็ก login เอง**
 - `TakeTest` อยู่นอก layout จึงต้องครอบตัวเองด้วย `<RequireStudent>` (มีให้แล้วใน placeholder อย่าลบ)
 - ข้อมูลผู้ใช้: `useStudentMe()` จาก `@/components/student/RequireStudent` · สถานะ Home: `useStudentStatus()` / รายการข้อสอบ: `useStudentTests()` จาก `@/components/student/queries`
-- UI พื้นฐาน: `Button, Card, Badge, DraftBadge, Input, Spinner, PageLoader, EmptyState, ErrorNote, PageHeader` จาก `@/components/ui`
+- UI พื้นฐาน: `Button, Card, Badge, Input, Spinner, PageLoader, EmptyState, ErrorNote, PageHeader` จาก `@/components/ui`
 - สี: Games = `games` (violet) · 3D = `explore` (teal) · Tests = `tests` (blue) + `-soft` / `-ink` เช่น `bg-games-soft text-games-ink`
 - ไอคอน: `@/components/student/icons` (inline SVG — ห้ามลง icon library)
 
@@ -65,7 +65,7 @@ npm run dev                        # เปิด http://localhost:5173 (Vite + 
 | Method | Path | ใช้ทำอะไร |
 |---|---|---|
 | GET | `/api/me/tests` | `StudentTestItem[]` — รายการข้อสอบของ Section พร้อม `status`, `attemptsUsed`, `maxAttempts`, `inProgressAttemptId`, `lastSubmittedAttemptId` |
-| GET | `/api/me/status` | `StudentStatus` — `menusLocked`, คะแนน pretest/posttest |
+| GET | `/api/me/status` | `StudentStatus` — คะแนน pretest/posttest |
 | POST | `/api/attempts` `{ assignmentId }` | เริ่ม **หรือ resume** attempt → `AttemptInProgress` (มี `questions`, `answers`, `deadlineAt`, `serverNow`) |
 | GET | `/api/attempts/:id` | `AttemptInProgress` หรือ `AttemptResult` (ถ้าหมดเวลา server จะ auto-submit ให้) |
 | PUT | `/api/attempts/:id/answers` `{ answers }` | autosave แบบ merge → `{ savedAt }` · ส่งเฉพาะข้อที่เปลี่ยน debounce ~1 วินาที |
@@ -82,5 +82,5 @@ const remainingMs = attempt.deadlineAt ? Date.parse(attempt.deadlineAt) - (Date.
 ```
 
 - คำตอบ: single = option id (string) · multi = string[] · truefalse = boolean · short = string (≤ 500 ตัวอักษร)
-- ส่งแล้ว (โดยเฉพาะ pretest) ให้ `queryClient.invalidateQueries({ queryKey: ["me"] })` เพื่อให้ Home ปลดล็อกเมนู
+- ส่งแล้ว (โดยเฉพาะ pretest) ให้ `queryClient.invalidateQueries({ queryKey: ["me"] })` เพื่อให้ chip ของ Tests ที่หน้า Home อัปเดต
 - Error: ใช้ `ApiRequestError` (`status`, `code`) จาก `@/lib/api` แสดงข้อความที่เป็นมิตรด้วย `<ErrorNote>`

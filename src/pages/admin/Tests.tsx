@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AdminTestDetail, AdminTestSaveResult, AdminTestSummary, SaveTestBody, TestKind } from "@shared/contract";
 import { KindBadge } from "@/components/admin/KindBadge";
 import { api } from "@/lib/api";
-import { Button, Card, DraftBadge, EmptyState, ErrorNote, Input, PageHeader, PageLoader, Select } from "@/components/ui";
+import { Button, Card, EmptyState, ErrorNote, Input, PageHeader, PageLoader, Select } from "@/components/ui";
 import { QueryError } from "@/components/admin/controls";
 import { errorMessage, formatDateTime, relativeTime } from "@/components/admin/format";
 import { IconPlus, IconTrash } from "@/components/admin/icons";
@@ -39,7 +39,6 @@ export default function Tests() {
         subtitle="Build pretests and posttests like a Google Form, then assign them to sections."
         actions={
           <>
-            <DraftBadge />
             <Button onClick={() => setCreateOpen(true)}>
               <IconPlus size={16} /> New test
             </Button>

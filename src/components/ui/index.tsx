@@ -67,15 +67,6 @@ export function Badge({ tone = "neutral", className, children }: { tone?: Accent
   return <span className={cx("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold", badgeTone[tone], className)}>{children}</span>;
 }
 
-/** Figma "DRAFT" pill: 64×26, zinc-900, 11 px bold white. */
-export function DraftBadge({ className }: { className?: string }) {
-  return (
-    <span className={cx("inline-flex h-[26px] items-center rounded-full bg-ink px-[13px] text-[11px] font-bold tracking-wide text-white", className)}>
-      DRAFT
-    </span>
-  );
-}
-
 type FieldProps = { label?: string; hint?: string; error?: string };
 
 export function Input({ label, hint, error, className, id, ...rest }: InputHTMLAttributes<HTMLInputElement> & FieldProps) {
@@ -143,7 +134,7 @@ export function ErrorNote({ children }: { children: ReactNode }) {
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: ReactNode; actions?: ReactNode }) {
   return (
-    // Figma admin header: 32 px bold title, 15 px muted subtitle, actions (DRAFT + primary button) 15 px lower.
+    // Figma admin header: 32 px bold title, 15 px muted subtitle, actions (primary button) 15 px lower.
     <div className="mb-[27px] flex flex-wrap items-start justify-between gap-4">
       <div>
         <h1 className="text-[32px] font-bold leading-10 text-ink">{title}</h1>

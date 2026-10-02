@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createClassBody, type AdminClass } from "@shared/contract";
 import { api } from "@/lib/api";
-import { Button, Card, cx, DraftBadge, EmptyState, ErrorNote, Input, PageHeader, PageLoader, Select, Spinner } from "@/components/ui";
+import { Button, Card, cx, EmptyState, ErrorNote, Input, PageHeader, PageLoader, Select, Spinner } from "@/components/ui";
 import { useAdminClass } from "@/components/admin/adminClass";
 import { CardTitle, FilterPills, QueryError, SearchBox, StatusChip, Switch } from "@/components/admin/controls";
 import { copyText, errorMessage, formatDate } from "@/components/admin/format";
@@ -64,7 +64,6 @@ export default function Classes() {
         subtitle="One class = academic year + semester + section. Each section gets its own QR code."
         actions={
           <>
-            <DraftBadge />
             <Button size="lg" className="w-[140px] whitespace-nowrap rounded-xl px-0" onClick={() => setCreateOpen(true)}>
               <IconPlus size={18} /> New class
             </Button>

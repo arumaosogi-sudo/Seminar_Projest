@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
-import { DraftBadge, Logo } from "@/components/ui";
+import { Logo } from "@/components/ui";
 import { useMe } from "@/lib/auth";
 import { useDocumentTitle } from "./useDocumentTitle";
 
@@ -21,7 +21,6 @@ export function PublicPage({ title, intro, children }: { title: string; intro?: 
             <Link to={back.to} className="rounded text-sm font-semibold text-muted hover:text-ink">
               ← {back.label}
             </Link>
-            <DraftBadge />
           </div>
         </div>
       </header>

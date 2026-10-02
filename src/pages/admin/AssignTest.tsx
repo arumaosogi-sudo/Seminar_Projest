@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AdminAssignment, AdminClass, AdminTestDetail, ScorePolicy } from "@shared/contract";
 import { api } from "@/lib/api";
-import { Button, Card, cx, DraftBadge, EmptyState, ErrorNote, PageHeader, PageLoader } from "@/components/ui";
+import { Button, Card, cx, EmptyState, ErrorNote, PageHeader, PageLoader } from "@/components/ui";
 import { useAdminClass } from "@/components/admin/adminClass";
 import { defaultForm, formFromAssignment, pickSettings, sameSettings, toSettings, type AssignForm } from "@/components/admin/assign";
 import { CardTitle, QueryError, Segmented, SettingRow, Switch } from "@/components/admin/controls";
@@ -179,7 +179,6 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
         }
         actions={
           <>
-            <DraftBadge />
             <button
               type="button"
               onClick={() => navigate(-1)}
@@ -371,10 +370,6 @@ function AssignEditor({ test, assignments, classes }: { test: AdminTestDetail; a
 
                 <SettingRow label="Show answers after submit" helper="Students see the correct answers on their result page">
                   <Switch checked={form.showAnswers} onChange={(v) => setForm({ showAnswers: v })} label="Show answers after submit" />
-                </SettingRow>
-
-                <SettingRow label="Required before other menus" helper="Students must finish this test before opening Games / 3D (use for Pretest)">
-                  <Switch checked={form.requiredFirst} onChange={(v) => setForm({ requiredFirst: v })} label="Required before other menus" />
                 </SettingRow>
               </div>
 

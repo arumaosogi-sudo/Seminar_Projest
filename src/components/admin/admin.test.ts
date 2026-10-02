@@ -129,7 +129,7 @@ describe("builder", () => {
 describe("assign settings", () => {
   it("converts defaults to valid settings", () => {
     const r = toSettings(defaultForm("pretest"));
-    expect(r.ok && r.value).toMatchObject({ timeLimitMin: null, maxAttempts: 1, requiredFirst: true, availability: "manual" });
+    expect(r.ok && r.value).toMatchObject({ timeLimitMin: null, maxAttempts: 1, requiredFirst: false, availability: "manual" });
   });
   it("blank retakes = unlimited; validates ranges", () => {
     const f = { ...defaultForm("other"), attemptsMode: "retakes" as const, attempts: "" };

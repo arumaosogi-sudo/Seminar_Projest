@@ -37,7 +37,7 @@ card title 17–26 semibold, body 14–15, labels 12–13.
 | Switch | 40×24 track, 18 px knob, blue when on |
 | Segmented control | 44 px `#F0F0F2` track, 36 px white active segment with blue text |
 
-Shared components already implement these: `Card`, `Button`, `DraftBadge`, `Logo` (`src/components/ui`),
+Shared components already implement these: `Card`, `Button`, `Logo` (`src/components/ui`),
 `FilterPills`, `FilterSelect`, `SearchBox`, `StatusChip`, `StatCard`, `Segmented`, `Switch`, `SettingRow`
 (`src/components/admin/controls.tsx`). Prefer them over new one-off styles.
 

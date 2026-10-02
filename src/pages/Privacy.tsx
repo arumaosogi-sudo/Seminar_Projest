@@ -42,7 +42,7 @@ export default function Privacy() {
         </p>
       </ProseCard>
 
-      <p className="text-xs text-faint">Draft notice — last updated October 2026.</p>
+      <p className="text-xs text-faint">Last updated October 2026.</p>
     </PublicPage>
   );
 }

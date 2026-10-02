@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { DraftBadge, Logo } from "@/components/ui";
+import { Logo } from "@/components/ui";
 
 /**
  * Shared shell for /login and /onboarding — Figma frames "Login 1 – Sign in" / "Login 2 – First name".
@@ -15,9 +15,6 @@ export function AuthShell({ children, below }: { children: ReactNode; below?: Re
       <CompactHero />
 
       <main className="relative flex flex-1 flex-col items-center px-4 lg:justify-center lg:px-10 lg:py-12">
-        <div className="absolute right-10 top-8 hidden lg:block">
-          <DraftBadge />
-        </div>
         <div className="relative z-10 -mt-[74px] w-full md:-mt-[110px] md:w-[480px] lg:mt-0 lg:w-[440px]">
           <section className="rounded-[20px] border border-line bg-surface p-6">{children}</section>
           {below && <div className="mt-4">{below}</div>}
@@ -95,9 +92,6 @@ function CompactHero() {
           className="absolute inset-0 size-full object-cover object-top"
         />
       </picture>
-      <div className="absolute right-4 top-4">
-        <DraftBadge />
-      </div>
       <div className="relative flex flex-col items-center pt-12 text-center md:pt-[70px]">
         <span className="md:hidden">
           <Logo variant="hero" size={51} withText={false} />

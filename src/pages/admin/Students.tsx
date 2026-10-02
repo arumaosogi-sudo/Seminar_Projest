@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AdminClass, AdminStudentRow } from "@shared/contract";
 import { api } from "@/lib/api";
-import { Button, Card, cx, DraftBadge, EmptyState, ErrorNote, PageHeader, PageLoader, Spinner } from "@/components/ui";
+import { Button, Card, cx, EmptyState, ErrorNote, PageHeader, PageLoader, Spinner } from "@/components/ui";
 import { useAdminClass } from "@/components/admin/adminClass";
 import { FilterPills, QueryError, SearchBox, StatusChip } from "@/components/admin/controls";
 import { MAX_ROSTER_ENTRIES, parseRosterCsv, type RosterParseResult } from "@/components/admin/csv";
@@ -33,7 +33,7 @@ export default function Students() {
   if (!classId || !currentClass)
     return (
       <>
-        <PageHeader title="Students" actions={<DraftBadge />} />
+        <PageHeader title="Students" />
         <EmptyState title="No classes yet — create the first section" action={<Link to="/admin/classes" className="font-semibold underline">Go to Classes</Link>}>
           Students appear here after they scan a section’s QR code.
         </EmptyState>
@@ -144,7 +144,6 @@ function StudentsForClass({ cls, classes }: { cls: AdminClass; classes: AdminCla
         subtitle={`${cls.name} · ${counts.active} active · ${withdrawn} withdrawn`}
         actions={
           <>
-            <DraftBadge />
             <button
               type="button"
               onClick={() => setImportOpen(true)}

@@ -21,7 +21,7 @@ export interface AssignForm {
   requiredFirst: boolean;
 }
 
-export function defaultForm(kind: TestKind): AssignForm {
+export function defaultForm(_kind?: TestKind): AssignForm {
   return {
     timeMode: "none",
     minutes: "30",
@@ -33,7 +33,8 @@ export function defaultForm(kind: TestKind): AssignForm {
     opensLocal: "",
     closesLocal: "",
     showAnswers: false,
-    requiredFirst: kind === "pretest",
+    // Games / 3D are always open (no Pretest lock in the UI) — keep the stored flag off.
+    requiredFirst: false,
   };
 }
 

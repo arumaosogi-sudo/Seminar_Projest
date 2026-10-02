@@ -6,7 +6,7 @@ import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, v
 import { CSS } from "@dnd-kit/utilities";
 import { saveTestBody, type AdminTestDetail, type AdminTestSaveResult, type QuestionType, type TestKind } from "@shared/contract";
 import { api } from "@/lib/api";
-import { Badge, Button, Card, cx, DraftBadge, EmptyState, ErrorNote, Input, PageLoader, Select } from "@/components/ui";
+import { Badge, Button, Card, cx, EmptyState, ErrorNote, Input, PageLoader, Select } from "@/components/ui";
 import {
   TYPE_LABEL,
   blankQuestion,
@@ -287,7 +287,6 @@ function Builder({ testId, initial }: { testId: number; initial: AdminTestDetail
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5 lg:mt-[15px]">
-          <DraftBadge />
           <span aria-live="polite" className="px-1">
             {statusNode}
           </span>

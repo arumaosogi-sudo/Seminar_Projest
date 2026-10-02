@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
-import { Badge, Card, cx, DraftBadge } from "@/components/ui";
+import { Badge, Card, cx } from "@/components/ui";
 import { ArrowLeftIcon, CheckIcon } from "./icons";
 import { useDocumentTitle } from "./useDocumentTitle";
 
@@ -65,7 +65,6 @@ export function Placeholder({
           <h1 className="text-3xl font-bold tracking-tight sm:text-[34px]">{title}</h1>
           {description && <p className="mt-1 max-w-2xl text-sm text-muted">{description}</p>}
         </div>
-        <DraftBadge />
       </div>
 
       <section

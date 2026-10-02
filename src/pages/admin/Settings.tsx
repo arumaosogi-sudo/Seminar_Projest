@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addAdminBody, type AdminUser, type AuditEntry } from "@shared/contract";
 import { api } from "@/lib/api";
 import { useAppConfig, useMe } from "@/lib/auth";
-import { Badge, Button, Card, DraftBadge, ErrorNote, Input, PageHeader, Spinner } from "@/components/ui";
+import { Badge, Button, Card, ErrorNote, Input, PageHeader, Spinner } from "@/components/ui";
 import { CardTitle, QueryError } from "@/components/admin/controls";
 import { errorMessage, formatDateTime, relativeTime } from "@/components/admin/format";
 import { adminKeys } from "@/components/admin/keys";
@@ -13,7 +13,7 @@ import { useToast } from "@/components/admin/toastContext";
 export default function Settings() {
   return (
     <>
-      <PageHeader title="Settings" subtitle="Instructor accounts, sign-in status and recent activity." actions={<DraftBadge />} />
+      <PageHeader title="Settings" subtitle="Instructor accounts, sign-in status and recent activity." />
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="space-y-6">
           <AdminsCard />

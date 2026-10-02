@@ -1,12 +1,12 @@
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import type { StudentStatus } from "@shared/contract";
-import { cx, DraftBadge } from "@/components/ui";
+import { cx } from "@/components/ui";
 import { useStudentMe } from "@/components/student/RequireStudent";
 import { joinNoticeStore } from "@/components/student/authHelpers";
 import { useStudentStatus } from "@/components/student/queries";
 import { useDocumentTitle } from "@/components/student/useDocumentTitle";
-import { InfoIcon, LockIcon } from "@/components/student/icons";
+import { InfoIcon } from "@/components/student/icons";
 
 type Accent = "games" | "explore" | "tests";
 
@@ -29,26 +29,16 @@ export default function Home() {
     joinNoticeStore.clear();
   }, []);
 
-  const pretestLocked = enrolled && status.data?.menusLocked === true;
-  // Fail-closed: if the status can't be loaded, keep Games / 3D locked until a retry succeeds.
-  const locked = pretestLocked || (enrolled && status.isError);
-  const lockHint = status.isError ? "Couldn't check your status" : "Finish the Pretest first";
-  // Until the status is known we don't know if menus are locked — keep their buttons inactive briefly.
-  const statusUnknown = enrolled && status.isPending;
-
   return (
     <div>
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="text-[26px] font-bold leading-8 text-ink md:text-[33px] md:leading-10 lg:text-[41px] lg:leading-[48px]">
-            Hi, {me.student.firstName ?? "there"}
-          </h1>
-          <p className="mt-1 text-[13px] leading-[18px] text-muted md:mt-1.5 md:text-[15px] md:leading-[22px] lg:mt-2.5 lg:text-[16px] lg:leading-6">
-            {me.student.studentCode}
-            {me.enrollment && ` · ${sectionLabel(me.enrollment.className)}`}
-          </p>
-        </div>
-        <DraftBadge className="mt-[5px] shrink-0 md:mt-1.5" />
+      <div className="min-w-0">
+        <h1 className="text-[26px] font-bold leading-8 text-ink md:text-[33px] md:leading-10 lg:text-[41px] lg:leading-[48px]">
+          Hi, {me.student.firstName ?? "there"}
+        </h1>
+        <p className="mt-1 text-[13px] leading-[18px] text-muted md:mt-1.5 md:text-[15px] md:leading-[22px] lg:mt-2.5 lg:text-[16px] lg:leading-6">
+          {me.student.studentCode}
+          {me.enrollment && ` · ${sectionLabel(me.enrollment.className)}`}
+        </p>
       </div>
 
       <div className="mt-6 space-y-3 empty:hidden">
@@ -63,7 +53,7 @@ export default function Home() {
           </Notice>
         )}
         {status.isError && (
-          <Notice tone="warning" title="We couldn't load your test status, so Games and 3D Explore are locked for now.">
+          <Notice tone="warning" title="We couldn't load your test status.">
             <button
               type="button"
               className="font-semibold underline disabled:opacity-50"
@@ -73,20 +63,6 @@ export default function Home() {
               {status.isFetching ? "Retrying…" : "Retry"}
             </button>
           </Notice>
-        )}
-        {pretestLocked && (
-          <div className="flex flex-col gap-3 rounded-2xl border border-blue-200 bg-tests-soft px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-            <p className="flex items-start gap-2.5 text-[15px] font-medium text-tests-ink">
-              <LockIcon size={20} className="mt-px shrink-0" />
-              Finish the Pretest to unlock Games and 3D Explore
-            </p>
-            <Link
-              to="/tests"
-              className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-tests px-4 text-sm font-semibold text-white hover:bg-blue-700"
-            >
-              Start pretest
-            </Link>
-          </div>
         )}
       </div>
 
@@ -101,9 +77,6 @@ export default function Home() {
           lo="OL1–OL3"
           action="Play"
           to="/games"
-          locked={locked}
-          lockHint={lockHint}
-          pending={statusUnknown}
         />
         <MenuCard
           accent="explore"
@@ -115,9 +88,6 @@ export default function Home() {
           lo="OL2–OL5"
           action="Explore"
           to="/explore"
-          locked={locked}
-          lockHint={lockHint}
-          pending={statusUnknown}
         />
         <MenuCard
           accent="tests"
@@ -181,9 +151,6 @@ type MenuCardProps = {
   lo: string;
   action: string;
   to: string;
-  locked?: boolean;
-  lockHint?: string;
-  pending?: boolean;
 };
 
 /*
@@ -192,49 +159,28 @@ type MenuCardProps = {
  *   Tablet : 88 px tile on the left, everything else in the right column, 132×44 button
  *   Desktop: 180 px tinted cover with an 84 px icon, body below, 132×44 button pinned to the bottom
  */
-function MenuCard({
-  accent,
-  image,
-  title,
-  subtitle,
-  chips,
-  compactChips,
-  lo,
-  action,
-  to,
-  locked = false,
-  lockHint = "Finish the Pretest first",
-  pending = false,
-}: MenuCardProps) {
+function MenuCard({ accent, image, title, subtitle, chips, compactChips, lo, action, to }: MenuCardProps) {
   const t = tone[accent];
-  const lockHintId = useId();
-  const inactive = locked || pending;
-  const art = (size: string) => (
-    <img src={image} alt="" width={168} height={168} draggable={false} className={cx(size, locked && "opacity-50 grayscale")} />
-  );
+  const art = (size: string) => <img src={image} alt="" width={168} height={168} draggable={false} className={size} />;
 
   return (
     <li className="flex flex-col overflow-hidden rounded-[20px] border border-line bg-surface lg:min-h-[453px]">
       {/* Desktop cover */}
-      <div className={cx("relative hidden h-[180px] shrink-0 items-center justify-center lg:flex", locked ? "bg-zinc-100" : t.soft)}>
-        {art("size-[84px]")}
-        {locked && <LockBadge />}
-      </div>
+      <div className={cx("relative hidden h-[180px] shrink-0 items-center justify-center lg:flex", t.soft)}>{art("size-[84px]")}</div>
 
       <div className="grid flex-1 grid-cols-[48px_1fr] gap-x-[15px] px-[17px] pb-4 pt-4 md:grid-cols-[88px_1fr] md:gap-x-[29px] md:p-7 lg:flex lg:flex-col lg:gap-x-0">
         {/* Phone / tablet tile */}
         <div
           className={cx(
             "relative col-start-1 row-start-1 grid size-12 place-items-center rounded-[14px] md:row-span-3 md:size-[88px] md:rounded-[20px] lg:hidden",
-            locked ? "bg-zinc-100" : t.soft,
+            t.soft,
           )}
         >
           {art("size-7 md:size-12")}
-          {locked && <LockBadge small />}
         </div>
 
         <div className="col-start-2 row-start-1 min-w-0 self-center md:self-start">
-          <h3 className={cx("text-[17px] font-semibold leading-[22px] md:text-[22px] md:leading-7 lg:text-[26px] lg:leading-8", locked ? "text-muted" : "text-ink")}>
+          <h3 className="text-[17px] font-semibold leading-[22px] text-ink md:text-[22px] md:leading-7 lg:text-[26px] lg:leading-8">
             {title}
           </h3>
           <p className="mt-0.5 text-[12px] leading-4 text-muted md:mt-[7px] md:text-[13px] md:leading-[18px] lg:mt-[9px] lg:text-[15px] lg:leading-[22px]">
@@ -243,7 +189,7 @@ function MenuCard({
         </div>
 
         {compactChips === "path" && (
-          <p className={cx("col-span-2 mt-3 text-[12px] font-semibold leading-4 md:hidden", locked ? "text-muted" : "text-explore")}>
+          <p className="col-span-2 mt-3 text-[12px] font-semibold leading-4 text-explore md:hidden">
             {chips.map((c) => c.label).join(" › ")}
           </p>
         )}
@@ -255,7 +201,7 @@ function MenuCard({
           aria-label={`${title} includes`}
         >
           {chips.map((c) => (
-            <li key={c.label} className={cx("inline-flex h-[25px] items-center rounded-full px-3 text-[12px] font-semibold", locked ? "bg-zinc-100 text-muted" : chipTone[c.tone])}>
+            <li key={c.label} className={cx("inline-flex h-[25px] items-center rounded-full px-3 text-[12px] font-semibold", chipTone[c.tone])}>
               {c.label}
             </li>
           ))}
@@ -263,56 +209,23 @@ function MenuCard({
 
         <div className="col-span-2 mt-4 flex items-center justify-between gap-3 md:col-span-1 md:col-start-2 md:mt-[21px] lg:mt-auto lg:pt-[35px]">
           <span className="text-[12px] font-semibold text-faint lg:text-[13px]">{lo}</span>
-          {inactive ? (
-            <span className="flex flex-col items-end" title={locked ? lockHint : undefined}>
-              <button
-                type="button"
-                disabled
-                aria-describedby={locked ? lockHintId : undefined}
-                className="inline-flex cursor-not-allowed items-center gap-1.5 text-[14px] font-semibold text-muted md:h-11 md:w-[132px] md:justify-center md:rounded-xl md:bg-zinc-200 md:text-[15px]"
-              >
-                {locked && <LockIcon size={14} />}
-                {action}
-              </button>
-              {locked && (
-                <span id={lockHintId} className="mt-1 text-[11px] text-muted">
-                  {lockHint}
-                </span>
-              )}
+          <Link
+            to={to}
+            aria-label={`${action} — ${title}`}
+            className={cx(
+              "inline-flex items-center text-[15px] font-semibold transition-colors md:h-11 md:w-[132px] md:justify-center md:rounded-xl md:text-[15px] md:text-white",
+              t.text,
+              t.button,
+            )}
+          >
+            {action}
+            <span aria-hidden="true" className="ml-1 md:hidden">
+              →
             </span>
-          ) : (
-            <Link
-              to={to}
-              aria-label={`${action} — ${title}`}
-              className={cx(
-                "inline-flex items-center text-[15px] font-semibold transition-colors md:h-11 md:w-[132px] md:justify-center md:rounded-xl md:text-[15px] md:text-white",
-                t.text,
-                t.button,
-              )}
-            >
-              {action}
-              <span aria-hidden="true" className="ml-1 md:hidden">
-                →
-              </span>
-            </Link>
-          )}
+          </Link>
         </div>
       </div>
     </li>
-  );
-}
-
-function LockBadge({ small }: { small?: boolean }) {
-  return (
-    <span
-      className={cx(
-        "absolute grid place-items-center rounded-full bg-surface text-muted shadow-sm",
-        small ? "-right-1.5 -top-1.5 size-6" : "right-3 top-3 size-8",
-      )}
-    >
-      <LockIcon size={small ? 12 : 16} />
-      <span className="sr-only">Locked</span>
-    </span>
   );
 }
 

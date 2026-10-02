@@ -2,9 +2,8 @@ import { useEffect, useId, useRef, useState, type ComponentType } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { useLogout } from "@/lib/auth";
 import { cx, Logo } from "@/components/ui";
-import { useStudentStatus } from "./queries";
 import { RequireStudent, useStudentMe } from "./RequireStudent";
-import { BalloonIcon, ChecklistIcon, CubeIcon, HouseIcon, LockIcon } from "./icons";
+import { BalloonIcon, ChecklistIcon, CubeIcon, HouseIcon } from "./icons";
 
 type NavItem = {
   to: string;
@@ -12,16 +11,12 @@ type NavItem = {
   short: string; // tablet + phone tab bar
   icon: ComponentType<{ size?: number }>;
   end?: boolean;
-  /** Locked (links to /tests instead) while required-first tests are pending. */
-  lockable?: boolean;
 };
-
-const LOCKED_HINT = "Locked — finish the Pretest first";
 
 const NAV: NavItem[] = [
   { to: "/", label: "Home", short: "Home", icon: HouseIcon, end: true },
-  { to: "/games", label: "Games", short: "Games", icon: BalloonIcon, lockable: true },
-  { to: "/explore", label: "3D Explore", short: "3D", icon: CubeIcon, lockable: true },
+  { to: "/games", label: "Games", short: "Games", icon: BalloonIcon },
+  { to: "/explore", label: "3D Explore", short: "3D", icon: CubeIcon },
   { to: "/tests", label: "Tests", short: "Tests", icon: ChecklistIcon },
 ];
 
@@ -36,11 +31,6 @@ export default function StudentLayout() {
 
 function Shell() {
   const { pathname } = useLocation();
-  const me = useStudentMe();
-  const enrolled = me.enrollment?.status === "active";
-  const status = useStudentStatus(enrolled);
-  // Fail-closed: an unreadable status locks the menus too (RequireUnlocked guards the routes themselves).
-  const locked = enrolled && (status.data?.menusLocked === true || status.isError);
 
   // Scroll to top on page change (SPA navigation keeps the old scroll position otherwise).
   useEffect(() => {
@@ -55,7 +45,7 @@ function Shell() {
       >
         Skip to content
       </a>
-      <TopBar locked={locked} />
+      <TopBar />
       <main id="main" tabIndex={-1} className="flex-1 outline-none">
         {/* Figma content column: 1200 px on desktop (120 px gutters at 1440), 40 px gutters on tablet, 16 px on phone */}
         <div className="mx-auto w-full max-w-[1280px] px-4 pb-28 pt-[15px] md:pb-10 md:px-10 md:pt-[26px] lg:pt-[42px]">
@@ -63,12 +53,12 @@ function Shell() {
         </div>
       </main>
       <Footer />
-      <BottomTabs locked={locked} />
+      <BottomTabs />
     </div>
   );
 }
 
-function TopBar({ locked }: { locked: boolean }) {
+function TopBar() {
   return (
     <header className="sticky top-0 z-30 bg-surface">
       <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-4 px-4 md:h-[72px] md:px-10 lg:px-20">
@@ -80,20 +70,7 @@ function TopBar({ locked }: { locked: boolean }) {
           <ul className="flex items-stretch gap-6 lg:gap-14">
             {NAV.map((item) => (
               <li key={item.to} className="flex">
-                {locked && item.lockable ? (
-                  <Link
-                    to="/tests"
-                    aria-disabled="true"
-                    aria-label={`${item.label} (${LOCKED_HINT})`}
-                    title={LOCKED_HINT}
-                    className="relative flex h-[72px] items-center gap-1.5 rounded-md text-[15px] text-faint"
-                  >
-                    <LockIcon size={14} />
-                    <span className="hidden lg:inline">{item.label}</span>
-                    <span className="lg:hidden">{item.short}</span>
-                  </Link>
-                ) : (
-                  <NavLink
+                <NavLink
                     to={item.to}
                     end={item.end}
                     className={({ isActive }) =>
@@ -113,7 +90,6 @@ function TopBar({ locked }: { locked: boolean }) {
                       </>
                     )}
                   </NavLink>
-                )}
               </li>
             ))}
           </ul>
@@ -228,32 +204,15 @@ function UserMenu() {
   );
 }
 
-function BottomTabs({ locked }: { locked: boolean }) {
+function BottomTabs() {
   return (
     <nav
       aria-label="Main"
       className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
     >
       <ul className="grid grid-cols-4">
-        {NAV.map(({ to, label, short, icon: Icon, end, lockable }) => (
+        {NAV.map(({ to, short, icon: Icon, end }) => (
           <li key={to}>
-            {locked && lockable ? (
-              <Link
-                to="/tests"
-                aria-disabled="true"
-                aria-label={`${label} (${LOCKED_HINT})`}
-                title={LOCKED_HINT}
-                className="relative flex h-[75px] flex-col items-center justify-center gap-1.5 text-[11.5px] font-semibold text-faint opacity-70"
-              >
-                <span className="relative">
-                  <Icon size={22} />
-                  <span className="absolute -right-2 -top-1 grid size-4 place-items-center rounded-full bg-surface">
-                    <LockIcon size={12} />
-                  </span>
-                </span>
-                {short}
-              </Link>
-            ) : (
             <NavLink
               to={to}
               end={end}
@@ -267,7 +226,6 @@ function BottomTabs({ locked }: { locked: boolean }) {
               <Icon size={22} />
               {short}
             </NavLink>
-            )}
           </li>
         ))}
       </ul>

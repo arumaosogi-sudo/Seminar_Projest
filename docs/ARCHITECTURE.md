@@ -68,7 +68,7 @@ public/images/            logo.png, login-hero-{desktop,tablet,phone}-*.webp, me
 - Answer review (`show_answers = 1`) is returned only after the student's **last allowed attempt** or once the test is
   **closed** — otherwise students could read the answers and retake for a higher score.
 - Submit is two-step (claim `submitted_at`, then re-read answers and grade) so a late autosave can't change the graded answers.
-- `required_first = 1` on an open assignment → Home menus (Games, 3D) are locked until the student submits it.
+- `required_first` is still stored and `menusLocked` is still returned by `/api/me/status`, but the UI no longer locks Games / 3D (removed 2026-10-02 by request) — both menus are always open.
 
 ## 5. Endpoints
 

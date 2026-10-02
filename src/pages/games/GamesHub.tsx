@@ -15,10 +15,8 @@ export default function GamesHub() {
         "Cards link to /games/balloon-pop, /games/group-sort and /games/diameter",
         "Optional: best score of this session per game (local state only — saving to the DB is GAME-7, Future)",
         "Responsive: 3 columns ≥1024px, 1 column on phones (≥360px); touch targets ≥44px",
-        "Respect the Home lock: if GET /api/me/status says menusLocked, show a notice + link to /tests instead of the games",
-        "Keep the DRAFT badge top-right while the design is a draft",
+        "Games are always open — there is no Pretest lock",
       ]}
-      apiReady={["GET /api/me/status → StudentStatus (menusLocked)"]}
       links={[
         { to: "/", label: "Back to Home" },
         { to: "/games/balloon-pop", label: "Balloon Pop" },
