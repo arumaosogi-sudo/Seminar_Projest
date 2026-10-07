@@ -40,6 +40,10 @@ public/images/            logo.png, login-hero-{desktop,tablet,phone}-*.webp, me
 - **Student login**: Google ID token must have `aud = GOOGLE_CLIENT_ID`, `iss = accounts.google.com`, `email_verified = true`,
   `hd = ALLOWED_STUDENT_DOMAIN` (lamduan.mfu.ac.th) and an e-mail local part of 8–12 digits → that is the **student code**.
 - **Admin login**: any verified Google account whose e-mail is in the `admins` table or in the `ADMIN_EMAILS` var (comma-separated).
+- **Password admin** (`POST /api/auth/admin-password`): optional local instructor account from `ADMIN_USERNAME` +
+  `ADMIN_PASSWORD_HASH` (PBKDF2-SHA256, `npm run admin:hash`; only the hash is stored). Session e-mail is
+  `local:<username>`; it stops working as soon as either var is removed. Max 5 failures per IP per 15 min
+  (`admin_login_attempts`, migration 0004); successful logins are audit-logged.
 - **Dev login** (`POST /api/auth/dev`): enabled only when `DEV_LOGIN=true` (set in `.dev.vars`, never in production).
   Same rules as Google but the e-mail is typed in. Used until the team has a Google OAuth Client ID.
 - **Session**: HS256 JWT (`SESSION_SECRET`) in cookie `dm_session` — HttpOnly, SameSite=Lax, Secure except on localhost, 7 days.
@@ -79,6 +83,7 @@ public/images/            logo.png, login-hero-{desktop,tablet,phone}-*.webp, me
 | GET | `/api/config` | `AppConfig` |
 | GET | `/api/classes/by-code/:code` | `PublicClassInfo` (404 if unknown or archived) |
 | POST | `/api/auth/google` | body `googleLoginBody` → `Me` + cookie |
+| POST | `/api/auth/admin-password` | body `adminPasswordLoginBody` → `Me` + cookie (404 unless configured, 401 wrong, 429 throttled) |
 | POST | `/api/auth/dev` | body `devLoginBody` → `Me` + cookie (404 unless DEV_LOGIN) |
 | POST | `/api/auth/logout` | clears cookie |
 | GET | `/api/me` | `Me` or 401 |

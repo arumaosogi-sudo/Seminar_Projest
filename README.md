@@ -26,9 +26,17 @@ npm run dev                         # เปิด http://localhost:5173
 | บทบาท | วิธี |
 |---|---|
 | นักศึกษา | เปิด `http://localhost:5173/join/MUS-4K7P` (Section 1) → พิมพ์อีเมลแบบ `6531501234@lamduan.mfu.ac.th` ในกล่อง *Developer mode* |
-| อาจารย์ | เปิด `http://localhost:5173/admin/login` → พิมพ์ `instructor@mfu.ac.th` |
+| อาจารย์ | เปิด `http://localhost:5173/admin/login` (หรือกดลิงก์ *For instructors →* ใต้การ์ด Sign in) → ใช้ **username / password** ที่ตั้งใน `.dev.vars` หรือพิมพ์ `instructor@mfu.ac.th` ในกล่อง *Developer mode* |
 
-เมื่อได้ **Google OAuth Client ID** แล้ว ใส่ใน `GOOGLE_CLIENT_ID` (`.dev.vars` ตอน dev / `wrangler.jsonc` ตอน deploy) ปุ่ม *Sign in with Google* จะใช้ได้ทันที
+**บัญชีอาจารย์แบบ username / password** (ใช้ไปก่อนจนกว่าอาจารย์จะ login ด้วย Google ได้):
+
+```bash
+npm run admin:hash                  # พิมพ์รหัสผ่าน (ไม่แสดงบนจอ) → ได้ค่า hash
+```
+
+ใส่ใน `.dev.vars`: `ADMIN_USERNAME=...` และ `ADMIN_PASSWORD_HASH=<hash>` แล้วรีสตาร์ต `npm run dev` · **ห้ามเก็บรหัสผ่านจริงไว้ในไฟล์ใด ๆ** · ผิดเกิน 5 ครั้ง/15 นาที จะถูกล็อกชั่วคราว
+
+เมื่อได้ **Google OAuth Client ID** แล้ว (ขั้นตอน: `docs/GOOGLE_SIGNIN.md`) ใส่ใน `GOOGLE_CLIENT_ID` (`.dev.vars` ตอน dev / `wrangler.jsonc` ตอน deploy) ปุ่ม *Sign in with Google* จะใช้ได้ทันที
 
 ## 🧰 คำสั่ง
 
@@ -39,6 +47,7 @@ npm run dev                         # เปิด http://localhost:5173
 | `npm test` | unit tests (Vitest) |
 | `npm run db:reset` | ลบฐานข้อมูล local แล้วสร้างใหม่ + seed |
 | `npm run db:migrate` | apply migration ใหม่กับฐานข้อมูล local |
+| `npm run admin:hash` | สร้าง hash รหัสผ่านของบัญชีอาจารย์ (ADMIN_PASSWORD_HASH) |
 | `npm run cf-typegen` | สร้าง type ของ Env ใหม่หลังแก้ `wrangler.jsonc` |
 | `npm run deploy` | build + deploy ขึ้น Cloudflare (ต้อง `wrangler login` และสร้าง D1 ก่อน — ดูด้านล่าง) |
 
@@ -69,13 +78,17 @@ src/                  React app
 | 3D Explore + Sarcomere | เพื่อนในทีม | 🧩 placeholder |
 | หน้า Tests: รายการ / ทำข้อสอบ / ผลสอบ | nitiphum01 | ✅ เสร็จ (7 ต.ค. 2026) |
 
-## ☁️ Deploy ขึ้น Cloudflare (เมื่อพร้อม)
+## ☁️ Deploy ขึ้น Cloudflare
+
+เว็บจริง: **https://digital-muscle.arumaosogi.workers.dev**
 
 ```bash
 npx wrangler login
 npx wrangler d1 create digital-muscle-db      # นำ database_id ที่ได้ไปใส่ใน wrangler.jsonc
 npm run db:migrate:remote
 npx wrangler secret put SESSION_SECRET        # สุ่มข้อความยาว ≥ 32 ตัวอักษร
+npx wrangler secret put ADMIN_USERNAME        # ชื่อผู้ใช้อาจารย์
+npx wrangler secret put ADMIN_PASSWORD_HASH   # ค่าจาก npm run admin:hash
 npm run deploy
 ```
 
