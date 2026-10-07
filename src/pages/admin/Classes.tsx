@@ -12,6 +12,7 @@ import { IconDownload, IconPlus } from "@/components/admin/icons";
 import { adminKeys } from "@/components/admin/keys";
 import { ConfirmDialog, Modal } from "@/components/admin/Modal";
 import { downloadDataUrl, useQrDataUrl } from "@/components/admin/qr";
+import { exportWholeClass } from "@/components/admin/exportResults";
 import { useToast } from "@/components/admin/toastContext";
 
 type Tab = "active" | "archived";
@@ -38,13 +39,15 @@ export default function Classes() {
 
   const all = useMemo(() => q.data ?? [], [q.data]);
   const counts = useMemo(() => ({ active: all.filter((c) => c.status === "active").length, archived: all.filter((c) => c.status === "archived").length }), [all]);
+  // The "Archived" pill disappears after the last archived class is deleted → fall back to Active.
+  const effectiveTab: Tab = tab === "archived" && counts.archived === 0 ? "active" : tab;
   const rows = useMemo(() => {
     const term = search.trim().toLowerCase();
     return all
-      .filter((c) => c.status === tab)
+      .filter((c) => c.status === effectiveTab)
       .filter((c) => !term || c.name.toLowerCase().includes(term) || c.joinCode.toLowerCase().includes(term))
       .sort((a, b) => b.academicYear - a.academicYear || b.semester - a.semester || a.section - b.section);
-  }, [all, tab, search]);
+  }, [all, effectiveTab, search]);
 
   // Selection: explicit choice → current class (if visible) → first row.
   const selected =
@@ -90,14 +93,15 @@ export default function Classes() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <FilterPills<Tab>
                 label="Class status"
-                value={tab}
+                value={effectiveTab}
                 onChange={(t) => {
                   setTab(t);
                   setSelectedId(null);
                 }}
                 options={[
                   { value: "active", label: `Active (${counts.active})` },
-                  { value: "archived", label: `Archived (${counts.archived})` },
+                  // Archiving was replaced by Delete; the tab only remains so old archived classes can be deleted.
+                  ...(counts.archived > 0 ? [{ value: "archived" as Tab, label: `Archived (${counts.archived})` }] : []),
                 ]}
               />
               <div className="w-full sm:w-[259px]">
@@ -106,7 +110,7 @@ export default function Classes() {
             </div>
 
             {rows.length === 0 ? (
-              <p className="py-10 text-center text-sm text-muted">{search ? "No classes match your search." : tab === "active" ? "No active classes." : "No archived classes."}</p>
+              <p className="py-10 text-center text-sm text-muted">{search ? "No classes match your search." : effectiveTab === "active" ? "No active classes." : "No archived classes."}</p>
             ) : (
               <div className="relative -mx-[19px] mt-[28px] overflow-x-auto">
                 <table className="w-full min-w-[700px] table-fixed text-[14px]">
@@ -254,17 +258,33 @@ function SelectedClass({ c }: { c: AdminClass }) {
   const url = joinUrl(c.joinCode);
   const qr = useQrDataUrl(c.status === "active" ? url : null);
   const [editOpen, setEditOpen] = useState(false);
-  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exported, setExported] = useState(false);
 
-  const archive = useMutation({
-    mutationFn: () => api.post<unknown>(`/admin/classes/${c.id}/${c.status === "active" ? "archive" : "unarchive"}`),
-    onSuccess: () => {
-      toast.show(c.status === "active" ? `${c.name} archived` : `${c.name} is active again`, "success");
-      setArchiveOpen(false);
+  const remove = useMutation({
+    mutationFn: () => api.del<{ ok: true; deleted: { students: number; attempts: number } }>(`/admin/classes/${c.id}`),
+    onSuccess: (r) => {
+      toast.show(`${c.name} deleted · ${r.deleted.students} student(s), ${r.deleted.attempts} test attempt(s) removed`, "success");
+      setDeleteOpen(false);
       void qc.invalidateQueries({ queryKey: adminKeys.classesRoot });
       void qc.invalidateQueries({ queryKey: adminKeys.studentsRoot });
+      void qc.invalidateQueries({ queryKey: adminKeys.resultsRoot });
     },
   });
+
+  async function exportFirst() {
+    setExporting(true);
+    try {
+      const name = await exportWholeClass(c.id, c.name);
+      setExported(true);
+      toast.show(name ? `Exported ${name}` : "No tests are assigned to this class, so there are no scores to export.", "success");
+    } catch (e) {
+      toast.show(`Export failed: ${errorMessage(e)}`, "error");
+    } finally {
+      setExporting(false);
+    }
+  }
 
   return (
     <Card className="p-[25px]">
@@ -327,40 +347,45 @@ function SelectedClass({ c }: { c: AdminClass }) {
         )}
         <button
           type="button"
-          onClick={() => setArchiveOpen(true)}
-          className="h-[37px] rounded-xl border border-line bg-surface text-[13px] font-semibold text-ink hover:bg-zinc-50"
+          onClick={() => setDeleteOpen(true)}
+          className="h-[37px] rounded-xl border border-red-200 bg-surface text-[13px] font-semibold text-danger hover:bg-red-50"
         >
-          {c.status === "active" ? "Archive class" : "Unarchive"}
+          Delete class
         </button>
       </div>
 
       {editOpen && <EditClassModal c={c} onClose={() => setEditOpen(false)} />}
 
       <ConfirmDialog
-        open={archiveOpen}
+        open={deleteOpen}
         onClose={() => {
-          setArchiveOpen(false);
-          archive.reset();
+          if (remove.isPending) return;
+          setDeleteOpen(false);
+          remove.reset();
         }}
-        onConfirm={() => archive.mutate()}
-        loading={archive.isPending}
-        error={archive.isError ? errorMessage(archive.error) : null}
-        title={c.status === "active" ? `Archive ${c.name}?` : `Unarchive ${c.name}?`}
-        confirmLabel={c.status === "active" ? "Archive class" : "Unarchive"}
+        onConfirm={() => remove.mutate()}
+        loading={remove.isPending}
+        error={remove.isError ? errorMessage(remove.error) : null}
+        title={`Delete ${c.name}?`}
+        confirmLabel="Delete class"
+        accent="danger"
+        confirmText={c.joinCode}
+        confirmTextLabel={`Type the join code ${c.joinCode} to confirm`}
       >
-        {c.status === "active" ? (
-          <>
-            <p>Archiving makes this section <strong>read-only</strong> and hides it from the class selector:</p>
-            <ul className="list-disc space-y-1 pl-5">
-              <li>Its QR code / join code stops accepting students.</li>
-              <li>Tests assigned to it are closed.</li>
-              <li>Scores stay available in Results and can still be exported.</li>
-            </ul>
-            <p>You can unarchive it later.</p>
-          </>
-        ) : (
-          <p>The class becomes active again: it shows up in the class selector and its QR code accepts students.</p>
-        )}
+        <p>
+          This <strong>permanently deletes</strong> the section and cannot be undone:
+        </p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>
+            {c.studentCount} student{c.studentCount === 1 ? "" : "s"} are removed from it (students who are not in another section are deleted).
+          </li>
+          <li>All Pretest / Posttest scores in this section are deleted.</li>
+          <li>Its QR code / join code stops working.</li>
+        </ul>
+        <p>Tests themselves stay in the Tests page and can be assigned to other sections.</p>
+        <Button variant="outline" accent="success" loading={exporting} onClick={() => void exportFirst()}>
+          {exported ? "Exported ✓ — export again" : "Export scores to Excel first"}
+        </Button>
       </ConfirmDialog>
     </Card>
   );

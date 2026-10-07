@@ -144,6 +144,52 @@ classRoutes.post("/classes/:id/unarchive", async (c) => {
   return c.json(await loadAdminClass(db, id));
 });
 
+/**
+ * Permanently deletes a section: its enrollments, every attempt (score) in it, its roster and its test assignments.
+ * Students who are left without any section are deleted too (we don't keep data for people who left).
+ * The audit log keeps a record of the deletion (name, join code, counts) but no student data.
+ */
+classRoutes.delete("/classes/:id", async (c) => {
+  const id = idParam(c);
+  const db = c.env.DB;
+  const cls = await loadClassBasics(db, id);
+  const counts = await queryFirst<{ students: number; attempts: number }>(
+    db,
+    `SELECT (SELECT COUNT(*) FROM enrollments WHERE class_id = ?1) AS students,
+            (SELECT COUNT(*) FROM attempts a
+              WHERE a.enrollment_id IN (SELECT id FROM enrollments WHERE class_id = ?1)
+                 OR a.assignment_id IN (SELECT id FROM test_assignments WHERE class_id = ?1)) AS attempts`,
+    id,
+  );
+  // One transaction (db.batch). Order matters: attempts → students who are only in this class (while their
+  // enrollment still identifies them) → remaining enrollments → assignments → roster → the class itself.
+  await db.batch([
+    stmt(
+      db,
+      `DELETE FROM attempts WHERE enrollment_id IN (SELECT id FROM enrollments WHERE class_id = ?1)
+          OR assignment_id IN (SELECT id FROM test_assignments WHERE class_id = ?1)`,
+      id,
+    ),
+    stmt(
+      db,
+      `DELETE FROM students WHERE id IN (
+         SELECT e.student_id FROM enrollments e WHERE e.class_id = ?1
+            AND NOT EXISTS (SELECT 1 FROM enrollments o WHERE o.student_id = e.student_id AND o.class_id <> ?1))`,
+      id,
+    ),
+    stmt(db, "DELETE FROM enrollments WHERE class_id = ?", id),
+    stmt(db, "DELETE FROM test_assignments WHERE class_id = ?", id),
+    stmt(db, "DELETE FROM class_roster WHERE class_id = ?", id),
+    stmt(db, "DELETE FROM classes WHERE id = ?", id),
+    auditStmt(db, c.get("admin").email, "class.delete", "class", id, {
+      name: cls.name,
+      students: counts?.students ?? 0,
+      attempts: counts?.attempts ?? 0,
+    }),
+  ]);
+  return c.json({ ok: true as const, deleted: { students: counts?.students ?? 0, attempts: counts?.attempts ?? 0 } });
+});
+
 /* ───────────── roster ───────────── */
 
 export interface RosterEntry {
