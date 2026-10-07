@@ -12,9 +12,9 @@ import { InfoIcon } from "@/components/student/icons";
 type Accent = "games" | "explore" | "tests";
 
 const tone: Record<Accent, { soft: string; text: string; button: string }> = {
-  games: { soft: "bg-games-soft", text: "text-games", button: "md:bg-games md:hover:bg-violet-700" },
-  explore: { soft: "bg-explore-soft", text: "text-explore", button: "md:bg-explore md:hover:bg-teal-700" },
-  tests: { soft: "bg-tests-soft", text: "text-tests", button: "md:bg-tests md:hover:bg-blue-700" },
+  games: { soft: "bg-games-soft", text: "text-games", button: "bg-games hover:bg-violet-700" },
+  explore: { soft: "bg-explore-soft", text: "text-explore", button: "bg-explore hover:bg-teal-700" },
+  tests: { soft: "bg-tests-soft", text: "text-tests", button: "bg-tests hover:bg-blue-700" },
 };
 
 export default function Home() {
@@ -210,7 +210,7 @@ function MenuCard({ accent, image, title, subtitle, chips, compactChips, lo, act
   const art = (size: string) => <img src={image} alt="" width={168} height={168} draggable={false} className={size} />;
 
   return (
-    <li className="flex flex-col overflow-hidden rounded-[20px] border border-line bg-surface lg:min-h-[453px]">
+    <li className="relative flex flex-col overflow-hidden rounded-[20px] border border-line bg-surface transition-colors hover:border-zinc-300 lg:min-h-[453px]">
       {/* Desktop cover */}
       <div className={cx("relative hidden h-[180px] shrink-0 items-center justify-center lg:flex", t.soft)}>{art("size-[84px]")}</div>
 
@@ -259,15 +259,12 @@ function MenuCard({ accent, image, title, subtitle, chips, compactChips, lo, act
             to={to}
             aria-label={`${action} — ${title}`}
             className={cx(
-              "inline-flex items-center text-[15px] font-semibold transition-colors md:h-11 md:w-[132px] md:justify-center md:rounded-xl md:text-[15px] md:text-white",
-              t.text,
+              // after:inset-0 stretches the link over the whole card, so tapping anywhere on the card opens it.
+              "inline-flex h-10 w-[112px] items-center justify-center rounded-xl text-[15px] font-semibold text-white transition-colors after:absolute after:inset-0 after:rounded-[20px] md:h-11 md:w-[132px]",
               t.button,
             )}
           >
             {action}
-            <span aria-hidden="true" className="ml-1 md:hidden">
-              →
-            </span>
           </Link>
         </div>
       </div>
