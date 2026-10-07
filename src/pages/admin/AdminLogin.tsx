@@ -10,6 +10,7 @@ import { DevLoginForm } from "@/components/student/DevLoginForm";
 import { describeAuthError } from "@/components/student/authHelpers";
 import { errorMessage, isApiStatus } from "@/components/admin/format";
 import { loginMethodStore, type LoginMethod } from "@/components/admin/session";
+import { PasswordLoginForm } from "@/components/admin/PasswordLoginForm";
 
 const FORBIDDEN_MSG = "This account isn't an instructor account. Ask an existing admin to add you in Settings.";
 
@@ -46,6 +47,9 @@ export default function AdminLogin() {
     navigate(target, { replace: true });
   };
 
+  const passwordLogin = config.data?.adminPasswordLogin === true;
+  const googleReady = !!config.data?.googleClientId;
+
   if (me.isPending || config.isPending) return <PageLoader />;
   if (me.data?.role === "admin") return <Navigate to={target} replace />;
 
@@ -54,7 +58,9 @@ export default function AdminLogin() {
       <Card className="w-full max-w-[420px] p-8 shadow-sm sm:p-10">
         <Logo sub="Admin" />
         <h1 className="mt-8 text-2xl font-bold tracking-tight">Instructor sign in</h1>
-        <p className="mt-1 text-sm text-muted">Use your MFU Google account</p>
+        <p className="mt-1 text-sm text-muted">
+          {passwordLogin ? "Use your instructor username and password" : "Use your MFU Google account"}
+        </p>
 
         {me.data?.role === "student" && (
           <p className="mt-4 rounded-xl bg-zinc-100 px-3 py-2 text-xs text-zinc-700">
@@ -64,7 +70,17 @@ export default function AdminLogin() {
 
         <div className="mt-6 space-y-4">
           {config.isError && <ErrorNote>Couldn’t load sign-in settings. {errorMessage(config.error)}</ErrorNote>}
-          <GoogleSignInButton as="admin" onSuccess={onSuccess("google")} onError={(e) => setError(loginError(e))} onPendingChange={(p) => p && setError(null)} />
+          {passwordLogin && <PasswordLoginForm onSuccess={onSuccess("password")} />}
+          {(googleReady || !passwordLogin) && (
+            <>
+              {passwordLogin && (
+                <p className="flex items-center gap-3 text-xs text-muted" aria-hidden="true">
+                  <span className="h-px flex-1 bg-line" /> or <span className="h-px flex-1 bg-line" />
+                </p>
+              )}
+              <GoogleSignInButton as="admin" onSuccess={onSuccess("google")} onError={(e) => setError(loginError(e))} onPendingChange={(p) => p && setError(null)} />
+            </>
+          )}
           <DevLoginForm as="admin" onSuccess={onSuccess("dev")} />
           {error && <ErrorNote>{error}</ErrorNote>}
         </div>

@@ -11,6 +11,7 @@ import { exportWholeClass } from "@/components/admin/exportResults";
 import { findOtherEnrollments } from "@/components/admin/students";
 import { errorMessage, formatDateTime } from "@/components/admin/format";
 import { adminKeys } from "@/components/admin/keys";
+import { LIVE_REFRESH_MS, LiveIndicator, isRecentJoin } from "@/components/admin/live";
 import { RowMenu } from "@/components/admin/Menu";
 import { ConfirmDialog, Modal } from "@/components/admin/Modal";
 import { useToast } from "@/components/admin/toastContext";
@@ -48,6 +49,8 @@ function StudentsForClass({ cls, classes }: { cls: AdminClass; classes: AdminCla
   const q = useQuery({
     queryKey: adminKeys.students(cls.id, "all"),
     queryFn: () => api.get<AdminStudentRow[]>(`/admin/students?${new URLSearchParams({ classId: String(cls.id), status: "all" })}`),
+    // Live during class: students appear here a few seconds after they scan the section's QR code and sign in.
+    refetchInterval: LIVE_REFRESH_MS,
   });
   const [filter, setFilter] = useState<Filter>("active");
   const [search, setSearch] = useState("");
@@ -159,6 +162,7 @@ function StudentsForClass({ cls, classes }: { cls: AdminClass; classes: AdminCla
         <Card className="min-w-0 px-[19px] pb-[15px] pt-[17px]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <FilterPills<Filter> label="Filter by status" value={filter} onChange={setFilter} options={pills} />
+            <LiveIndicator updatedAt={q.dataUpdatedAt} fetching={q.isFetching} />
             <div className="w-full sm:w-[239px]">
               <SearchBox value={search} onChange={setSearch} placeholder="Search ID or name..." label="Search by student ID, name or e-mail" />
             </div>
@@ -193,7 +197,7 @@ function StudentsForClass({ cls, classes }: { cls: AdminClass; classes: AdminCla
                   <tr className="text-left text-[12px] uppercase text-faint">
                     <th scope="col" className="pb-[14px] pl-5 font-semibold">Student ID</th>
                     <th scope="col" className="pb-[14px] font-semibold">First name</th>
-                    <th scope="col" className="pb-[14px] font-semibold">Joined</th>
+                    <th scope="col" className="pb-[14px] font-semibold">Joined via QR</th>
                     <th scope="col" className="pb-[14px] font-semibold">Status</th>
                     <th scope="col" className="pb-[14px] pr-5">
                       <span className="sr-only">Actions</span>
@@ -222,6 +226,11 @@ function StudentsForClass({ cls, classes }: { cls: AdminClass; classes: AdminCla
                         <td className="truncate pr-3">{r.firstName ?? <span className="text-faint">—</span>}</td>
                         <td className="tabular-nums" title={formatDateTime(r.joinedAt)}>
                           {joinedLabel(r.joinedAt)}
+                          {isRecentJoin(r) && (
+                            <span className="ml-2 inline-flex h-[20px] items-center rounded-full bg-[#e8f5ec] px-2 text-[11px] font-semibold text-success">
+                              New
+                            </span>
+                          )}
                         </td>
                         <td>
                           <StatusBadge status={r.status} />

@@ -51,6 +51,7 @@ export default function Results() {
     queryFn: () => api.get<AdminResults>(`/admin/results?${new URLSearchParams({ ...(classId ? { classId: String(classId) } : {}), testIds: testIds.join(","), status })}`),
     enabled: testIds.length > 0,
     placeholderData: (prev) => prev,
+    refetchInterval: 30_000, // scores arrive while students are taking the test
   });
 
   const classes = classesQ.data ?? [];

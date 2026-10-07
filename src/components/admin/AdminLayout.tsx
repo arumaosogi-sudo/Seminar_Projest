@@ -154,7 +154,9 @@ function Sidebar({ me, ctx, classesError, onClose }: { me: AdminMe; ctx: AdminCl
   const navigate = useNavigate();
   const config = useAppConfig();
   const selectId = useId();
-  const method = loginMethodStore.get() ?? (config.data && !config.data.googleClientId ? "dev" : "google");
+  const method = me.admin.email.startsWith("local:")
+    ? "password"
+    : (loginMethodStore.get() ?? (config.data && !config.data.googleClientId ? "dev" : "google"));
   const initial = (me.admin.name || me.admin.email).trim().charAt(0).toUpperCase() || "A";
 
   return (
@@ -224,7 +226,7 @@ function Sidebar({ me, ctx, classesError, onClose }: { me: AdminMe; ctx: AdminCl
             <p className="truncate text-[13px] font-semibold leading-[18px]" title={me.admin.email}>
               {me.admin.name || me.admin.email}
             </p>
-            <p className="text-[12px] leading-4 text-muted">admin · {method === "dev" ? "dev" : "Google"}</p>
+            <p className="text-[12px] leading-4 text-muted">admin · {method === "dev" ? "dev" : method === "password" ? "username" : "Google"}</p>
           </div>
           <button
             type="button"

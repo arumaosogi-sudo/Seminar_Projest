@@ -1,12 +1,13 @@
 import { useMemo, useState, type FormEvent, type KeyboardEvent } from "react";
 import { Link } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createClassBody, type AdminClass } from "@shared/contract";
+import { createClassBody, type AdminClass, type AdminStudentRow } from "@shared/contract";
 import { api } from "@/lib/api";
 import { Button, Card, cx, EmptyState, ErrorNote, Input, PageHeader, PageLoader, Select, Spinner } from "@/components/ui";
 import { useAdminClass } from "@/components/admin/adminClass";
 import { CardTitle, FilterPills, QueryError, SearchBox, StatusChip, Switch } from "@/components/admin/controls";
-import { copyText, errorMessage, formatDate } from "@/components/admin/format";
+import { copyText, errorMessage, formatDate, formatDateTime, relativeTime } from "@/components/admin/format";
+import { LIVE_REFRESH_MS, LiveIndicator, isRecentJoin } from "@/components/admin/live";
 import { IconDownload, IconPlus } from "@/components/admin/icons";
 import { adminKeys } from "@/components/admin/keys";
 import { ConfirmDialog, Modal } from "@/components/admin/Modal";
@@ -25,7 +26,11 @@ function StatusBadge({ c }: { c: AdminClass }) {
 
 export default function Classes() {
   const { classId: currentId, setClassId } = useAdminClass();
-  const q = useQuery({ queryKey: adminKeys.classes("all"), queryFn: () => api.get<AdminClass[]>("/admin/classes?status=all") });
+  const q = useQuery({
+    queryKey: adminKeys.classes("all"),
+    queryFn: () => api.get<AdminClass[]>("/admin/classes?status=all"),
+    refetchInterval: LIVE_REFRESH_MS, // student / pretest / posttest counts change during class
+  });
   const [tab, setTab] = useState<Tab>("active");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -159,7 +164,14 @@ export default function Classes() {
             )}
           </Card>
 
-          {selected ? <SelectedClass key={selected.id} c={selected} /> : <Card className="p-6 text-sm text-muted">Select a class to see its QR code.</Card>}
+          {selected ? (
+            <div className="space-y-[25px] xl:sticky xl:top-6">
+              <SelectedClass key={selected.id} c={selected} />
+              {selected.status === "active" && <RecentJoins key={`joins-${selected.id}`} c={selected} />}
+            </div>
+          ) : (
+            <Card className="p-6 text-sm text-muted">Select a class to see its QR code.</Card>
+          )}
         </div>
       )}
 
@@ -173,6 +185,64 @@ export default function Classes() {
         }}
       />
     </>
+  );
+}
+
+/* ───────────────────────── Live "who just scanned the QR" list ───────────────────────── */
+
+const RECENT_LIMIT = 6;
+
+function RecentJoins({ c }: { c: AdminClass }) {
+  const q = useQuery({
+    queryKey: adminKeys.students(c.id, "all"),
+    queryFn: () => api.get<AdminStudentRow[]>(`/admin/students?${new URLSearchParams({ classId: String(c.id), status: "all" })}`),
+    refetchInterval: LIVE_REFRESH_MS,
+  });
+  const recent = useMemo(
+    () =>
+      (q.data ?? [])
+        .filter((r) => r.status === "active" && r.joinedAt)
+        .sort((a, b) => Date.parse(b.joinedAt ?? "") - Date.parse(a.joinedAt ?? ""))
+        .slice(0, RECENT_LIMIT),
+    [q.data],
+  );
+
+  return (
+    <Card className="p-[25px]">
+      <div className="flex items-center justify-between gap-2">
+        <CardTitle>Joined via QR</CardTitle>
+        <LiveIndicator updatedAt={q.dataUpdatedAt} fetching={q.isFetching} />
+      </div>
+      {q.isPending ? (
+        <div className="py-6 text-center">
+          <Spinner />
+        </div>
+      ) : q.isError ? (
+        <p className="mt-3 text-sm text-danger">Couldn’t load students. {errorMessage(q.error)}</p>
+      ) : recent.length === 0 ? (
+        <p className="mt-3 text-sm text-muted">Nobody has joined yet. Students appear here a few seconds after they scan this QR code and sign in.</p>
+      ) : (
+        <ul className="mt-3 divide-y divide-line">
+          {recent.map((r) => (
+            <li key={r.enrollmentId ?? r.studentCode} className="flex items-center justify-between gap-3 py-2.5">
+              <span className="min-w-0">
+                <span className="block truncate text-[14px] font-semibold text-ink">{r.firstName ?? <span className="text-faint">(no name yet)</span>}</span>
+                <span className="block text-[12px] tabular-nums text-muted">{r.studentCode}</span>
+              </span>
+              <span className="flex shrink-0 items-center gap-2 text-[12px] text-muted" title={formatDateTime(r.joinedAt)}>
+                {isRecentJoin(r) && (
+                  <span className="inline-flex h-[20px] items-center rounded-full bg-[#e8f5ec] px-2 text-[11px] font-semibold text-success">New</span>
+                )}
+                {relativeTime(r.joinedAt)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <Link to="/admin/students" className="mt-3 inline-block text-[13px] font-semibold text-ink hover:underline">
+        All students in this section →
+      </Link>
+    </Card>
   );
 }
 
@@ -197,7 +267,7 @@ function SelectedClass({ c }: { c: AdminClass }) {
   });
 
   return (
-    <Card className="p-[25px] xl:sticky xl:top-6">
+    <Card className="p-[25px]">
       <CardTitle>Selected</CardTitle>
       <h2 className="mt-1.5 text-[22px] font-semibold leading-7 text-ink">{c.name}</h2>
 

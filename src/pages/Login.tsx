@@ -49,7 +49,16 @@ export default function Login() {
 
   return (
     <AuthShell
-      below={config.data?.devLogin ? <DevLoginForm as="student" joinCode={joinCode} onSuccess={onSuccess} /> : undefined}
+      below={
+        <>
+          {config.data?.devLogin && <DevLoginForm as="student" joinCode={joinCode} onSuccess={onSuccess} />}
+          <p className={config.data?.devLogin ? "mt-4 text-center" : "text-center"}>
+            <Link to="/admin/login" className="rounded text-[13px] font-semibold text-gray-800 hover:text-ink hover:underline">
+              For instructors →
+            </Link>
+          </p>
+        </>
+      }
     >
       {joinCode ? (
         joinClass.data ? (

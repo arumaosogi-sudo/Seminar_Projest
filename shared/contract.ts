@@ -27,7 +27,15 @@ export interface AppConfig {
   googleClientId: string; // "" when not configured
   devLogin: boolean; // true only when DEV_LOGIN=true (local dev)
   allowedStudentDomain: string; // lamduan.mfu.ac.th
+  adminPasswordLogin: boolean; // true when ADMIN_USERNAME + ADMIN_PASSWORD_HASH are configured
 }
+
+/** POST /api/auth/admin-password — local instructor account (until instructors sign in with Google). */
+export const adminPasswordLoginBody = z.object({
+  username: z.string().trim().toLowerCase().min(1).max(64),
+  password: z.string().min(1).max(200),
+});
+export type AdminPasswordLoginBody = z.input<typeof adminPasswordLoginBody>;
 
 export const loginAs = z.enum(["student", "admin"]);
 

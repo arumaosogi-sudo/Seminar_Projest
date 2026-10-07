@@ -72,6 +72,21 @@ export function envAdminEmails(env: Env): string[] {
   return parseAdminEmails(env.ADMIN_EMAILS as string | undefined);
 }
 
+/** Session e-mail used for the local username/password admin (never a real address). */
+export const LOCAL_ADMIN_PREFIX = "local:";
+
+/**
+ * Optional username + password admin (ADMIN_USERNAME + ADMIN_PASSWORD_HASH from `npm run admin:hash`).
+ * Returns null unless both are set and the hash is well-formed.
+ */
+export function localAdminConfig(env: Env): { username: string; passwordHash: string } | null {
+  const vars = env as unknown as Record<string, string | undefined>;
+  const username = (vars.ADMIN_USERNAME ?? "").trim().toLowerCase();
+  const passwordHash = (vars.ADMIN_PASSWORD_HASH ?? "").trim();
+  if (!/^[a-z0-9._-]{3,64}$/.test(username) || !passwordHash.startsWith("pbkdf2_sha256$")) return null;
+  return { username, passwordHash };
+}
+
 /** Refuses to issue / read sessions without a strong secret. */
 export function sessionKey(env: Env): Uint8Array {
   const secret = env.SESSION_SECRET as string | undefined;

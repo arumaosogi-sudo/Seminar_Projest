@@ -1,5 +1,6 @@
 import { Hono, type Context } from "hono";
 import {
+  adminPasswordLoginBody,
   devLoginBody,
   googleLoginBody,
   updateMeBody,
@@ -20,9 +21,18 @@ import {
   toStudentMe,
   verifyGoogleCredential,
 } from "../auth";
-import { execute, nowIso, placeholders, queryFirst } from "../db";
+import { auditStmt, execute, nowIso, placeholders, queryFirst, stmt } from "../db";
 import { anonymizedIdentityHashes } from "../identityHash";
-import { googleClientId, isDevLoginEnabled, sessionKey, studentDomain, type AppEnv } from "../env";
+import {
+  LOCAL_ADMIN_PREFIX,
+  googleClientId,
+  isDevLoginEnabled,
+  localAdminConfig,
+  sessionKey,
+  studentDomain,
+  type AppEnv,
+} from "../env";
+import { verifyPassword } from "../password";
 import { normalizeJoinCode } from "../grading";
 import { HttpError, forbidden, readBody, unauthenticated } from "../http";
 import { parseStudentEmail } from "../identity";
@@ -36,6 +46,7 @@ publicRoutes.get("/config", (c) => {
     googleClientId: googleClientId(c.env),
     devLogin: isDevLoginEnabled(c.env, c.req.url),
     allowedStudentDomain: studentDomain(c.env),
+    adminPasswordLogin: localAdminConfig(c.env) !== null,
   };
   return c.json(cfg);
 });
@@ -199,6 +210,45 @@ publicRoutes.post("/auth/dev", async (c) => {
   const body = await readBody(c, devLoginBody);
   if (body.as === "admin") return loginAdmin(c, body.email);
   return loginStudent(c, body.email, body.joinCode);
+});
+
+/* Username + password instructor account (ADMIN_USERNAME / ADMIN_PASSWORD_HASH). Max 5 failures per IP per 15 min. */
+const ADMIN_LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const ADMIN_LOGIN_MAX_FAILURES = 5;
+
+publicRoutes.post("/auth/admin-password", async (c) => {
+  const local = localAdminConfig(c.env);
+  if (!local) throw new HttpError(404, "password_login_disabled", "Password sign-in is not configured.");
+  const body = await readBody(c, adminPasswordLoginBody);
+  const db = c.env.DB;
+  const ip = c.req.header("CF-Connecting-IP") ?? "local";
+  const since = new Date(Date.now() - ADMIN_LOGIN_WINDOW_MS).toISOString();
+
+  const recent = await queryFirst<{ n: number }>(
+    db,
+    "SELECT COUNT(*) AS n FROM admin_login_attempts WHERE ip = ? AND success = 0 AND attempted_at > ?",
+    ip,
+    since,
+  );
+  if ((recent?.n ?? 0) >= ADMIN_LOGIN_MAX_FAILURES) {
+    throw new HttpError(429, "too_many_attempts", "Too many failed sign-in attempts. Please wait 15 minutes and try again.");
+  }
+
+  // Always run the hash (even for a wrong username) so timing doesn't reveal which part was wrong.
+  const passwordOk = await verifyPassword(body.password, local.passwordHash);
+  const ok = passwordOk && body.username === local.username;
+  await c.env.DB.batch([
+    stmt(db, "DELETE FROM admin_login_attempts WHERE attempted_at < ?", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()),
+    stmt(db, "INSERT INTO admin_login_attempts (ip, success, attempted_at) VALUES (?, ?, ?)", ip, ok ? 1 : 0, nowIso()),
+    ...(ok ? [auditStmt(db, LOCAL_ADMIN_PREFIX + local.username, "admin.login", "admin", local.username, { method: "password" })] : []),
+  ]);
+  if (!ok) throw new HttpError(401, "invalid_credentials", "Incorrect username or password.");
+
+  const email = LOCAL_ADMIN_PREFIX + local.username;
+  await startSession(c, { sub: email, role: "admin", email });
+  const admin = await findAdmin(db, c.env, email);
+  if (!admin) throw new Error("Local admin vanished after sign-in");
+  return c.json<Me>(toAdminMe(admin));
 });
 
 publicRoutes.post("/auth/logout", (c) => {

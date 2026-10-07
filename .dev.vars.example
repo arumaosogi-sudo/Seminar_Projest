@@ -8,5 +8,10 @@ DEV_LOGIN=true
 # Instructors who may open /admin (comma-separated). Admins can also be added later in Admin → Settings.
 ADMIN_EMAILS=instructor@mfu.ac.th
 
+# Username + password instructor account (used until instructors sign in with Google).
+# ADMIN_PASSWORD_HASH comes from `npm run admin:hash` — never put the plain password here.
+ADMIN_USERNAME=
+ADMIN_PASSWORD_HASH=
+
 # Google OAuth Web Client ID (leave empty until the team creates one in Google Cloud Console).
 GOOGLE_CLIENT_ID=

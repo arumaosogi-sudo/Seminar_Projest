@@ -9,9 +9,11 @@ import { SignJWT, createRemoteJWKSet, errors as joseErrors, jwtVerify } from "jo
 import type { AdminMe, StudentMe } from "../shared/contract";
 import { queryAll, queryFirst } from "./db";
 import {
+  LOCAL_ADMIN_PREFIX,
   SESSION_COOKIE,
   SESSION_TTL_SECONDS,
   envAdminEmails,
+  localAdminConfig,
   googleClientId,
   sessionKey,
   type AdminContext,
@@ -112,6 +114,12 @@ export async function verifyGoogleCredential(env: Env, credential: string): Prom
 
 export async function findAdmin(db: D1Database, env: Env, email: string): Promise<AdminContext | null> {
   const e = email.trim().toLowerCase();
+  // Local username/password admin: valid only while ADMIN_USERNAME + ADMIN_PASSWORD_HASH are still configured.
+  if (e.startsWith(LOCAL_ADMIN_PREFIX)) {
+    const local = localAdminConfig(env);
+    if (!local || e !== LOCAL_ADMIN_PREFIX + local.username) return null;
+    return { id: null, email: e, name: `Admin (${local.username})` };
+  }
   const row = await queryFirst<{ id: number; email: string; name: string | null }>(
     db,
     "SELECT id, email, name FROM admins WHERE email = ?",
