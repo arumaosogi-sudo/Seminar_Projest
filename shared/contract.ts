@@ -26,7 +26,8 @@ export interface ApiError {
 export interface AppConfig {
   googleClientId: string; // "" when not configured
   devLogin: boolean; // true only when DEV_LOGIN=true (local dev)
-  allowedStudentDomain: string; // lamduan.mfu.ac.th
+  allowedStudentDomain: string; // primary domain: lamduan.mfu.ac.th
+  allowedStudentDomains: string[]; // all accepted student domains, e.g. ["lamduan.mfu.ac.th", "mfu.ac.th"]
   adminPasswordLogin: boolean; // true when ADMIN_USERNAME + ADMIN_PASSWORD_HASH are configured
 }
 

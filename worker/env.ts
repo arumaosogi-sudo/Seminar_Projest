@@ -1,6 +1,6 @@
 import type { Role } from "../shared/contract";
 import { HttpError } from "./http";
-import { isLocalHostname, parseAdminEmails } from "./identity";
+import { isLocalHostname, parseAdminEmails, parseDomains } from "./identity";
 
 /*
  * `wrangler types` already generates SESSION_SECRET / DEV_LOGIN / ADMIN_EMAILS / GOOGLE_CLIENT_ID
@@ -60,8 +60,13 @@ export function isDevLoginEnabled(env: Env, requestUrl: string): boolean {
   }
 }
 
+/** Allowed student e-mail domains (comma-separated ALLOWED_STUDENT_DOMAIN). The first one is the primary domain. */
+export function studentDomains(env: Env): string[] {
+  return parseDomains(env.ALLOWED_STUDENT_DOMAIN as string | undefined);
+}
+
 export function studentDomain(env: Env): string {
-  return ((env.ALLOWED_STUDENT_DOMAIN as string | undefined) || "lamduan.mfu.ac.th").trim().toLowerCase();
+  return studentDomains(env)[0];
 }
 
 export function googleClientId(env: Env): string {

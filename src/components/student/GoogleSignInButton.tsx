@@ -95,7 +95,9 @@ export function GoogleSignInButton({ as, joinCode, onSuccess, onError, onPending
   });
 
   const clientId = config.data?.googleClientId ?? "";
-  const hd = as === "student" ? config.data?.allowedStudentDomain || undefined : undefined;
+  // Google's `hd` hint can only name one domain — use it only when a single student domain is allowed.
+  const studentDomains = config.data?.allowedStudentDomains ?? [];
+  const hd = as === "student" && studentDomains.length === 1 ? studentDomains[0] : undefined;
 
   useEffect(() => {
     if (!clientId) return;

@@ -191,10 +191,10 @@ function SignInCard() {
           />
           <li className="flex items-start justify-between gap-4 py-3">
             <div>
-              <p className="text-sm font-semibold">Student e-mail domain</p>
-              <p className="text-xs text-muted">Only accounts from this Google Workspace domain can join as students.</p>
+              <p className="text-sm font-semibold">Student e-mail domains</p>
+              <p className="text-xs text-muted">Only accounts from these Google Workspace domains can join as students.</p>
             </div>
-            <span className="font-mono text-xs">{config.data.allowedStudentDomain || "—"}</span>
+            <span className="font-mono text-xs">{(config.data.allowedStudentDomains ?? [config.data.allowedStudentDomain]).join(", ") || "—"}</span>
           </li>
         </ul>
       )}

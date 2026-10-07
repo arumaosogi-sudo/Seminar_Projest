@@ -1,5 +1,9 @@
 # เปิดใช้ "Sign in with Google" (Google OAuth Client ID)
 
+> ✅ **ตั้งค่าแล้ว (8 ต.ค. 2026):** Google Cloud project `digital-muscle-510921` (บัญชี arumaosogi@gmail.com) · consent screen External · **In production**
+> Client ID `802030159205-1tm8v14uihqi060us1iinnrh8iop9se3.apps.googleusercontent.com` · origins: เว็บจริง, `http://localhost:5173`, `http://localhost`
+> โดเมนที่รับ: `ALLOWED_STUDENT_DOMAIN=lamduan.mfu.ac.th,mfu.ac.th` · ขั้นตอนด้านล่างเก็บไว้เผื่อต้องสร้างใหม่
+
 ระบบตรวจ Google ID token ที่ฝั่ง Worker และรับเฉพาะบัญชีที่ `hd = lamduan.mfu.ac.th` (นักศึกษา)
 สิ่งที่ต้องมีมีแค่ **Client ID** (ไม่ต้องใช้ Client secret) — ทำครั้งเดียว ใช้ได้ทั้งในเครื่องและบนเว็บจริง
 

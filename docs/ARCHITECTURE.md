@@ -38,7 +38,9 @@ public/images/            logo.png, login-hero-{desktop,tablet,phone}-*.webp, me
 ## 3. Auth & session rules
 
 - **Student login**: Google ID token must have `aud = GOOGLE_CLIENT_ID`, `iss = accounts.google.com`, `email_verified = true`,
-  `hd = ALLOWED_STUDENT_DOMAIN` (lamduan.mfu.ac.th) and an e-mail local part of 8–12 digits → that is the **student code**.
+  `hd` ∈ `ALLOWED_STUDENT_DOMAIN` (comma-separated, now `lamduan.mfu.ac.th,mfu.ac.th`) and `hd` = the e-mail's domain
+  (personal Gmail has no `hd` → rejected). On lamduan the local part must be the 8–12 digit **student code**; on other
+  allowed domains (mfu.ac.th staff/TA) the local part itself is stored as the student code.
 - **Admin login**: any verified Google account whose e-mail is in the `admins` table or in the `ADMIN_EMAILS` var (comma-separated).
 - **Password admin** (`POST /api/auth/admin-password`): optional local instructor account from `ADMIN_USERNAME` +
   `ADMIN_PASSWORD_HASH` (PBKDF2-SHA256, `npm run admin:hash`; only the hash is stored). Session e-mail is

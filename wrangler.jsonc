@@ -25,8 +25,8 @@
 
   // Non-secret config. Secrets (SESSION_SECRET) go in .dev.vars locally and `wrangler secret put` in production.
   "vars": {
-    "ALLOWED_STUDENT_DOMAIN": "lamduan.mfu.ac.th",
-    "GOOGLE_CLIENT_ID": "",
+    "ALLOWED_STUDENT_DOMAIN": "lamduan.mfu.ac.th,mfu.ac.th",
+    "GOOGLE_CLIENT_ID": "802030159205-1tm8v14uihqi060us1iinnrh8iop9se3.apps.googleusercontent.com",
     "ADMIN_EMAILS": ""
   }
 }

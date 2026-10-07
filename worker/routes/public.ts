@@ -30,12 +30,13 @@ import {
   localAdminConfig,
   sessionKey,
   studentDomain,
+  studentDomains,
   type AppEnv,
 } from "../env";
 import { verifyPassword } from "../password";
 import { normalizeJoinCode } from "../grading";
 import { HttpError, forbidden, readBody, unauthenticated } from "../http";
-import { parseStudentEmail } from "../identity";
+import { domainsLabel, parseStudentEmail } from "../identity";
 
 export const publicRoutes = new Hono<AppEnv>();
 
@@ -46,6 +47,7 @@ publicRoutes.get("/config", (c) => {
     googleClientId: googleClientId(c.env),
     devLogin: isDevLoginEnabled(c.env, c.req.url),
     allowedStudentDomain: studentDomain(c.env),
+    allowedStudentDomains: studentDomains(c.env),
     adminPasswordLogin: localAdminConfig(c.env) !== null,
   };
   return c.json(cfg);
@@ -144,7 +146,7 @@ async function applyJoinCode(db: D1Database, studentId: number, studentCode: str
 }
 
 async function loginStudent(c: Context<AppEnv>, email: string, joinCode: string | undefined) {
-  const check = parseStudentEmail(email, studentDomain(c.env));
+  const check = parseStudentEmail(email, studentDomains(c.env));
   if (!check.ok) throw forbidden(check.error, check.code);
   const db = c.env.DB;
   const now = nowIso();
@@ -200,8 +202,13 @@ publicRoutes.post("/auth/google", async (c) => {
   const id = await verifyGoogleCredential(c.env, body.credential);
   if (!id.emailVerified) throw forbidden("Your Google e-mail address is not verified.", "email_not_verified");
   if (body.as === "admin") return loginAdmin(c, id.email);
-  const domain = studentDomain(c.env);
-  if (id.hd !== domain) throw forbidden(`Please sign in with your @${domain} account.`, "domain_not_allowed");
+  // `hd` (hosted domain) is set by Google only for Google Workspace accounts — personal Gmail has none.
+  // It must be one of the allowed university domains AND match the e-mail's own domain.
+  const domains = studentDomains(c.env);
+  const emailDomain = id.email.slice(id.email.lastIndexOf("@") + 1);
+  if (!id.hd || !domains.includes(id.hd) || id.hd !== emailDomain) {
+    throw forbidden(`Please sign in with your ${domainsLabel(domains)} account.`, "domain_not_allowed");
+  }
   return loginStudent(c, id.email, body.joinCode);
 });
 

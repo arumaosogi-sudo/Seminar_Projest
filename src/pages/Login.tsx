@@ -45,7 +45,7 @@ export default function Login() {
     return <Navigate to={me.data.student.needsOnboarding ? "/onboarding" : from} replace />;
   }
 
-  const domain = config.data?.allowedStudentDomain || "lamduan.mfu.ac.th";
+  const domains = config.data?.allowedStudentDomains?.length ? config.data.allowedStudentDomains : ["lamduan.mfu.ac.th"];
 
   return (
     <AuthShell
@@ -108,7 +108,7 @@ export default function Login() {
         <span className="grid size-4 shrink-0 place-items-center rounded-full bg-faint text-white" aria-hidden="true">
           <CheckIcon size={10} />
         </span>
-        Only @{domain} accounts
+        Only {domains.map((d) => `@${d}`).join(" or ")} accounts
       </p>
 
       {error && (
