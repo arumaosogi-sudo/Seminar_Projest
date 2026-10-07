@@ -334,6 +334,14 @@ function SelectedClass({ c }: { c: AdminClass }) {
           <p className="mt-4 text-center text-[12px] leading-[18px] text-muted">
             Students who scan this QR are added to this section automatically — they can’t pick a section themselves.
           </p>
+          {c.restrictToRoster && (
+            <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-[12px] leading-[18px] text-amber-900">
+              {c.rosterCount > 0
+                ? `Roster only: just the ${c.rosterCount} student${c.rosterCount === 1 ? "" : "s"} on the roster can join. Others are refused.`
+                : "Roster only is on, but the roster is empty — anyone can join until you import it from Students."}{" "}
+              Change it in Edit.
+            </p>
+          )}
         </>
       )}
 

@@ -112,13 +112,14 @@ async function applyJoinCode(db: D1Database, studentId: number, studentCode: str
   if (existing) return `You were withdrawn from ${cls.name}. Please contact your instructor.`;
 
   if (cls.restrict_to_roster === 1) {
-    const listed = await queryFirst<{ one: number }>(
+    // An empty roster can't mean "nobody may join" — the instructor just hasn't imported it yet.
+    const roster = await queryFirst<{ total: number; listed: number }>(
       db,
-      "SELECT 1 AS one FROM class_roster WHERE class_id = ? AND student_code = ?",
-      cls.id,
+      "SELECT COUNT(*) AS total, COALESCE(SUM(student_code = ?), 0) AS listed FROM class_roster WHERE class_id = ?",
       studentCode,
+      cls.id,
     );
-    if (!listed) return `Your student ID is not on the roster of ${cls.name}. Please contact your instructor.`;
+    if (roster && roster.total > 0 && roster.listed === 0) return `Your student ID is not on the roster of ${cls.name}. Please contact your instructor.`;
   }
 
   const sameTerm = await queryFirst<{ name: string; status: string }>(
