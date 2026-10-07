@@ -12,12 +12,13 @@
     "run_worker_first": ["/api/*"]
   },
 
-  // D1 (SQLite). `database_id` is filled in after `wrangler d1 create digital-muscle-db`.
+  // D1 (SQLite). Production DB created 2026-10-07 (`wrangler d1 create digital-muscle-db`, region APAC).
   // Local dev (`npm run dev`) uses a local SQLite file under .wrangler/ and needs no Cloudflare account.
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "digital-muscle-db",
+      "database_id": "b42f2470-2df6-4257-a51a-c46239687036",
       "migrations_dir": "migrations"
     }
   ],
