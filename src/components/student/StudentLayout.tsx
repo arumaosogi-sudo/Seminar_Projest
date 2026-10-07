@@ -45,7 +45,8 @@ function Shell() {
       >
         Skip to content
       </a>
-      <TopBar />
+      {/* Figma phone frames: only Home shows the logo bar; sub-pages use their own back-arrow header. */}
+      <TopBar phoneHidden={pathname !== "/"} />
       <main id="main" tabIndex={-1} className="flex-1 outline-none">
         {/* Figma content column: 1200 px on desktop (120 px gutters at 1440), 40 px gutters on tablet, 16 px on phone */}
         <div className="mx-auto w-full max-w-[1280px] px-4 pb-28 pt-[15px] md:pb-10 md:px-10 md:pt-[26px] lg:pt-[42px]">
@@ -58,9 +59,9 @@ function Shell() {
   );
 }
 
-function TopBar() {
+function TopBar({ phoneHidden }: { phoneHidden: boolean }) {
   return (
-    <header className="sticky top-0 z-30 bg-surface">
+    <header className={cx("sticky top-0 z-30 bg-surface", phoneHidden && "max-md:hidden")}>
       <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-4 px-4 md:h-[72px] md:px-10 lg:px-20">
         <Link to="/" className="shrink-0 rounded-lg" aria-label="Digital Muscle — Home">
           <Logo size={31} textClassName="text-[17px] font-semibold lg:text-[18px]" />

@@ -1,4 +1,6 @@
-# คู่มือเพื่อนร่วมทีม (Games · 3D · Tests)
+# คู่มือเพื่อนร่วมทีม (Games · 3D)
+
+> ✅ หน้า Tests (รายการข้อสอบ / ทำข้อสอบ / ผลสอบ) ทำเสร็จแล้วเมื่อ 7 ต.ค. 2026 — ไม่ต้องทำซ้ำ ใช้เป็นตัวอย่างการเรียก API ได้
 
 > หน้าของคุณ "ถูกจองไว้แล้ว" — route ต่อไว้ครบใน `src/router.tsx` ตอนนี้แต่ละหน้าแสดง placeholder (กรอบเส้นประ 🧩)
 > พร้อม checklist ของสิ่งที่ต้องทำ ให้ **แทนที่ไฟล์ทั้งไฟล์** แต่ต้องคง `export default` ไว้
@@ -29,9 +31,9 @@ npm run dev                        # เปิด http://localhost:5173 (Vite + 
 | Game result | `/games/result` | `src/pages/games/GameResult.tsx` | GAME-6 |
 | 3D Explore | `/explore` | `src/pages/explore/Explore3D.tsx` | 3D-1..4, 7, 10, 11, 14 |
 | Sarcomere | `/explore/sarcomere` | `src/pages/explore/Sarcomere.tsx` | 3D-5..9 |
-| Tests list | `/tests` | `src/pages/tests/TestsList.tsx` | TEST-1, 5 |
-| Take test (เต็มจอ ไม่มี nav) | `/tests/:assignmentId/take` | `src/pages/tests/TakeTest.tsx` | TEST-2..4 |
-| Test result | `/tests/result/:attemptId` | `src/pages/tests/TestResult.tsx` | TEST-5 |
+| ✅ Tests list (เสร็จแล้ว) | `/tests` | `src/pages/tests/TestsList.tsx` | TEST-1, 5 |
+| ✅ Take test (เสร็จแล้ว) | `/tests/:assignmentId/take` | `src/pages/tests/TakeTest.tsx` | TEST-2..4 |
+| ✅ Test result (เสร็จแล้ว) | `/tests/result/:attemptId` | `src/pages/tests/TestResult.tsx` | TEST-5 |
 
 - หน้าที่อยู่ใต้ `/` ถูกครอบด้วย `StudentLayout` แล้ว (มี guard login, top nav, bottom tab บนมือถือ, footer) — **ไม่ต้องเช็ก login เอง**
 - `TakeTest` อยู่นอก layout จึงต้องครอบตัวเองด้วย `<RequireStudent>` (มีให้แล้วใน placeholder อย่าลบ)

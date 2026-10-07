@@ -174,7 +174,9 @@ export interface AttemptResult {
   review: {
     questionId: number;
     position: number;
+    type: QuestionType;
     prompt: string;
+    options: { id: string; text: string }[];
     yourAnswer: AnswerValue | null;
     correctAnswer: AnswerValue;
     correct: boolean;

@@ -336,7 +336,10 @@ export async function toResult(
       return {
         questionId: q.id,
         position: q.position,
+        type: q.type,
         prompt: q.prompt,
+        // Option texts let the result page show "Actin, Tropomyosin" instead of option ids.
+        options: q.options.map((o) => ({ id: o.id, text: o.text })),
         yourAnswer: answers[String(q.id)] ?? null,
         correctAnswer: displayCorrectAnswer(q),
         correct: item?.correct ?? false,

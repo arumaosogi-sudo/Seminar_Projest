@@ -100,3 +100,38 @@ export function ArrowLeftIcon(p: IconProps) {
     </svg>
   );
 }
+
+export function ArrowRightIcon(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
+  );
+}
+
+export function ChevronLeftIcon(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="m15 5-7 7 7 7" />
+    </svg>
+  );
+}
+
+export function ClockIcon(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" />
+    </svg>
+  );
+}
+
+export function XIcon(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="m6 6 12 12" />
+      <path d="M18 6 6 18" />
+    </svg>
+  );
+}

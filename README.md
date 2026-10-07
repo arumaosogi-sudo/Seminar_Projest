@@ -48,7 +48,7 @@ npm run dev                         # เปิด http://localhost:5173
 docs/plan/            ⚖️ ข้อบังคับ + requirement + stack + แผนงาน (อ่านก่อนเริ่มงาน)
 docs/ARCHITECTURE.md  สัญญา API, กติกา auth/ข้อสอบ, endpoint ทั้งหมด
 docs/DESIGN_NOTES.md  ค่าจาก Figma (สี ขนาด ฟอนต์ layout) + ข้อแตกต่างที่ตั้งใจ — อ่านก่อนทำหน้าใหม่
-docs/TEAMMATE_GUIDE.md คู่มือสำหรับเพื่อนในทีมที่รับทำหน้า Games / 3D / Tests
+docs/TEAMMATE_GUIDE.md คู่มือสำหรับเพื่อนในทีมที่รับทำหน้า Games / 3D
 shared/contract.ts    type + zod schema ที่ frontend และ API ใช้ร่วมกัน
 migrations/           schema ของ D1
 worker/               API (Cloudflare Worker + Hono)
@@ -57,7 +57,7 @@ src/                  React app
   pages/admin/        หน้าอาจารย์ทั้งหมด
   pages/games/        🧩 เพื่อนในทีม (placeholder)
   pages/explore/      🧩 เพื่อนในทีม (placeholder)
-  pages/tests/        🧩 เพื่อนในทีม (placeholder — API พร้อมแล้ว)
+  pages/tests/        ✅ Tests: รายการ / ทำข้อสอบ / ผลสอบ
 ```
 
 ## 👥 แบ่งงาน
@@ -67,7 +67,7 @@ src/                  React app
 | Login / Join QR / Onboarding, ฐานข้อมูล, API ทั้งหมด (รวม API ทำข้อสอบ + ตรวจคะแนน), Home, Admin ทุกหน้า | nitiphum01 | ✅ รอบแรกเสร็จ |
 | Games (Balloon Pop, Group Sort, Diameter, Result) | เพื่อนในทีม | 🧩 placeholder |
 | 3D Explore + Sarcomere | เพื่อนในทีม | 🧩 placeholder |
-| หน้าทำข้อสอบ / ผลสอบ (UI) | เพื่อนในทีม | 🧩 placeholder |
+| หน้า Tests: รายการ / ทำข้อสอบ / ผลสอบ | nitiphum01 | ✅ เสร็จ (7 ต.ค. 2026) |
 
 ## ☁️ Deploy ขึ้น Cloudflare (เมื่อพร้อม)
 
