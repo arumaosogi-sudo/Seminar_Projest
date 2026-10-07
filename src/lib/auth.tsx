@@ -35,6 +35,18 @@ export function useLogout() {
   });
 }
 
+/** A signed-in student joins a section with its code. Refreshes the session and everything that depends on the class. */
+export function useJoinClass() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (joinCode: string) => api.post<Me>("/me/join", { joinCode }),
+    onSuccess: (next) => {
+      qc.setQueryData(meKey, next);
+      void qc.invalidateQueries({ predicate: (q) => q.queryKey[0] !== meKey[0] && q.queryKey[0] !== "config" });
+    },
+  });
+}
+
 const JOIN_KEY = "dm_join_code";
 
 /** Join code from a section QR (/join/:code) is kept until login succeeds. */

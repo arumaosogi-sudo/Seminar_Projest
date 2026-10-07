@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { joinCodeStore, useLogout, useMe } from "@/lib/auth";
+import { joinCodeStore, useJoinClass, useLogout, useMe } from "@/lib/auth";
 import { Button, ErrorNote, Spinner } from "@/components/ui";
 import { AuthShell, CardChip } from "@/components/student/AuthShell";
 import { useDocumentTitle } from "@/components/student/useDocumentTitle";
 import { ApiRequestError } from "@/lib/api";
+import { describeAuthError, joinNoticeStore } from "@/components/student/authHelpers";
 import { classLabel, normalizeJoinCode, useClassByCode } from "@/components/student/useClassByCode";
 
 /** How long "Joining Section 1 · 2569/1…" stays visible before moving on to /login. */
@@ -21,6 +22,9 @@ export default function Join() {
   useDocumentTitle("Join your class");
 
   const signedIn = !!me.data;
+  const isStudent = me.data?.role === "student";
+  const join = useJoinClass();
+  const joinStarted = useRef(false);
 
   // Remember the code for the login call (kept in sessionStorage until login succeeds).
   useEffect(() => {
@@ -33,6 +37,21 @@ export default function Join() {
     const t = window.setTimeout(() => navigate("/login", { replace: true }), HANDOFF_DELAY_MS);
     return () => window.clearTimeout(t);
   }, [cls.data, me.isPending, signedIn, navigate]);
+
+  // Already signed in as a student → join right away (no need to sign out and in again).
+  useEffect(() => {
+    if (!cls.data || !isStudent || joinStarted.current) return;
+    joinStarted.current = true;
+    const label = classLabel(cls.data);
+    join.mutate(code, {
+      onSuccess: (next) => {
+        joinCodeStore.clear();
+        if (next.role !== "student") return;
+        joinNoticeStore.set(next.joinNotice ?? `You joined ${label}.`);
+        navigate(next.student.needsOnboarding ? "/onboarding" : "/", { replace: true });
+      },
+    });
+  }, [cls.data, isStudent, code, join, navigate]);
 
   const invalid = !code || cls.notFound;
 
@@ -69,6 +88,33 @@ export default function Join() {
           <p className="mt-4 text-[15px] font-medium">Checking your class code…</p>
           <p className="mt-1 font-mono text-xs text-muted">{code}</p>
         </div>
+      ) : isStudent ? (
+        join.isError ? (
+          <>
+            <CardChip>{classLabel(cls.data)} · via QR</CardChip>
+            <h2 className="mt-5 text-2xl font-bold tracking-tight">Couldn't join this class</h2>
+            <div className="mt-4">
+              <ErrorNote>{describeAuthError(join.error)}</ErrorNote>
+            </div>
+            <div className="mt-6 space-y-2">
+              <Button block size="lg" loading={join.isPending} onClick={() => join.mutate(code)}>
+                Try again
+              </Button>
+              <Link
+                to="/"
+                replace
+                className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-line px-4 text-sm font-semibold hover:bg-zinc-50"
+              >
+                Go Home
+              </Link>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center py-6 text-center" role="status" aria-live="polite">
+            <Spinner className="size-7 text-success" />
+            <p className="mt-4 text-[15px] font-semibold">Joining {classLabel(cls.data)}…</p>
+          </div>
+        )
       ) : signedIn ? (
         <>
           <CardChip>{classLabel(cls.data)} · via QR</CardChip>

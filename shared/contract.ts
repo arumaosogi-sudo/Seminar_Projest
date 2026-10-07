@@ -97,6 +97,11 @@ export const updateMeBody = z.object({
   firstName: z.string().trim().min(1).max(60),
 });
 
+/** POST /api/me/join — a signed-in student joins a section with its code (QR scanned after signing in). */
+export const joinClassBody = z.object({
+  joinCode: z.string().trim().toUpperCase().min(1).max(20),
+});
+
 /* ───────────── student: home status & tests ───────────── */
 
 /** GET /api/me/status — drives the Home page (menus locked until required tests are submitted) */
@@ -240,6 +245,19 @@ export interface AdminStudentRow {
 
 export const setEnrollmentStatusBody = z.object({ status: z.enum(["active", "withdrawn"]) });
 export const moveEnrollmentBody = z.object({ classId: z.number().int().positive() });
+
+/** GET /api/admin/students/unassigned — signed in with Google but not enrolled in any class (no QR scanned). */
+export interface UnassignedStudent {
+  studentId: number;
+  studentCode: string;
+  firstName: string | null;
+  email: string;
+  createdAt: string;
+  lastLoginAt: string | null;
+}
+
+/** POST /api/admin/students/:id/enroll — the instructor adds a signed-in student to a section. */
+export const enrollStudentBody = z.object({ classId: z.number().int().positive() });
 
 /* ───────────── admin: tests & builder ───────────── */
 

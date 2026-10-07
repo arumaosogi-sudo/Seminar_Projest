@@ -8,6 +8,7 @@ export const adminKeys = {
   classesRoot: ["admin", "classes"] as const,
   students: (classId: number, status: string) => ["admin", "students", classId, status] as const,
   studentsRoot: ["admin", "students"] as const,
+  unassigned: ["admin", "students", "unassigned"] as const,
   tests: ["admin", "tests"] as const,
   test: (id: number) => ["admin", "test", id] as const,
   assignments: (testId: number) => ["admin", "assignments", testId] as const,

@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Link } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { AdminClass, AdminStudentRow } from "@shared/contract";
+import type { AdminClass, AdminStudentRow, UnassignedStudent } from "@shared/contract";
 import { api } from "@/lib/api";
 import { Button, Card, cx, EmptyState, ErrorNote, PageHeader, PageLoader, Spinner } from "@/components/ui";
 import { useAdminClass } from "@/components/admin/adminClass";
@@ -157,6 +157,8 @@ function StudentsForClass({ cls, classes }: { cls: AdminClass; classes: AdminCla
           </>
         }
       />
+
+      <UnassignedStudents cls={cls} onEnrolled={invalidate} />
 
       <div className="grid items-start gap-[25px] xl:grid-cols-[minmax(0,1fr)_339px]">
         <Card className="min-w-0 px-[19px] pb-[15px] pt-[17px]">
@@ -433,6 +435,81 @@ function joinedLabel(iso: string | null) {
   if (Number.isNaN(d.getTime())) return "—";
   const p = (n: number) => String(n).padStart(2, "0");
   return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}, ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/* ───────────────────────── Signed in, but in no class ───────────────────────── */
+
+/**
+ * Students who signed in without scanning a section QR are in no class yet, so they're missing from the table.
+ * List them here so the instructor can see who arrived and add them to this section in one click.
+ */
+function UnassignedStudents({ cls, onEnrolled }: { cls: AdminClass; onEnrolled: () => void }) {
+  const toast = useToast();
+  const q = useQuery({
+    queryKey: adminKeys.unassigned,
+    queryFn: () => api.get<UnassignedStudent[]>("/admin/students/unassigned"),
+    refetchInterval: LIVE_REFRESH_MS,
+  });
+  const enroll = useMutation({
+    mutationFn: (s: UnassignedStudent) => api.post<unknown>(`/admin/students/${s.studentId}/enroll`, { classId: cls.id }),
+    onSuccess: (_d, s) => {
+      toast.show(`${s.firstName ?? s.studentCode} (${s.studentCode}) added to ${cls.name}`, "success");
+      onEnrolled();
+    },
+    onError: (e) => toast.show(errorMessage(e), "error"),
+  });
+
+  const list = q.data ?? [];
+  if (list.length === 0 || cls.status !== "active") return null;
+
+  return (
+    <section className="mb-[25px] rounded-[20px] border border-amber-200 bg-amber-50 px-[21px] pb-4 pt-5" aria-labelledby="unassigned-title">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 id="unassigned-title" className="text-[15px] font-semibold text-amber-900">
+          Signed in but not in a class ({list.length})
+        </h2>
+        <p className="text-[12px] text-amber-900/80">They opened the site without scanning a section QR code. Add them to {cls.name}, or ask them to scan the QR.</p>
+      </div>
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full min-w-[560px] text-[14px]">
+          <caption className="sr-only">Students who signed in but aren’t in any class</caption>
+          <thead>
+            <tr className="text-left text-[12px] uppercase text-amber-900/70">
+              <th scope="col" className="pb-2 font-semibold">Student ID</th>
+              <th scope="col" className="pb-2 font-semibold">First name</th>
+              <th scope="col" className="pb-2 font-semibold">E-mail</th>
+              <th scope="col" className="pb-2 font-semibold">Last sign-in</th>
+              <th scope="col" className="pb-2">
+                <span className="sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {list.map((s) => (
+              <tr key={s.studentId} className="h-11 border-t border-amber-200/70 text-ink">
+                <td className="tabular-nums">{s.studentCode}</td>
+                <td className="truncate pr-3">{s.firstName ?? <span className="text-faint">— (not entered yet)</span>}</td>
+                <td className="truncate pr-3 text-muted">{s.email}</td>
+                <td className="tabular-nums text-muted" title={formatDateTime(s.lastLoginAt ?? s.createdAt)}>
+                  {joinedLabel(s.lastLoginAt ?? s.createdAt)}
+                </td>
+                <td className="text-right">
+                  <Button
+                    size="sm"
+                    loading={enroll.isPending && enroll.variables?.studentId === s.studentId}
+                    disabled={enroll.isPending}
+                    onClick={() => enroll.mutate(s)}
+                  >
+                    Add to this section
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
 }
 
 /* ───────────────────────── Actions panel (Figma "Actions · NAME (ID)") ───────────────────────── */

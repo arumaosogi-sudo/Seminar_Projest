@@ -1,5 +1,11 @@
 import { Hono } from "hono";
-import { moveEnrollmentBody, setEnrollmentStatusBody, type AdminStudentRow } from "../../../shared/contract";
+import {
+  enrollStudentBody,
+  moveEnrollmentBody,
+  setEnrollmentStatusBody,
+  type AdminStudentRow,
+  type UnassignedStudent,
+} from "../../../shared/contract";
 import { auditStmt, nowIso, queryAll, queryFirst, stmt, type SqlValue } from "../../db";
 import { sessionKey, type AppEnv } from "../../env";
 import { anonymizedIdentityHashes } from "../../identityHash";
@@ -105,6 +111,69 @@ studentAdminRoutes.get("/students", async (c) => {
   }
 
   return c.json(rows);
+});
+
+/**
+ * Students who signed in but are in no class at all (opened the site without scanning a section QR).
+ * Students with only withdrawn enrollments are not listed — they can't sign in until reactivated.
+ */
+studentAdminRoutes.get("/students/unassigned", async (c) => {
+  const rows = await queryAll<{
+    id: number;
+    student_code: string;
+    first_name: string | null;
+    email: string;
+    created_at: string;
+    last_login_at: string | null;
+  }>(
+    c.env.DB,
+    `SELECT s.id, s.student_code, s.first_name, s.email, s.created_at, s.last_login_at
+       FROM students s
+      WHERE s.anonymized_at IS NULL AND s.student_code IS NOT NULL AND s.email IS NOT NULL
+        AND NOT EXISTS (SELECT 1 FROM enrollments e WHERE e.student_id = s.id)
+      ORDER BY COALESCE(s.last_login_at, s.created_at) DESC
+      LIMIT 500`,
+  );
+  return c.json(
+    rows.map<UnassignedStudent>((r) => ({
+      studentId: r.id,
+      studentCode: r.student_code,
+      firstName: r.first_name,
+      email: r.email,
+      createdAt: r.created_at,
+      lastLoginAt: r.last_login_at,
+    })),
+  );
+});
+
+/** The instructor adds a signed-in student to a section (same rules as joining with the QR code, minus the roster check). */
+studentAdminRoutes.post("/students/:id/enroll", async (c) => {
+  const id = idParam(c);
+  const body = await readBody(c, enrollStudentBody);
+  const db = c.env.DB;
+  const student = await queryFirst<{ id: number; anonymized_at: string | null }>(db, "SELECT id, anonymized_at FROM students WHERE id = ?", id);
+  if (!student) throw notFound("Student not found.");
+  if (student.anonymized_at) throw conflict("This student has been anonymized.");
+  const cls = await loadClassBasics(db, body.classId);
+  assertWritable(cls);
+  const existing = await queryFirst(db, "SELECT 1 AS one FROM enrollments WHERE student_id = ? AND class_id = ?", id, cls.id);
+  if (existing) throw conflict(`The student is already enrolled in ${cls.name}.`);
+  const other = await queryFirst<{ name: string }>(
+    db,
+    `SELECT c.name FROM enrollments e JOIN classes c ON c.id = e.class_id
+      WHERE e.student_id = ? AND e.status = 'active' AND c.academic_year = ? AND c.semester = ?`,
+    id,
+    cls.academic_year,
+    cls.semester,
+  );
+  if (other) throw conflict(`The student is already in ${other.name} this semester. Use “Move to section” there instead.`);
+  await db.batch([
+    stmt(db, "INSERT INTO enrollments (student_id, class_id, status, joined_at) VALUES (?, ?, 'active', ?)", id, cls.id, nowIso()),
+    auditStmt(db, c.get("admin").email, "student.enroll", "student", id, { classId: cls.id }),
+  ]);
+  const enr = await queryFirst<{ id: number }>(db, "SELECT id FROM enrollments WHERE student_id = ? AND class_id = ?", id, cls.id);
+  if (!enr) throw new Error("Failed to enroll the student");
+  return c.json(await loadStudentRow(db, enr.id));
 });
 
 interface EnrollmentCore {

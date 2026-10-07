@@ -3,6 +3,7 @@ import {
   adminPasswordLoginBody,
   devLoginBody,
   googleLoginBody,
+  joinClassBody,
   updateMeBody,
   type AppConfig,
   type Me,
@@ -285,6 +286,17 @@ publicRoutes.get("/me", async (c) => {
   }
   if (load.kind === "withdrawn") throw forbidden(WITHDRAWN_MESSAGE, "withdrawn");
   return c.json<Me>(toStudentMe(load.student));
+});
+
+/** A signed-in student joins a section (scanned the QR after signing in, or typed the code on Home). */
+publicRoutes.post("/me/join", requireStudent, async (c) => {
+  const body = await readBody(c, joinClassBody);
+  const s = c.get("student");
+  const db = c.env.DB;
+  const joinNotice = await applyJoinCode(db, s.id, s.studentCode, body.joinCode);
+  const load = await loadStudent(db, s.id);
+  if (load.kind !== "ok") throw unauthenticated("This account can no longer sign in.");
+  return c.json<Me>(toStudentMe(load.student, joinNotice));
 });
 
 publicRoutes.patch("/me", requireStudent, async (c) => {

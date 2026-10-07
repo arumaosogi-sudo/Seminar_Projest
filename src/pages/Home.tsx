@@ -1,9 +1,10 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Link } from "react-router";
 import type { StudentStatus } from "@shared/contract";
 import { cx } from "@/components/ui";
 import { useStudentMe } from "@/components/student/RequireStudent";
-import { joinNoticeStore } from "@/components/student/authHelpers";
+import { describeAuthError, joinNoticeStore } from "@/components/student/authHelpers";
+import { useJoinClass } from "@/lib/auth";
 import { useStudentStatus } from "@/components/student/queries";
 import { useDocumentTitle } from "@/components/student/useDocumentTitle";
 import { InfoIcon } from "@/components/student/icons";
@@ -44,7 +45,8 @@ export default function Home() {
       <div className="mt-6 space-y-3 empty:hidden">
         {!enrolled && (
           <Notice tone="warning" title="You're not in a class yet — scan your section's QR code.">
-            Ask your instructor for the QR code of your section. After scanning it, sign in again to join.
+            Scan the QR code your instructor shows, or type the join code below.
+            <JoinCodeForm onJoined={setNotice} />
           </Notice>
         )}
         {notice && (
@@ -101,6 +103,50 @@ export default function Home() {
         />
       </ul>
     </div>
+  );
+}
+
+/** Join code (e.g. MUS-4K7P) for students who signed in without scanning the section QR. */
+function JoinCodeForm({ onJoined }: { onJoined: (notice: string | undefined) => void }) {
+  const join = useJoinClass();
+  const [code, setCode] = useState("");
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    const value = code.trim().toUpperCase();
+    if (!value) return;
+    join.mutate(value, {
+      onSuccess: (next) => {
+        if (next.role !== "student") return;
+        onJoined(next.joinNotice ?? (next.enrollment ? `You joined ${sectionLabel(next.enrollment.className)}.` : undefined));
+        setCode("");
+      },
+    });
+  };
+  return (
+    <form onSubmit={onSubmit} className="mt-2.5 flex flex-wrap items-center gap-2">
+      <label htmlFor="join-code" className="sr-only">
+        Join code
+      </label>
+      <input
+        id="join-code"
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        placeholder="MUS-XXXX"
+        autoComplete="off"
+        autoCapitalize="characters"
+        spellCheck={false}
+        maxLength={20}
+        className="h-10 w-40 rounded-xl border border-amber-300 bg-white px-3 font-mono text-sm uppercase text-ink outline-none focus:border-amber-600"
+      />
+      <button
+        type="submit"
+        disabled={join.isPending || !code.trim()}
+        className="h-10 rounded-xl bg-ink px-4 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-50"
+      >
+        {join.isPending ? "Joining…" : "Join class"}
+      </button>
+      {join.isError && <p className="w-full text-[13px] font-medium text-red-700">{describeAuthError(join.error)}</p>}
+    </form>
   );
 }
 
