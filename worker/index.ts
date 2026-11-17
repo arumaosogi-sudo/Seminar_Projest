@@ -9,6 +9,7 @@ import { HttpError } from "./http";
 import { pruneOldData } from "./maintenance";
 import { adminRoutes } from "./routes/admin";
 import { attemptRoutes } from "./routes/attempts";
+import { gameRoutes } from "./routes/games";
 import { imageRoutes } from "./routes/images";
 import { publicRoutes } from "./routes/public";
 import { studentRoutes } from "./routes/student";
@@ -61,6 +62,7 @@ app.use("*", async (c, next) => {
 app.route("/", publicRoutes);
 app.route("/", studentRoutes);
 app.route("/", attemptRoutes);
+app.route("/", gameRoutes);
 app.route("/", imageRoutes);
 app.route("/admin", adminRoutes);
 

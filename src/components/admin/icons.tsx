@@ -36,6 +36,12 @@ export const IconResults = (p: IconProps) => (
     <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
   </svg>
 );
+export const IconGames = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="2.5" y="7" width="19" height="11" rx="5" />
+    <path d="M7.5 10.5v4M5.5 12.5h4M15 11.5h.01M18 13.5h.01" />
+  </svg>
+);
 export const IconStudents = (p: IconProps) => (
   <svg {...base(p)}>
     <circle cx="9" cy="8" r="3.5" />

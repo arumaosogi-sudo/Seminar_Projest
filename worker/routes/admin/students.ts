@@ -287,7 +287,7 @@ studentAdminRoutes.post("/students/:id/anonymize", async (c) => {
   return c.json({ ok: true as const });
 });
 
-/** Hard delete: student, enrollments, attempts and roster entries with the same code. */
+/** Hard delete: student, enrollments, attempts, game runs and roster entries with the same code. */
 studentAdminRoutes.delete("/students/:id", async (c) => {
   const id = idParam(c);
   const db = c.env.DB;
@@ -295,6 +295,7 @@ studentAdminRoutes.delete("/students/:id", async (c) => {
   const s = await queryFirst<{ student_code: string | null }>(db, "SELECT student_code FROM students WHERE id = ?", id);
   if (!s) throw notFound("Student not found.");
   const statements: D1PreparedStatement[] = [
+    stmt(db, "DELETE FROM game_runs WHERE student_id = ?", id),
     stmt(db, "DELETE FROM attempts WHERE enrollment_id IN (SELECT id FROM enrollments WHERE student_id = ?)", id),
     stmt(db, "DELETE FROM enrollment_progress WHERE enrollment_id IN (SELECT id FROM enrollments WHERE student_id = ?)", id),
     stmt(db, "DELETE FROM enrollments WHERE student_id = ?", id),

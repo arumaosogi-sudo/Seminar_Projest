@@ -14,6 +14,7 @@ export const adminKeys = {
   assignments: (testId: number) => ["admin", "assignments", testId] as const,
   results: (classId: number | null, testIds: number[], status: "active" | "all") => ["admin", "results", classId ?? "all", testIds.join(","), status] as const,
   resultsRoot: ["admin", "results"] as const,
+  gameResults: (classId: number | null, status: "active" | "all") => ["admin", "game-results", classId ?? "all", status] as const,
   admins: ["admin", "admins"] as const,
   audit: ["admin", "audit"] as const,
   usage: ["admin", "usage"] as const,

@@ -8,7 +8,7 @@ import { Button, Card, cx, Logo, PageLoader } from "@/components/ui";
 import { ADMIN_CLASS_KEY, AdminClassContext, resolveCurrentClass, type AdminClassState } from "./adminClass";
 import { QueryError } from "./controls";
 import { safeStorage } from "./format";
-import { IconClasses, IconClose, IconLogout, IconMenu, IconResults, IconSettings, IconStudents, IconTests } from "./icons";
+import { IconClasses, IconClose, IconGames, IconLogout, IconMenu, IconResults, IconSettings, IconStudents, IconTests } from "./icons";
 import { adminKeys } from "./keys";
 import { loginMethodStore } from "./session";
 import { ToastProvider } from "./Toast";
@@ -17,6 +17,7 @@ const NAV: { to: string; label: string; Icon: ComponentType<{ size?: number }> }
   { to: "/admin/classes", label: "Classes", Icon: IconClasses },
   { to: "/admin/tests", label: "Tests", Icon: IconTests },
   { to: "/admin/results", label: "Results", Icon: IconResults },
+  { to: "/admin/games", label: "Game scores", Icon: IconGames },
   { to: "/admin/students", label: "Students", Icon: IconStudents },
   { to: "/admin/settings", label: "Settings", Icon: IconSettings },
 ];

@@ -176,9 +176,10 @@ classRoutes.delete("/classes/:id", async (c) => {
                  OR a.assignment_id IN (SELECT id FROM test_assignments WHERE class_id = ?1)) AS attempts`,
     id,
   );
-  // One transaction (db.batch). Order matters: attempts → students who are only in this class (while their
+  // One transaction (db.batch). Order matters: game runs → attempts → students who are only in this class (while their
   // enrollment still identifies them) → remaining enrollments → assignments → roster → the class itself.
   await db.batch([
+    stmt(db, "DELETE FROM game_runs WHERE class_id = ?1 OR enrollment_id IN (SELECT id FROM enrollments WHERE class_id = ?1)", id),
     stmt(
       db,
       `DELETE FROM attempts WHERE enrollment_id IN (SELECT id FROM enrollments WHERE class_id = ?1)

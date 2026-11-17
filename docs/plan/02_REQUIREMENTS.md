@@ -48,7 +48,7 @@
 | GAME-4 | GAME-2 และ GAME-3 ใช้ **engine ลากวางตัวเดียว** ที่อ่านโจทย์จาก JSON | – | Must |
 | GAME-5 | รองรับจอสัมผัส (มือถือ/แท็บเล็ต) และเมาส์ | – | Must |
 | GAME-6 | แสดงเฉลย/คำอธิบายหลังจบเกม | – | Must |
-| GAME-7 | บันทึกคะแนนเกมลง DB | – | Future |
+| GAME-7 | บันทึกคะแนนเกมลง DB (ตาราง `game_runs`, แยกจากคะแนน Pretest/Posttest) · อาจารย์ดูที่ Admin → Game scores | – | Done |
 
 ---
 

@@ -1,0 +1,1637 @@
+/* Fonts (Nunito Sans, Playfair Display, Inter, Cinzel Decorative, Bungee) are loaded by the host page,
+   not here: the main site's CSP blocks Google Fonts. Standalone hosts import src/fonts.css. */
+
+/*
+ * Theme = the Digital Muscle site's "Coastal Soft" Games colours (sea green, hue 165).
+ * Dark values follow the device setting, or the site's <html data-theme="light|dark"> choice.
+ * --art-* stay light in dark mode so the drawn tissue pictures keep their contrast.
+ */
+.mg-root {
+  --sea-50: hsl(165 40% 96%);
+  --sea-100: hsl(165 34% 92%);
+  --sea-200: hsl(165 42% 84%);
+  --sea-300: hsl(165 38% 70%);
+  --sea-400: hsl(165 40% 52%);
+  --sea-500: hsl(165 52% 38%);
+  --sea-600: hsl(165 52% 32%);
+  --sea-700: hsl(165 55% 26%);
+  --sea-800: hsl(165 50% 20%);
+  --sea-900: hsl(165 40% 15%);
+  --on-accent: #ffffff;
+  --bg: hsl(205 32% 94%);
+  --surface: #ffffff;
+  --text: #18181b;
+  --muted: #71717a;
+  --border: #e4e4e7;
+  --chip: #f0f0f2;
+  --card-bg: hsl(165 34% 92%);
+  --card-panel: hsl(165 42% 84%);
+  --card-text: hsl(165 40% 15%);
+  --card-muted: hsl(165 25% 34%);
+  --card-chip: rgb(255 255 255 / 0.65);
+  --card-edge: hsl(165 42% 40% / 0.35);
+  --card-hair: hsl(165 42% 30% / 0.22);
+  --art-bg: #ffffff;
+  --art-tint: hsl(165 40% 96%);
+  --ok: #15803d;
+  --ok-bg: #dcfce7;
+  --ok-line: #86efac;
+  --bad: #b91c1c;
+  --bad-bg: #fee2e2;
+  --gold-bg: #fef3c7;
+  --gold-ink: #92400e;
+  --map-top: hsl(195 55% 90%);
+  --map-bottom: hsl(38 55% 92%);
+  --map-a: hsl(12 70% 88%);
+  --map-b: hsl(165 42% 84%);
+  --map-c: hsl(205 60% 86%);
+  --lens-rim: hsl(165 40% 15%);
+  --overlay: rgb(12 24 22 / 0.5);
+  --shadow: 0 10px 22px hsl(165 35% 30% / 0.12);
+  --shadow-lg: 0 20px 50px hsl(165 35% 15% / 0.3);
+  --radius: 18px;
+  --tap: 44px;
+  /* Same stacks as the main site's student pages (.coast-sans / .coast-serif in its index.css). */
+  --font: 'Nunito Sans Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Playfair Display Variable', Georgia, serif;
+  font-family: var(--font);
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mg-root {
+    --sea-50: hsl(165 21% 14%);
+    --sea-100: hsl(165 21% 17%);
+    --sea-200: hsl(165 23% 25%);
+    --sea-300: hsl(165 30% 36%);
+    --sea-400: hsl(165 40% 52%);
+    --sea-500: hsl(165 52% 62%);
+    --sea-600: hsl(165 57% 72%);
+    --sea-700: hsl(165 57% 78%);
+    --sea-800: hsl(165 50% 85%);
+    --sea-900: hsl(165 30% 93%);
+    --on-accent: hsl(165 45% 12%);
+    --bg: hsl(205 30% 9%);
+    --surface: #1a1d23;
+    --text: #f1f2f4;
+    --muted: #a1a7b1;
+    --border: #2c313a;
+    --chip: #262a31;
+    --card-bg: hsl(165 21% 17%);
+    --card-panel: hsl(165 23% 25%);
+    --card-text: hsl(165 30% 93%);
+    --card-muted: hsl(165 20% 75%);
+    --card-chip: rgb(255 255 255 / 0.1);
+    --card-edge: hsl(165 52% 70% / 0.4);
+    --card-hair: hsl(165 42% 80% / 0.18);
+    --art-bg: hsl(165 18% 90%);
+    --art-tint: hsl(165 22% 84%);
+    --ok: #4ade80;
+    --ok-bg: #12301d;
+    --ok-line: #166534;
+    --bad: #f87171;
+    --bad-bg: #3b1515;
+    --gold-bg: #3a2a0b;
+    --gold-ink: #fcd34d;
+    --map-top: hsl(200 30% 16%);
+    --map-bottom: hsl(38 25% 15%);
+    --map-a: hsl(12 30% 24%);
+    --map-b: hsl(165 23% 25%);
+    --map-c: hsl(205 30% 24%);
+    --lens-rim: hsl(165 25% 32%);
+    --overlay: rgb(0 0 0 / 0.6);
+    --shadow: 0 12px 26px rgb(0 0 0 / 0.38);
+    --shadow-lg: 0 20px 50px rgb(0 0 0 / 0.55);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] .mg-root {
+  --sea-50: hsl(165 21% 14%);
+  --sea-100: hsl(165 21% 17%);
+  --sea-200: hsl(165 23% 25%);
+  --sea-300: hsl(165 30% 36%);
+  --sea-400: hsl(165 40% 52%);
+  --sea-500: hsl(165 52% 62%);
+  --sea-600: hsl(165 57% 72%);
+  --sea-700: hsl(165 57% 78%);
+  --sea-800: hsl(165 50% 85%);
+  --sea-900: hsl(165 30% 93%);
+  --on-accent: hsl(165 45% 12%);
+  --bg: hsl(205 30% 9%);
+  --surface: #1a1d23;
+  --text: #f1f2f4;
+  --muted: #a1a7b1;
+  --border: #2c313a;
+  --chip: #262a31;
+  --card-bg: hsl(165 21% 17%);
+  --card-panel: hsl(165 23% 25%);
+  --card-text: hsl(165 30% 93%);
+  --card-muted: hsl(165 20% 75%);
+  --card-chip: rgb(255 255 255 / 0.1);
+  --card-edge: hsl(165 52% 70% / 0.4);
+  --card-hair: hsl(165 42% 80% / 0.18);
+  --art-bg: hsl(165 18% 90%);
+  --art-tint: hsl(165 22% 84%);
+  --ok: #4ade80;
+  --ok-bg: #12301d;
+  --ok-line: #166534;
+  --bad: #f87171;
+  --bad-bg: #3b1515;
+  --gold-bg: #3a2a0b;
+  --gold-ink: #fcd34d;
+  --map-top: hsl(200 30% 16%);
+  --map-bottom: hsl(38 25% 15%);
+  --map-a: hsl(12 30% 24%);
+  --map-b: hsl(165 23% 25%);
+  --map-c: hsl(205 30% 24%);
+  --lens-rim: hsl(165 25% 32%);
+  --overlay: rgb(0 0 0 / 0.6);
+  --shadow: 0 12px 26px rgb(0 0 0 / 0.38);
+  --shadow-lg: 0 20px 50px rgb(0 0 0 / 0.55);
+  color-scheme: dark;
+}
+
+/* Everything is scoped under .mg-root so the games never leak into, or inherit from, the host site. */
+.mg-root, .mg-root *, .mg-root *::before, .mg-root *::after { box-sizing: border-box; }
+.mg-root {
+  min-height: 100%; min-width: 0; line-height: 1.5; font-size: 16px; text-align: left;
+  background: var(--bg);
+}
+.mg-root :where(h1, h2, h3, p, figure) { margin: 0; font-family: inherit; color: inherit; letter-spacing: normal; text-transform: none; }
+.mg-root :where(h1, h2, h3) { line-height: 1.2; font-weight: 700; font-family: var(--font-serif); }
+.mg-root :where(button) { font: inherit; color: inherit; margin: 0; text-transform: none; letter-spacing: normal; line-height: inherit; -webkit-appearance: none; appearance: none; }
+.mg-root :where(ul, ol) { list-style: none; margin: 0; padding: 0; }
+.mg-root :where(a) { text-decoration: none; }
+.mg-root svg { display: block; max-width: 100%; height: auto; }
+.mg-root details > summary { list-style: none; }
+
+.mg-page { max-width: 1160px; margin: 0 auto; padding: 24px 16px 56px; }
+.mg-muted { color: var(--muted); }
+
+/* ---------- Buttons, tags, chips ---------- */
+.mg-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: var(--tap); min-width: var(--tap); padding: 0 18px;
+  border-radius: 10px; border: 1px solid transparent;
+  font-weight: 700; text-decoration: none; cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+.mg-btn:active { transform: scale(0.97); }
+.mg-btn:focus-visible, .mg-bin:focus-visible, .mg-piece:focus-visible, .mg-row:focus-visible, .mg-board:focus-visible,
+.mg-mcard:focus-visible, .mg-mode:focus-visible {
+  outline: 3px solid var(--sea-500); outline-offset: 2px;
+}
+.mg-btn--primary { background: var(--sea-600); color: var(--on-accent); box-shadow: var(--shadow); }
+.mg-btn--primary:hover { filter: brightness(1.06); }
+.mg-btn--primary:active { transform: translateY(1px); }
+.mg-btn--secondary { background: var(--card-chip); color: var(--sea-700); border-color: var(--card-edge); }
+.mg-btn--secondary:hover { background: var(--sea-200); }
+.mg-btn--ghost { background: transparent; color: var(--sea-700); padding: 0 12px; }
+.mg-btn--ghost:hover { background: var(--sea-100); }
+.mg-btn--icon { padding: 0; font-size: 18px; }
+.mg-btn--block { width: 100%; min-height: 50px; font-size: 17px; }
+.mg-btn--pulse { animation: mg-pulse 1.8s ease-in-out infinite; }
+@keyframes mg-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(165 52% 38% / 0.45); }
+  50% { box-shadow: 0 0 0 9px hsl(165 52% 38% / 0); transform: scale(1.015); }
+}
+
+.mg-lo-tag {
+  display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: 0.04em;
+  padding: 3px 10px; border-radius: 999px; background: var(--sea-600); color: var(--on-accent); cursor: help;
+}
+.mg-chip { font-size: 12.5px; font-weight: 700; padding: 4px 11px; border-radius: 999px; background: var(--card-chip); color: var(--card-text); }
+.mg-legend { margin-top: 10px; font-size: 13px; color: var(--muted); text-align: center; }
+
+/* ---------- Armin (muscle-buddy mascot) ---------- */
+/* Arms turn at the shoulders and legs at the hips (origins set inline in Fx.jsx), so limbs stay on the skeleton. */
+.mg-armin { overflow: visible; }
+.mg-armin__body, .mg-armin__head, .mg-armin__arm, .mg-armin__leg { transform-box: view-box; transition: transform 0.35s ease; }
+.mg-armin__body { transform-origin: 60px 140px; }
+.mg-armin__head { transform-origin: 60px 80px; }
+.mg-armin__arm--l { transform: rotate(8deg); }
+.mg-armin__arm--r { transform: rotate(-8deg); }
+/* Every mood stands still in the same pose, arms down; only the face (eyes, mouth, brows) changes with the mood. */
+/* Moves played once, then he stands still again (Fx.say's act): */
+/* point: at the start of a game he leans toward his speech bubble, points and beckons twice, eyes on the bubble */
+.mg-armin--act-point .mg-armin__body { animation: mg-am-lean 2.4s ease-in-out; }
+.mg-armin--act-point .mg-armin__head { animation: mg-am-tilt 2.4s ease-in-out; }
+.mg-armin--act-point .mg-armin__arm--r { animation: mg-am-point 2.4s ease-in-out; }
+.mg-armin--act-point .mg-armin__pupil { animation: mg-am-look 2.4s ease-in-out; }
+.mg-mascot-bar__bubble--nudge { animation: mg-bubble 0.3s ease-out, mg-bubble-nudge 0.5s ease-in-out 0.4s 2; }
+/* jump: a full score - a crouch, a jump with both arms up and the legs kicking out, then he lands */
+.mg-armin--act-jump .mg-armin__body { animation: mg-am-jump 1.6s ease-in-out; }
+.mg-armin--act-jump .mg-armin__arm--l { animation: mg-am-jump-l 1.6s ease-in-out; }
+.mg-armin--act-jump .mg-armin__arm--r { animation: mg-am-jump-r 1.6s ease-in-out; }
+.mg-armin--act-jump .mg-armin__leg--l { animation: mg-am-kick-l 1.6s ease-in-out; }
+.mg-armin--act-jump .mg-armin__leg--r { animation: mg-am-kick-r 1.6s ease-in-out; }
+/* wave: on the games hub he waves hello every 4 s, standing still in between */
+.mg-hub-hero__mascot .mg-armin__arm--r { animation: mg-am-wave 4s ease-in-out 0.6s infinite; }
+.mg-hub-hero__mascot .mg-armin__head { animation: mg-am-wave-head 4s ease-in-out 0.6s infinite; }
+@keyframes mg-am-lean { 0%, 100% { transform: none; } 15%, 80% { transform: rotate(6deg); } }
+@keyframes mg-am-tilt { 0%, 100% { transform: none; } 15%, 80% { transform: rotate(-4deg); } }
+@keyframes mg-am-point { 0%, 100% { transform: rotate(-8deg); } 15% { transform: rotate(-95deg); } 30% { transform: rotate(-70deg); } 42% { transform: rotate(-95deg); } 54% { transform: rotate(-70deg); } 66%, 80% { transform: rotate(-95deg); } }
+@keyframes mg-am-look { 0%, 100% { transform: none; } 12%, 82% { transform: translateX(2.5px); } }
+@keyframes mg-bubble-nudge { 50% { transform: translateX(4px) scale(1.03); } }
+@keyframes mg-am-jump { 0%, 82%, 100% { transform: none; } 15% { transform: translateY(4px) scaleY(0.94); } 35%, 55% { transform: translateY(-16px); } 70% { transform: translateY(3px) scaleY(0.96); } }
+@keyframes mg-am-jump-l { 0%, 100% { transform: rotate(8deg); } 15% { transform: rotate(20deg); } 35%, 60% { transform: rotate(150deg); } 80% { transform: rotate(8deg); } }
+@keyframes mg-am-jump-r { 0%, 100% { transform: rotate(-8deg); } 15% { transform: rotate(-20deg); } 35%, 60% { transform: rotate(-150deg); } 80% { transform: rotate(-8deg); } }
+@keyframes mg-am-kick-l { 0%, 30%, 65%, 100% { transform: none; } 40%, 55% { transform: rotate(14deg); } }
+@keyframes mg-am-kick-r { 0%, 30%, 65%, 100% { transform: none; } 40%, 55% { transform: rotate(-14deg); } }
+@keyframes mg-am-wave { 0%, 55%, 100% { transform: rotate(-8deg); } 10% { transform: rotate(-150deg); } 17% { transform: rotate(-120deg); } 24% { transform: rotate(-155deg); } 31% { transform: rotate(-120deg); } 38% { transform: rotate(-155deg); } 46% { transform: rotate(-140deg); } }
+@keyframes mg-am-wave-head { 0%, 55%, 100% { transform: none; } 10%, 46% { transform: rotate(6deg); } }
+
+/* ---------- Hub ---------- */
+.mg-hub-hero { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.mg-hub-hero__mascot { width: 84px; flex: none; }
+.mg-eyebrow { color: var(--sea-600); font-weight: 700; font-size: 14px; letter-spacing: 0.04em; }
+.mg-hub-hero h1 { font-size: clamp(30px, 5vw, 40px); margin: 0 0 4px; line-height: 1.1; }
+.mg-lede { color: var(--muted); max-width: 62ch; font-size: 15px; line-height: 1.5; }
+@keyframes mg-float { 50% { transform: translateY(-6px); } }
+
+.mg-games-grid { display: grid; gap: 22px; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .mg-games-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .mg-games-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.mg-game-card {
+  display: flex; flex-direction: column; overflow: hidden; padding: 12px 12px 16px;
+  background: var(--card-bg); color: var(--card-text); border: 1px solid var(--card-edge); border-radius: 18px; box-shadow: var(--shadow);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+@media (hover: hover) { .mg-game-card:hover { transform: translateY(-2px); } }
+.mg-game-card__cover { position: relative; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 12px; background: var(--card-panel); }
+.mg-game-card__cover .mg-scene { width: 100%; height: 100%; }
+.mg-game-card__body { display: flex; flex-direction: column; gap: 8px; padding: 18px 8px 0; flex: 1; }
+.mg-game-card__tags { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+/* Compact chips so OL · time · points stay on one row even in the narrow two-column cards. */
+.mg-game-card__tags > * { white-space: nowrap; font-size: 12px; padding: 4px 9px; }
+.mg-game-card__titlerow { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
+/* Same as the main site's lesson card titles: 19/26 px on phones, 21/28 px from 768 px. */
+.mg-game-card__body h2 { font-size: 19px; line-height: 26px; }
+@media (min-width: 768px) { .mg-game-card__body h2 { font-size: 21px; line-height: 28px; } }
+/* "Game 1" sits on its own small line above the title, so long titles never wrap in two-column cards. */
+.mg-game-card__num { display: block; font-family: var(--font); font-size: 12px; line-height: 18px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--card-muted); }
+.mg-game-card__goal { color: var(--card-muted); line-height: 1.5; font-size: 14.5px; }
+/* The chips take the spare height, so they always sit right on the divider whatever the description length. */
+.mg-game-card__body .mg-game-card__tags { margin-top: auto; }
+.mg-game-card__best { font-size: 13px; color: var(--card-muted); font-weight: 700; padding: 12px 0 4px; border-top: 1px solid var(--card-hair); }
+
+/* Scene loops */
+.mg-scene * { transform-box: fill-box; }
+.mg-sc-bob { animation: mg-bob 3s ease-in-out infinite; transform-origin: center; }
+.mg-sc-drift { animation: mg-drift 9s ease-in-out infinite alternate; }
+.mg-sc-drift--slow { animation-duration: 13s; animation-direction: alternate-reverse; }
+.mg-sc-spin { animation: mg-spin 14s linear infinite; transform-box: view-box; }
+.mg-sc-hop { animation: mg-float 2.6s ease-in-out infinite; }
+.mg-sc-deal { animation: mg-deal 4s ease-in-out infinite; }
+.mg-sc-belt { animation: mg-belt-move 0.8s linear infinite; }
+.mg-sc-convey { animation: mg-convey 6s linear infinite; }
+.mg-sc-twinkle { animation: mg-twinkle 2.4s ease-in-out infinite; transform-origin: center; }
+.mg-sc-breathe { animation: mg-breathe 4s ease-in-out infinite; transform-box: view-box; }
+.mg-sc-flicker { animation: mg-flicker 5s ease-in-out infinite; }
+.mg-sc-smoke { animation: mg-smoke 4s ease-out infinite; opacity: 0; }
+.mg-sc-smoke--late { animation-delay: 2s; }
+@keyframes mg-bob { 50% { transform: translateY(-7px); } }
+@keyframes mg-drift { to { transform: translateX(40px); } }
+@keyframes mg-spin { to { transform: rotate(360deg); } }
+@keyframes mg-deal { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes mg-belt-move { to { stroke-dashoffset: -18; } }
+@keyframes mg-convey { from { transform: translateX(-30px); } to { transform: translateX(340px); } }
+@keyframes mg-twinkle { 50% { opacity: 0.2; transform: scale(0.6); } }
+@keyframes mg-breathe { 50% { transform: scale(1.05); } }
+@keyframes mg-smoke { 0% { opacity: 0; transform: translateY(4px); } 30% { opacity: 0.45; } 100% { opacity: 0; transform: translateY(-8px); } }
+@keyframes mg-flicker { 0%, 100% { opacity: 1; } 45% { opacity: 0.8; } 50% { opacity: 0.95; } 55% { opacity: 0.75; } }
+
+/* Scene previews (hover / Preview button) */
+
+/* a still hub cover: nothing on it moves (Group Sort's halves come from the animated mode covers, frozen here) */
+.mg-still, .mg-still * { animation: none !important; }
+
+/* placed art (wizard, balloons) and its inner details keep plain SVG transforms, not the scene-wide fill-box */
+.mg-bc [transform] { transform-box: view-box; transform-origin: 0 0; }
+
+/* ---------- Game frame ---------- */
+.mg-page--game { max-width: 980px; padding-top: 16px; }
+/* Page header in the main site's style (its StudentPageHeader): phones get a sticky bar with a back chevron,
+   17 px title and 12 px subtitle; wider screens a 13 px breadcrumb, 36 px title and 15 px subtitle. */
+.mg-page-head { margin-bottom: 20px; }
+.mg-page-head h1 { font-family: var(--font); font-weight: 700; color: var(--text); }
+.mg-page-head p { color: var(--muted); }
+.mg-page-head__bar { display: none; }
+.mg-page-head__wide nav { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.mg-page-head__wide nav a { color: inherit; text-decoration: none; border-radius: 4px; }
+.mg-page-head__wide nav a:hover { color: var(--text); text-decoration: underline; }
+.mg-page-head__wide nav [aria-current] { font-weight: 600; color: var(--text); }
+.mg-page-head__wide h1 { margin-top: 16px; font-size: 33px; line-height: 40px; }
+.mg-page-head__wide p { margin-top: 4px; font-size: 15px; line-height: 22px; }
+@media (min-width: 1024px) { .mg-page-head__wide h1 { margin-top: 20px; font-size: 36px; line-height: 44px; } }
+@media (max-width: 767px) {
+  .mg-page-head { margin: -16px -16px 10px; }
+  .mg-page-head__wide { display: none; }
+  .mg-page-head__bar {
+    position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 8px; min-height: 64px; padding: 0 12px;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+  }
+  .mg-page-head__bar > div { min-width: 0; flex: 1; }
+  .mg-page-head__bar h1 { font-size: 17px; font-weight: 600; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mg-page-head__bar p { font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+.mg-page-head__back {
+  display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 999px; color: var(--text);
+}
+.mg-page-head__back:hover { background: var(--chip); }
+.mg-game-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 8px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.mg-game-bar .mg-lo-tag { margin-left: 6px; }
+.mg-game-bar__lo {
+  flex: 1; min-width: 0; font-size: 13px; line-height: 1.4; color: var(--muted);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.mg-game-bar__stats { display: flex; align-items: center; gap: 2px; }
+.mg-stat { display: flex; flex-direction: column; align-items: center; min-width: 58px; line-height: 1.15; }
+.mg-stat span { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.mg-stat strong { font-size: 20px; color: var(--sea-600); }
+.mg-stat strong small { font-size: 0.6em; font-weight: 700; color: var(--muted); }
+.mg-stat__bump { animation: mg-bump 0.35s ease-out; }
+@keyframes mg-bump { 40% { transform: scale(1.35); color: #f59e0b; } }
+/* Phones: one compact row, so the play area fits on screen even under a host's bottom nav. */
+@media (max-width: 560px) {
+  .mg-page--game { padding-top: 10px; }
+  .mg-page-head { margin-top: -10px; }
+  .mg-page--game:has(.mg-page-head) { --mg-top-inset: 74px; }
+  .mg-game-bar { flex-wrap: nowrap; gap: 4px; padding: 4px; }
+  .mg-game-bar__lo { visibility: hidden; }
+  .mg-stat { min-width: 48px; }
+  .mg-stat span { font-size: 11px; }
+  .mg-stat strong { font-size: 17px; }
+}
+
+.mg-mascot-bar { display: flex; align-items: center; gap: 10px; margin: 10px 0 12px; min-height: 60px; }
+.mg-mascot-bar__mascot { width: 58px; flex: none; }
+.mg-mascot-bar__bubble {
+  position: relative; padding: 10px 14px; border-radius: 16px; background: var(--surface); border: 1px solid var(--card-edge);
+  font-size: 15px; font-weight: 500; line-height: 1.5; box-shadow: var(--shadow); animation: mg-bubble 0.3s ease-out;
+}
+.mg-mascot-bar__bubble::before {
+  content: ''; position: absolute; left: -9px; top: 50%; width: 14px; height: 14px; margin-top: -7px;
+  background: var(--surface); border-left: 1px solid var(--card-edge); border-bottom: 1px solid var(--card-edge); transform: rotate(45deg);
+}
+@keyframes mg-bubble { from { transform: scale(0.85); opacity: 0; } }
+@media (max-width: 560px) {
+  .mg-mascot-bar { gap: 8px; margin: 6px 0 8px; min-height: 0; }
+  .mg-mascot-bar__mascot { width: 38px; }
+  .mg-mascot-bar__bubble { padding: 6px 10px; border-radius: 12px; font-size: 14px; line-height: 1.4; }
+  .mg-mascot-bar__bubble::before { left: -6px; width: 10px; height: 10px; margin-top: -5px; }
+}
+
+.mg-game-stage { position: relative; -webkit-user-select: none; user-select: none; }
+
+.mg-result {
+  position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
+  padding: 16px 16px calc(16px + var(--mg-bottom-inset, 0px));
+  background: var(--overlay); animation: mg-fade 0.2s ease-out;
+}
+.mg-result__cheer { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 8px; }
+.mg-result__cheer p { margin: 0; color: var(--sea-600); font-size: 16px; font-weight: 800; }
+.mg-result__mascot { width: 62px; flex: none; }
+.mg-result__mascot.mg-armin--act-jump [class*='mg-armin__'] { animation-delay: 0.35s; }
+.mg-result__card {
+  width: min(460px, 100%); max-height: calc(100svh - 32px - var(--mg-bottom-inset, 0px)); overflow-y: auto; padding: 22px 20px; text-align: center;
+  background: var(--surface); border: 1px solid var(--card-edge); border-radius: 20px; box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column; gap: 8px; animation: mg-pop-in 0.3s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+/* Type as on the main site's test result page: 19 px title, a big bold score with a small "/ 10", 13 px lines,
+   a 13.5 px status pill and 15 px buttons. */
+.mg-result__card h2 { font-family: var(--font); font-size: 19px; line-height: 26px; font-weight: 700; }
+.mg-result__score { font-size: 40px; font-weight: 800; color: var(--sea-600); line-height: 44px; }
+.mg-result__score small { font-size: 15px; font-weight: 600; color: var(--muted); }
+.mg-result__best { font-size: 13px; line-height: 20px; color: var(--muted); }
+.mg-result__best strong { color: var(--text); }
+.mg-save { font-size: 13.5px; font-weight: 600; line-height: 20px; padding: 7px 12px; border-radius: 12px; color: var(--muted); }
+.mg-save--saved { color: var(--ok); background: var(--ok-bg); }
+.mg-save--queued { color: var(--gold-ink); background: var(--gold-bg); }
+
+/* Balloon Pop's end screen (components/PosterResult.jsx): a WANTED poster on aged, burnt-edged paper, nailed up in
+   the night town and stamped MISSION COMPLETE. Only the score, the best score and the missed clues with their answers. */
+.mg-result--poster { background: rgba(14, 9, 30, 0.82); }
+.mg-poster-wrap {
+  width: min(400px, 100%); max-height: calc(100svh - 32px - var(--mg-bottom-inset, 0px)); overflow-y: auto; overflow-x: hidden;
+  padding: 6px 10px 4px; animation: mg-poster-drop 0.45s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+.mg-poster__defs { position: absolute; }
+.mg-poster {
+  position: relative; isolation: isolate; margin: 4px 2px 0; padding: 26px 22px 24px; transform: rotate(-0.6deg);
+  color: #2b1b0b; text-align: center; font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, 'Noto Serif', serif;
+}
+.mg-poster::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; filter: url(#mg-burn);
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .22 0 0 0 0 .08 0 0 0 .18 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>"),
+    radial-gradient(circle at 20% 78%, #a0682a33 0 30px, transparent 31px),
+    radial-gradient(circle at 86% 30%, #a0682a26 0 22px, transparent 23px),
+    radial-gradient(ellipse at center, #f4e6c2 0%, #e8d09a 55%, #c99a55 85%, #8a5522 100%);
+  box-shadow: inset 0 0 28px #6b3a10, 0 10px 24px rgba(0, 0, 0, 0.6);
+}
+.mg-poster__nail {
+  position: absolute; width: 13px; height: 13px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe9a8, #b88a3a 45%, #5a3e12); box-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
+}
+.mg-poster__nail--tl { left: 10px; top: 10px; }
+.mg-poster__nail--tr { right: 10px; top: 10px; }
+.mg-poster__nail--bl { left: 10px; bottom: 10px; }
+.mg-poster__rule {
+  display: flex; align-items: center; gap: 8px; margin: 2px 0 6px;
+  font-size: 10.5px; letter-spacing: 2.5px; text-transform: uppercase; color: #5a3a16;
+}
+.mg-poster__rule::before, .mg-poster__rule::after { content: ''; flex: 1; border-top: 1px solid #5a3a16; border-bottom: 1px solid #5a3a16; padding-top: 2px; }
+.mg-poster__title { margin: 2px 0 0; font-family: Rockwell, 'Bookman Old Style', Georgia, serif; font-size: 50px; line-height: 1; font-weight: 700; letter-spacing: 3px; color: #2b1b0b; }
+.mg-poster__sub { margin: 4px 0 0; font-size: 13px; font-variant: small-caps; letter-spacing: 1.5px; }
+.mg-poster__scene { position: relative; margin: 2px 0 4px; }
+.mg-poster__art { display: block; width: 100%; height: 132px; color: #2b1b0b; }
+.mg-poster__stamp {
+  position: absolute; left: 50%; top: 50%; padding: 4px 12px; white-space: nowrap;
+  border: 4px double #a3171d; color: #a3171d; font-family: Impact, 'Arial Black', sans-serif; font-size: 26px; letter-spacing: 3px; text-transform: uppercase;
+  opacity: 0.88; mix-blend-mode: multiply; transform: translate(-50%, -50%) rotate(-12deg);
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.6'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.6'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");
+  animation: mg-stamp 0.35s 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+.mg-poster__stamp--failed { color: #7d0f14; border-color: #7d0f14; font-size: 30px; }
+.mg-poster__scores { display: grid; grid-template-columns: 1fr 1fr; margin: 6px 0 12px; border-top: 1.5px solid #5a3a16; border-bottom: 1.5px solid #5a3a16; }
+.mg-poster__scores div { padding: 8px 4px 6px; }
+.mg-poster__scores div + div { border-left: 1px solid rgba(90, 58, 22, 0.55); }
+.mg-poster__scores span { display: block; font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: #5a3a16; }
+.mg-poster__scores b { display: block; font-family: Rockwell, 'Bookman Old Style', Georgia, serif; font-size: 38px; line-height: 1.1; color: #2b1b0b; }
+.mg-poster__scores small { font-size: 17px; }
+.mg-poster__missed { list-style: none; margin: 0; padding: 0; text-align: left; font-size: 13px; line-height: 1.45; }
+.mg-poster__missed li { padding: 6px 0; border-bottom: 1px dotted rgba(90, 58, 22, 0.6); }
+.mg-poster__missed span { display: block; font-style: italic; }
+.mg-poster__missed b { display: block; margin-top: 1px; color: #8a1b1b; }
+.mg-poster__clean { margin: 0; font-size: 14px; font-style: italic; }
+.mg-poster__save { margin: 10px 0 0; font-size: 12px; color: #5a3a16; }
+.mg-poster__save--saved { color: #1f4d2a; }
+.mg-poster__seal { position: absolute; right: -12px; bottom: -16px; width: 72px; height: 72px; transform: rotate(12deg); }
+.mg-poster__actions { display: flex; gap: 10px; margin: 18px 2px 4px; }
+.mg-poster__btn {
+  flex: 1; display: grid; place-items: center; min-height: 46px; padding: 8px; border-radius: 8px; cursor: pointer;
+  font: 600 14.5px/1.2 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif; letter-spacing: 0.5px; text-decoration: none;
+  color: #f6e7c1; background: linear-gradient(#7a4f24, #4e2f12); border: 1px solid #2a1606; box-shadow: inset 0 1px 0 #b98450, 0 3px 0 #2a1606;
+}
+.mg-poster__btn--gold { color: #2b1b0b; background: linear-gradient(#ffe39a, #d9a640); border-color: #7a5418; box-shadow: inset 0 1px 0 #fff3c4, 0 3px 0 #7a5418; }
+.mg-poster__btn:active { transform: translateY(2px); box-shadow: none; }
+@keyframes mg-poster-drop { from { opacity: 0; transform: translateY(-40px) rotate(-3deg); } }
+@keyframes mg-stamp { from { opacity: 0; transform: translate(-50%, -50%) rotate(-12deg) scale(2.2); } }
+@media (prefers-reduced-motion: reduce) { .mg-poster-wrap, .mg-poster__stamp { animation: none; } }
+
+/* Each game's own end screen (components/StyledResults.jsx): Picture Match's case report on the detective's desk,
+   Conveyor Sort's delivery manifest on a clipboard, Diameter's drawing sheet. Shared: the scrolling wrap, a red rubber
+   stamp (mission complete / failed), the save line and two buttons. */
+/* only the card and its buttons: the game stays dimmed behind, as for Balloon Pop's poster */
+.mg-result--desk, .mg-result--dock, .mg-result--blueprint { background: rgba(8, 10, 16, 0.82); }
+.mg-rwrap {
+  position: relative; width: min(400px, 100%); max-height: calc(100svh - 32px - var(--mg-bottom-inset, 0px));
+  overflow-y: auto; overflow-x: hidden; padding: 30px 8px 6px; animation: mg-poster-drop 0.45s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+.mg-rstamp {
+  display: inline-block; position: relative; padding: 3px 12px; white-space: nowrap; text-align: center;
+  border: 4px double currentColor; color: #b0161d; font: 400 24px/1.05 Impact, 'Arial Black', sans-serif; letter-spacing: 3px; text-transform: uppercase;
+  opacity: 0.9; transform: rotate(-6deg);
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.6'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.6'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");
+  animation: mg-rstamp 0.35s 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+.mg-rstamp--dark { color: #7d0f14; }
+@keyframes mg-rstamp { from { opacity: 0; scale: 2.2; } }
+.mg-rsave { margin: 0; font-size: 11.5px; }
+.mg-ractions { display: flex; gap: 10px; margin: 16px 2px 4px; }
+.mg-rbtn {
+  flex: 1; display: grid; place-items: center; min-height: 46px; padding: 8px; border-radius: 8px; cursor: pointer;
+  font: 700 14.5px/1.2 Georgia, serif; text-decoration: none; border: 1px solid transparent;
+}
+.mg-rbtn:active { transform: translateY(2px); }
+
+/* Picture Match: the case report */
+.mg-case { position: relative; margin-top: 20px; color: #1d1a16; }
+.mg-case__tab { position: absolute; left: 16px; top: -22px; padding: 4px 14px 3px; border-radius: 8px 8px 0 0; background: #d9b66e; font: 700 12px 'Courier New', Courier, monospace; letter-spacing: 2px; color: #5a3a12; }
+.mg-case__folder { padding: 14px 12px 16px; border-radius: 4px 10px 6px 6px; background: #d6ae62; box-shadow: 0 18px 34px #000d, inset 0 0 30px #8a6326aa; }
+.mg-case__sheet { position: relative; padding: 14px 14px 12px; background: #f3ead4; box-shadow: 0 2px 6px #0005; transform: rotate(-0.7deg); font-family: 'Courier New', Courier, monospace; }
+.mg-case__clip { position: absolute; right: 150px; top: -16px; width: 16px; height: 48px; border: 3px solid #9aa3ab; border-radius: 9px; z-index: 3; }
+.mg-case__photo { position: absolute; margin: 0; padding: 6px 6px 20px; background: #fbfaf5; box-shadow: 2px 5px 10px #0008; z-index: 2; }
+.mg-case__photo .mg-pic { display: block; width: 100%; height: 100%; object-fit: cover; background: #2a2320; }
+.mg-case__photo figcaption { position: absolute; left: 0; right: 0; bottom: 3px; text-align: center; font: 12px 'Segoe Print', 'Segoe Script', cursive; color: #222; }
+.mg-case__photo--a { right: 70px; top: -22px; width: 66px; height: 78px; transform: rotate(-5deg); }
+.mg-case__photo--b { right: -16px; top: -28px; width: 76px; height: 88px; transform: rotate(7deg); }
+.mg-case__unit { margin: 0; font-weight: 700; font-size: 10px; letter-spacing: 2px; color: #6b5a3a; }
+.mg-case__title { margin: 8px 0 0; font: 700 25px 'Courier New', Courier, monospace; color: #1d1a16; }
+.mg-case__sub { margin: 0; font-size: 11px; color: #5a4a2a; }
+.mg-case__rule { border-top: 1px dashed #6b5a3a; margin: 10px 0 8px; }
+.mg-case__scores { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mg-case__points span { display: block; font-size: 10px; letter-spacing: 2px; color: #6b5a3a; font-weight: 700; }
+.mg-case__points b { display: block; font-size: 24px; line-height: 1.1; white-space: nowrap; margin-bottom: 6px; }
+.mg-case__points b small { font-size: 13px; }
+.mg-case__points .mg-case__big { font-size: 34px; }
+.mg-case__points .mg-case__big small { font-size: 15px; }
+.mg-case__verdict { text-align: center; transform: rotate(-12deg); }
+.mg-case__verdict .mg-rstamp { transform: none; }
+.mg-case__verdict small { display: block; margin-top: 10px; font-size: 9.5px; color: #8a1b1b; }
+.mg-case__label { margin: 0 0 2px; font-weight: 700; font-size: 10px; letter-spacing: 2px; color: #6b5a3a; }
+.mg-case__wrong { margin: 0; padding-left: 20px; font-size: 12.5px; line-height: 1.4; color: #22201c; }
+.mg-case__wrong li { padding: 6px 0; border-bottom: 1px dotted #b9a983; }
+.mg-case__wrong b { display: block; color: #b0161d; text-transform: uppercase; }
+.mg-case__clean { margin: 0; font-size: 12.5px; }
+.mg-case__foot { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; margin-top: 10px; }
+.mg-case__foot .mg-rsave { color: #5a4a2a; }
+.mg-case__foot .mg-rsave--saved { color: #1f5a2a; }
+.mg-case__sign { margin-left: auto; text-align: right; }
+.mg-case__sign span { display: block; font: 20px 'Segoe Script', 'Brush Script MT', cursive; color: #1d3a8a; }
+.mg-case__sign small { display: block; font-size: 9px; color: #6b5a3a; border-top: 1px solid #6b5a3a; }
+.mg-desk__lens { position: absolute; left: 6px; bottom: -2px; width: 100px; height: 100px; transform: rotate(-28deg); pointer-events: none; }
+.mg-ractions--desk { margin-top: 26px; }
+.mg-ractions--desk .mg-rbtn { color: #e8c98a; background: #2a1a0e; border-color: #8a6a3a; }
+.mg-ractions--desk .mg-rbtn--main { color: #2a1b10; background: linear-gradient(#f0d595, #c99a4a); border-color: #6b4a1a; box-shadow: 0 3px 0 #6b4a1a; }
+
+/* Conveyor Sort: the delivery manifest */
+.mg-clipboard { position: relative; padding: 34px 12px 12px; border-radius: 12px; background: linear-gradient(#8a5a2e, #6b4220); box-shadow: 0 14px 26px #000b; }
+.mg-clipboard__clip { position: absolute; left: 50%; top: -12px; transform: translateX(-50%); width: 140px; height: 42px; border-radius: 8px 8px 16px 16px; background: linear-gradient(#f2f5f7, #9aa6ae 60%, #6f7a82); box-shadow: 0 3px 4px #0007; }
+.mg-clipboard__clip::after { content: ''; position: absolute; left: 50%; top: 10px; transform: translateX(-50%); width: 36px; height: 10px; border-radius: 5px; background: #4a545b; }
+.mg-manifest { padding: 12px; background: #fbfbf6; color: #1d2328; font-family: Arial, Helvetica, sans-serif; }
+.mg-manifest small { font-weight: 700; font-size: 9px; letter-spacing: 2px; color: #6f7a82; }
+.mg-manifest__head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #1d2328; padding-bottom: 6px; }
+.mg-manifest__head h2 { margin: 3px 0 0; font: 900 21px/1 'Arial Black', Arial, sans-serif; color: #1d2328; }
+.mg-manifest__barcode { width: 96px; height: 30px; fill: #1d2328; }
+.mg-manifest__barcode text { font: 6px Consolas, monospace; }
+.mg-manifest__load { display: flex; align-items: center; gap: 10px; margin: 10px 0 4px; }
+.mg-manifest__load svg { width: 60px; flex: none; }
+.mg-manifest__load > div { flex: 1; }
+.mg-manifest__crates { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin-top: 4px; }
+.mg-manifest__crates i { height: 12px; background: #d5dade; }
+.mg-manifest__crates i.is-ok { background: #2ecc71; }
+.mg-manifest__crates i.is-bad { background: #e74c3c; }
+.mg-manifest__stamp { text-align: center; margin: 12px 0 10px; }
+.mg-manifest__lcds { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mg-manifest__lcds div { background: #1d2328; border-radius: 6px; padding: 6px 10px; box-shadow: inset 0 0 0 2px #f5c518; }
+.mg-manifest__lcds span { display: block; font-weight: 700; font-size: 9px; letter-spacing: 2px; color: #f5c518; }
+.mg-manifest__lcds b { font: 700 30px Consolas, 'Courier New', monospace; color: #7ef0c8; text-shadow: 0 0 8px #7ef0c888; white-space: nowrap; }
+.mg-manifest__lcds b small { font-size: 13px; color: #9ad; letter-spacing: 0; }
+.mg-manifest__table { margin-top: 10px; }
+.mg-manifest__table p { margin: 0; padding: 4px 6px; background: #1d2328; color: #f5c518; font-weight: 700; font-size: 9px; letter-spacing: 1.5px; }
+.mg-manifest__table ul { list-style: none; margin: 0; padding: 0; font-size: 12.5px; line-height: 1.35; }
+.mg-manifest__table li { display: flex; gap: 8px; padding: 6px; border-bottom: 1px solid #cfd5d9; }
+.mg-manifest__table li > span { color: #e74c3c; font-weight: 900; }
+.mg-manifest__table b { display: block; color: #c0392b; }
+.mg-manifest__clean { margin: 10px 0 0; font-size: 13px; }
+.mg-manifest__foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; margin-top: 8px; }
+.mg-manifest__foot .mg-rsave { color: #6f7a82; }
+.mg-manifest__foot .mg-rsave--saved { color: #1f7a3a; }
+.mg-manifest__foot > div { margin-left: auto; text-align: right; }
+.mg-manifest__foot > div small { display: block; font-family: Consolas, monospace; font-weight: 400; }
+.mg-manifest__foot > div span { font: 20px 'Segoe Script', 'Brush Script MT', cursive; color: #1d3a8a; }
+.mg-ractions--dock .mg-rbtn { font-family: Arial, sans-serif; font-weight: 900; color: #f5c518; background: #1d2328; border: 2px solid #f5c518; }
+.mg-ractions--dock .mg-rbtn--main { color: #1d2328; background: #f5c518; border-color: #f5c518; box-shadow: 0 3px 0 #8a6d0a; }
+
+/* Diameter: the drawing sheet */
+.mg-dwg {
+  margin: 6px; padding: 12px; border: 2px solid #e8f1ff; color: #e8f1ff; font-family: Consolas, 'Courier New', monospace;
+  background: #0f3060;
+  background-image: linear-gradient(#ffffff16 1px, transparent 1px), linear-gradient(90deg, #ffffff16 1px, transparent 1px), linear-gradient(#ffffff08 1px, transparent 1px), linear-gradient(90deg, #ffffff08 1px, transparent 1px);
+  background-size: 40px 40px, 40px 40px, 8px 8px, 8px 8px;
+  box-shadow: 0 0 0 5px #0f3060, 0 0 0 6px #e8f1ff88, 0 14px 30px #000a;
+}
+.mg-dwg__meta { display: flex; justify-content: space-between; margin: 0; font-size: 10px; letter-spacing: 2px; color: #9fc3f0; }
+.mg-dwg__title { margin: 6px 0 0; font: 700 22px Consolas, 'Courier New', monospace; letter-spacing: 2px; color: #e8f1ff; }
+.mg-dwg__sub { margin: 0; font-size: 10px; color: #9fc3f0; }
+.mg-dwg__view { position: relative; height: 170px; margin: 8px 0 4px; border: 1px solid #e8f1ff55; overflow: hidden; }
+.mg-dwg__view svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mg-dwg__muscle { position: absolute; left: 2%; top: 18px; width: 56%; height: 120px; object-fit: contain; filter: grayscale(1) contrast(0.95) brightness(1.3); mix-blend-mode: luminosity; opacity: 0.85; }
+.mg-dwg__detail { position: absolute; right: 3%; top: 12px; width: 120px; height: 120px; border-radius: 50%; border: 1.5px dashed #e8f1ff; overflow: hidden; background: #0f3060; }
+/* the colour render, greyed and laid soft on the sheet's blue (no invert: the myofilament beads went harsh white) */
+.mg-dwg__detail img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.25); filter: grayscale(1) contrast(0.95) brightness(1.15); mix-blend-mode: luminosity; opacity: 0.85; }
+.mg-dwg__stamp { text-align: center; margin: 8px 0; }
+.mg-dwg__stamp .mg-rstamp { color: #ff5a5a; font-size: 28px; }
+.mg-dwg__label { margin: 0; padding-top: 6px; border-top: 1px solid #e8f1ff88; font-size: 10px; letter-spacing: 2px; color: #9fc3f0; }
+.mg-dwg__revs { list-style: none; margin: 0; padding: 0; font-size: 12px; line-height: 1.4; }
+.mg-dwg__revs li { display: flex; gap: 8px; padding: 5px 0; border-bottom: 1px dashed #e8f1ff55; }
+.mg-dwg__revs span { color: #f5c518; }
+.mg-dwg__revs b { color: #f5c518; text-transform: uppercase; }
+.mg-dwg__block { display: grid; grid-template-columns: 1fr 1fr 1fr; margin-top: 10px; border: 1.5px solid #e8f1ff; font-size: 9px; letter-spacing: 1px; color: #9fc3f0; }
+.mg-dwg__cell { padding: 4px 8px; border-right: 1px solid #e8f1ff88; }
+.mg-dwg__cell:nth-child(3n) { border-right: 0; }
+.mg-dwg__cell span { display: block; color: #e8f1ff; }
+.mg-dwg__cell--score { grid-column: span 2; padding: 6px 8px; border-bottom: 1px solid #e8f1ff88; }
+.mg-dwg__cell--best { padding: 6px 8px; border-bottom: 1px solid #e8f1ff88; border-right: 0; }
+.mg-dwg__cell--score b { display: block; margin-top: 2px; font: 700 30px/1 Consolas, monospace; color: #e8f1ff; }
+.mg-dwg__cell--score b small { font-size: 13px; color: #9fc3f0; }
+.mg-dwg__cell--best b { display: block; margin-top: 6px; font: 700 22px/1 Consolas, monospace; color: #f5c518; }
+.mg-dwg .mg-dwg__sign { font: 13px 'Segoe Script', 'Brush Script MT', cursive; }
+.mg-dwg__save { margin-top: 8px; color: #9fc3f0; }
+.mg-dwg__save.mg-rsave--saved { color: #7ef0a8; }
+.mg-ractions--blueprint .mg-rbtn { font-family: Consolas, monospace; color: #e8f1ff; border: 1.5px solid #e8f1ff; background: #0f3060; }
+.mg-ractions--blueprint .mg-rbtn--main { color: #0f3060; background: #f5c518; border-color: #f5c518; }
+@media (prefers-reduced-motion: reduce) { .mg-rwrap, .mg-rstamp { animation: none; } }
+.mg-result__actions { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.mg-result__actions .mg-btn { min-height: 46px; font-size: 15px; font-weight: 600; }
+.mg-badge { align-self: center; padding: 4px 12px; border-radius: 999px; font-weight: 600; font-size: 13px; background: var(--gold-bg); color: var(--gold-ink); }
+.mg-review { text-align: left; margin-top: 8px; border: 1px solid var(--border); border-radius: 14px; padding: 4px 12px; }
+.mg-review summary { cursor: pointer; font-size: 15px; font-weight: 700; padding: 8px 0; min-height: var(--tap); display: flex; align-items: center; }
+.mg-review li { padding: 10px 0; border-top: 1px solid var(--border); }
+/* a long list scrolls inside the box so the score and the buttons stay on one screen */
+.mg-review ul, .mg-review ol { max-height: min(34svh, 260px); overflow-y: auto; overscroll-behavior: contain; }
+.mg-review__q { font-size: 14px; line-height: 21px; font-weight: 600; }
+.mg-review__a { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 4px; font-size: 13px; line-height: 19px; }
+.mg-review__bad { color: var(--bad); text-decoration: line-through; }
+.mg-review__good { color: var(--ok); font-weight: 600; }
+.mg-review__why { color: var(--muted); font-size: 13px; line-height: 19px; margin-top: 2px; }
+
+/* ---------- FX layer ---------- */
+.mg-fx-layer { position: fixed; inset: 0; pointer-events: none; z-index: 40; overflow: hidden; }
+.mg-fx-float {
+  position: absolute; transform: translate(-50%, -50%); font-weight: 800; font-size: 22px; white-space: nowrap;
+  text-shadow: 0 2px 0 var(--surface), 0 0 8px var(--surface); animation: mg-float-up 1s ease-out forwards;
+}
+.mg-fx-float--good { color: var(--sea-700); }
+.mg-fx-float--gold { color: #b45309; font-size: 26px; }
+.mg-fx-float--bad { color: var(--bad); }
+@keyframes mg-float-up { 0% { transform: translate(-50%, -30%) scale(0.6); opacity: 0; } 20% { transform: translate(-50%, -60%) scale(1.15); opacity: 1; } 100% { transform: translate(-50%, -160%) scale(1); opacity: 0; } }
+.mg-fx-burst { position: absolute; width: 0; height: 0; }
+.mg-fx-burst i { position: absolute; width: 9px; height: 9px; left: -4px; top: -4px; animation: mg-confetti 1.05s cubic-bezier(0.2, 0.6, 0.4, 1) forwards; }
+@keyframes mg-confetti {
+  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  55% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 1; }
+  100% { transform: translate(calc(var(--dx) * 1.2), calc(var(--dy) + 150px)) rotate(var(--rot)); opacity: 0; }
+}
+
+/* ---------- Game frame ---------- */
+/* Every game sits in one frame with its own look, like Diameter's drawing sheet; Armin explains the game above it.
+   The frame header (components/FrameHead.jsx) holds a title, the time left, the question count, the score and the
+   session best. */
+.mg-frame { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 18px; }
+.mg-fhead { position: relative; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mg-fhead__title { margin-right: auto; font-size: 17px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+.mg-fpill {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 4px 12px; font-size: 13px; font-weight: 800;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.mg-fpill--low { animation: mg-fpill-low 0.6s ease-in-out infinite; }
+@keyframes mg-fpill-low { 50% { transform: scale(1.06); } }
+.mg-fpill--lives .mg-lives { font-size: 15px; }
+.mg-frame > p { color: inherit; opacity: 0.85; }
+@media (max-width: 560px) {
+  .mg-frame { gap: 8px; padding: 12px 10px; border-radius: 14px; }
+  .mg-fhead { gap: 6px; }
+  .mg-fhead__title { flex-basis: 100%; font-size: 15px; letter-spacing: 0.08em; }
+  .mg-fpill { min-height: 28px; padding: 3px 9px; font-size: 12px; }
+}
+
+/* Balloon Pop: a spellbook in deep night purple with a gold double border, to match the night sky of the game */
+.mg-frame--spell { color: #e9e1ff; border: 3px double #c9a24a; outline: 2px solid #c9a24a; outline-offset: 3px; background: radial-gradient(ellipse at 50% 35%, #4a3a78, #2f2456 70%, #1f173d); }
+.mg-frame--spell .mg-fpill { border: 1.5px solid #c9a24a; border-radius: 999px; background: #1c1438; color: #f6e7b8; }
+.mg-frame--spell .mg-fpill--low { border-color: #f87171; background: #7f1d1d; color: #fee2e2; }
+
+/* Picture Match: a film-noir detective's office - near-black brown wall under a dim light from above; the game sits
+   on its own evidence board inside it: dark cork in a heavy wooden frame, the photos a touch sepia */
+.mg-frame--noir {
+  color: #efe6d6; border: 2px solid #0c0a09; border-radius: 6px; box-shadow: inset 0 0 60px rgb(0 0 0 / 0.75), 0 12px 26px rgb(0 0 0 / 0.5);
+  background: radial-gradient(ellipse at 50% -5%, #d9b77a44, transparent 55%), repeating-linear-gradient(90deg, #ffffff05 0 1px, transparent 1px 4px), linear-gradient(#2b2420, #1c1714);
+}
+.mg-frame--noir .mg-fhead__title { color: #f3ead8; font-family: "Cinzel Decorative", Georgia, serif; font-size: 20px; font-weight: 900; letter-spacing: 0.06em; text-transform: none; text-shadow: 0 2px 0 #000; }
+.mg-frame--noir .mg-fpill { border: 1px solid #c8b38a66; border-radius: 1px; background: #0e0b09cc; color: #e9dcc2; font-family: "Courier New", monospace; letter-spacing: 0.04em; }
+.mg-frame--noir .mg-fpill--low { border-color: #dc2626; color: #fca5a5; }
+.mg-frame--noir .mg-cork {
+  position: relative; z-index: 1; padding: 12px; border: 12px solid #3a2416; border-radius: 4px;
+  background: radial-gradient(circle at 30% 40%, #5a3d26 0 1px, transparent 1.6px) 0 0 / 9px 9px, radial-gradient(circle at 70% 70%, #6e4b2e 0 1px, transparent 1.6px) 0 0 / 13px 13px, linear-gradient(#4a3322, #3b2819);
+  box-shadow: inset 0 0 0 2px #1a0f08, inset 0 0 26px rgb(0 0 0 / 0.65), 0 0 0 2px #6b4a2c, 0 8px 18px rgb(0 0 0 / 0.6);
+}
+.mg-frame--noir .mg-cork::before, .mg-frame--noir .mg-cork::after { display: none; }
+.mg-frame--noir .mg-pmatch__label { background: #e9dcc2; color: #1c1714; font-family: "Courier New", monospace; letter-spacing: 0.18em; }
+.mg-frame--noir .mg-pcard--pic { filter: sepia(0.25) contrast(1.05); }
+@media (max-width: 560px) { .mg-frame--noir .mg-cork { padding: 8px; border-width: 8px; } }
+
+/* Conveyor Sort: the night shift - a dark warehouse floor framed in yellow-and-black hazard tape */
+.mg-frame--warehouse {
+  color: #e7eef3; border: 10px solid transparent; border-image: repeating-linear-gradient(45deg, #ffcf3a 0 12px, #1d1d1d 12px 24px) 10;
+  background: radial-gradient(ellipse at 50% 0, #9fc3d633, transparent 60%), #2b3136;
+}
+.mg-frame--warehouse .mg-fpill { border: 1.5px solid #ffcf3a; border-radius: 4px; background: #1d1d1d; color: #ffcf3a; }
+.mg-frame--warehouse .mg-fpill--low { border-color: #ef4444; background: #ef4444; color: #fff; }
+
+.mg-lives { font-size: 20px; letter-spacing: 2px; }
+.mg-heart { color: #e11d48; display: inline-block; }
+.mg-heart--lost { color: var(--border); animation: mg-heart-lost 0.4s ease-out; }
+@keyframes mg-heart-lost { 40% { transform: scale(1.5); } }
+
+/* ---------- Balloon Pop ---------- */
+/* the label line keeps clear of the faint rune circle on the right */
+.mg-scroll .mg-prompt__label { display: flex; align-items: baseline; gap: 14px; padding-right: 60px; }
+
+/* Balloon Pop's clue: an ancient spell scroll at the top of the game's frame (see QuestionScroll) */
+.mg-scroll { --roll: 14px; --unroll: 0.9s; position: relative; display: block; padding: 0 calc(var(--roll) * 0.72); }
+.mg-scroll__paper {
+  position: relative; display: block; overflow: hidden; padding: 15px 26px 14px; color: #3b2410;
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 52%, rgb(70 35 8 / 0.6) 100%),
+    radial-gradient(circle at 74% 64%, rgb(139 90 30 / 0.2) 0 7%, transparent 17%),
+    radial-gradient(circle at 22% 80%, rgb(139 90 30 / 0.14) 0 5%, transparent 12%),
+    repeating-linear-gradient(90deg, rgb(120 80 30 / 0.05) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, #ecd6a4, #d6b274 58%, #bb8f4e);
+  border-radius: 3px; clip-path: inset(0 0 0 0);
+  animation: mg-scroll-unroll var(--unroll) cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+.mg-scroll__burn { position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 2px rgb(60 25 5 / 0.55), inset 0 0 10px 3px rgb(60 25 5 / 0.45); }
+/* the inner frame glows blue for a moment once the scroll is open, with a spark at each corner */
+.mg-scroll__frame {
+  position: absolute; inset: 4px 10px; pointer-events: none; border: 1px solid rgb(37 99 235 / 0.4);
+  outline: 1px solid rgb(212 165 55 / 0.55); outline-offset: -4px; animation: mg-scroll-glow 1.8s ease-out;
+}
+.mg-scroll__medal { position: absolute; width: 13px; height: 13px; }
+.mg-scroll__medal--tl { left: 6px; top: 5px; }
+.mg-scroll__medal--tr { right: 6px; top: 5px; }
+.mg-scroll__medal--bl { left: 6px; bottom: 5px; }
+.mg-scroll__medal--br { right: 6px; bottom: 5px; }
+.mg-scroll__medal--ml { left: 5px; top: 50%; margin-top: -6.5px; }
+.mg-scroll__medal--mr { right: 5px; top: 50%; margin-top: -6.5px; }
+.mg-scroll__spark {
+  position: absolute; width: 5px; height: 5px; border-radius: 50%; background: #bfdbfe; box-shadow: 0 0 6px 2px #60a5fa;
+  opacity: 0; animation: mg-scroll-spark 1.8s ease-out;
+}
+.mg-scroll__spark--tl { left: 10px; top: 9px; }
+.mg-scroll__spark--tr { right: 10px; top: 9px; animation-delay: 0.08s; }
+.mg-scroll__spark--bl { left: 10px; bottom: 9px; animation-delay: 0.16s; }
+.mg-scroll__spark--br { right: 10px; bottom: 9px; animation-delay: 0.24s; }
+.mg-scroll__rune { position: absolute; right: 18px; top: 50%; width: 62px; height: 62px; margin-top: -31px; opacity: 0.17; pointer-events: none; }
+.mg-scroll .mg-prompt__label, .mg-scroll .mg-prompt__text { position: relative; animation: mg-scroll-ink calc(var(--unroll) + 0.35s) ease-out; }
+.mg-scroll .mg-prompt__label { font-family: 'Cinzel Decorative', Georgia, serif; font-weight: 700; letter-spacing: 0.08em; color: #1e40af; text-shadow: 0 0 6px rgb(96 165 250 / 0.5); }
+.mg-scroll .mg-prompt__text { padding-right: 40px; font-family: 'Playfair Display Variable', 'Playfair Display', Georgia, serif; font-weight: 600; color: #3b2410; }
+/* the rollers, as tall as the paper: dark wood with a gold band, and gold caps with a small blue gem; the right one
+   travels out as it unrolls */
+.mg-scroll__roller {
+  position: absolute; z-index: 1; top: 0; bottom: 0; width: var(--roll); border-radius: calc(var(--roll) / 2);
+  background: linear-gradient(90deg, #3a2410, #7a5226 22%, #b98a4e 42%, #8a6030 62%, #4a2e12 88%, #2a1808); box-shadow: 2px 3px 5px rgb(0 0 0 / 0.55);
+}
+.mg-scroll__roller::before, .mg-scroll__roller::after { content: ''; position: absolute; left: 2px; right: 2px; height: 6px; border-radius: 50%; border: 1px solid rgb(240 210 150 / 0.35); }
+.mg-scroll__roller::before { top: 7px; }
+.mg-scroll__roller::after { bottom: 7px; }
+.mg-scroll__roller--left { left: 0; }
+.mg-scroll__roller--right { left: calc(100% - var(--roll)); animation: mg-scroll-roll var(--unroll) cubic-bezier(0.3, 0.7, 0.3, 1); }
+.mg-scroll__band { position: absolute; left: 0; right: 0; top: 50%; height: 6px; margin-top: -3px; background: linear-gradient(90deg, #6b4410, #fde68a 45%, #b8862b 70%, #5c3b10); }
+.mg-scroll__cap {
+  position: absolute; left: -1px; right: -1px; height: 6px; border-radius: 3px 3px 4px 4px;
+  background: radial-gradient(circle at 40% 30%, #fff3c4, #d4a537 45%, #6b4410); box-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+}
+.mg-scroll__cap--top { top: 0; transform: scaleY(-1); }
+.mg-scroll__cap--bottom { bottom: 0; }
+.mg-scroll__cap::after { content: ''; position: absolute; left: 50%; top: 1px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: radial-gradient(circle at 40% 30%, #bfdbfe, #2563eb 55%, #0b1430); }
+@keyframes mg-scroll-unroll { from { clip-path: inset(0 100% 0 0); } }
+@keyframes mg-scroll-roll { from { left: 0; } }
+@keyframes mg-scroll-ink { 0%, 55% { opacity: 0; filter: blur(2px); } }
+@keyframes mg-scroll-glow { 0%, 45% { box-shadow: none; } 60% { border-color: #60a5fa; box-shadow: 0 0 8px 1px rgb(96 165 250 / 0.9), inset 0 0 8px rgb(96 165 250 / 0.7); } }
+@keyframes mg-scroll-spark { 0%, 50% { opacity: 0; transform: scale(0.3); } 62% { opacity: 1; transform: scale(1.4); } 100% { opacity: 0; transform: scale(0.5); } }
+.mg-prompt__label { display: block; font-size: 12px; line-height: 18px; color: var(--sea-700); font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.mg-prompt__text { display: block; margin-top: 2px; font-size: 17px; font-weight: 600; line-height: 1.5; animation: mg-bubble 0.3s ease-out; }
+@media (max-width: 560px) {
+  .mg-prompt__label { font-size: 11px; line-height: 16px; }
+  .mg-prompt__text { font-size: 16px; line-height: 1.4; }
+  .mg-scroll { --roll: 11px; }
+  .mg-scroll__paper { padding: 12px 18px 11px; }
+  .mg-scroll .mg-prompt__label { gap: 10px; padding-right: 48px; }
+  .mg-scroll__rune { right: 12px; width: 48px; height: 48px; margin-top: -24px; }
+  .mg-scroll .mg-prompt__text { padding-right: 26px; }
+}
+
+.mg-sky {
+  position: relative; overflow: hidden; border-radius: 22px; height: min(62vh, 540px); min-height: 440px;
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 28% 42%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 46% 12%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 63% 33%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 82% 22%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 91% 52%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 7% 60%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 38% 66%, #fff 50%, transparent 51%),
+    linear-gradient(hsl(245 55% 16%) 0%, hsl(255 50% 28%) 45%, hsl(275 45% 38%) 80%, hsl(290 40% 44%) 100%);
+  border: 1px solid var(--border);
+  transition: filter 0.3s;
+}
+.mg-sky--frozen { box-shadow: inset 0 0 0 4px #bae6fd, inset 0 0 40px #e0f2fe; }
+/* while frozen the balloons turn pale and frosty */
+.mg-sky--frozen .mg-rider:not(.mg-rider--aim) .mg-rider__balloon { filter: saturate(0.55) brightness(1.15) drop-shadow(0 0 3px #e0f2fe); }
+/* the ice orb shattering (0.9 s) */
+.mg-shatter { position: absolute; z-index: 8; width: 260px; height: 260px; margin: -130px 0 0 -130px; overflow: visible; pointer-events: none; }
+.mg-shatter__flash { transform-origin: 0 0; animation: mg-shatter-flash 0.15s ease-out forwards; }
+.mg-shatter__shard { animation: mg-shatter-shard 0.9s cubic-bezier(0.2, 0.7, 0.4, 1) forwards; }
+@keyframes mg-shatter-flash { to { transform: scale(2); opacity: 0; } }
+@keyframes mg-shatter-shard { 60% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
+.mg-sky__moon { position: absolute; top: 18px; right: 22px; width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(circle at 38% 36%, #fffbeb, #fde68a 70%); box-shadow: 0 0 30px rgba(253, 230, 138, 0.55); }
+/* Clouds drift in a band just above the castle's rooftops. They pass over the castle, town and wizard
+   (z-index 4) but stay under the balloons (5), the wizard (6) and his wall (7), the ATP button and the fireballs (8). */
+.mg-clouds { position: absolute; left: 0; right: 0; bottom: calc(50px + min(60cqh, 70cqw) * 0.92); height: 20cqh; z-index: 4; pointer-events: none; }
+.mg-root .mg-cloud { position: absolute; left: 0; height: auto; max-width: none; opacity: 0.62; animation: mg-cloud-drift linear infinite; will-change: transform; }
+@keyframes mg-cloud-drift { from { transform: translateX(-110%); } to { transform: translateX(calc(100cqw + 10px)); } }
+.mg-cloud__shadow { fill: hsl(248 32% 30%); }
+.mg-cloud__body { fill: hsl(258 28% 40%); }
+.mg-cloud__lit { fill: #f2d3dc; }
+.mg-cloud__line { fill: none; stroke: hsl(248 34% 24%); stroke-width: 1.6; opacity: 0.5; }
+/* Reduced motion: hold the clouds where they are (spread out) rather than resetting them all to the left edge. */
+@media (prefers-reduced-motion: reduce) { .mg-root .mg-cloud { animation-play-state: paused; } }
+.mg-sky__balloons { position: absolute; inset: 0; }
+
+/* A falling hot-air balloon with a goblin in the basket; the answer hangs on a sign below the basket. */
+.mg-rider {
+  position: absolute; top: -45%; z-index: 5;
+  width: min(23%, 150px); left: calc(var(--lane) * 25% + 1%);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: crosshair; touch-action: manipulation;
+  animation: mg-fall var(--dur) linear var(--delay) forwards;
+}
+.mg-rider__balloon { position: relative; display: block; width: min(100%, 80px); aspect-ratio: 120 / 172; transition: filter 0.15s; }
+/* the balloon picture (airship.svg) is taller than the balloon box: 12 units above it and 6 below, of 172 */
+.mg-root .mg-rider__balloon .mg-air { position: absolute; left: 0; top: -6.977%; display: block; width: 100%; height: 110.465%; max-width: none; pointer-events: none; -webkit-user-drag: none; user-select: none; }
+/* the sign is tied under the basket: it overlaps the basket's foot and is a little narrower than the balloon */
+.mg-rider__banner {
+  position: relative; width: 100%; max-width: 110px; margin-top: -8px; padding: 4px 3px; border-radius: 6px; border: 2px solid hsl(35 45% 40%);
+  background: linear-gradient(hsl(42 80% 92%), hsl(38 65% 82%)); box-shadow: 0 2px 0 hsl(30 40% 30%);
+  font-size: clamp(9.5px, 2.4vw, 14px); font-weight: 800; line-height: 1.15; color: hsl(25 50% 16%); text-align: center;
+  /* long words break at a syllable with a hyphen rather than mid-letter */
+  hyphens: auto; overflow-wrap: break-word;
+}
+.mg-rider--aim .mg-rider__balloon { filter: drop-shadow(0 0 6px #fff) drop-shadow(0 0 2px #fff); }
+.mg-rider--good { animation: mg-fall var(--dur) linear var(--delay) forwards, mg-burst 0.3s ease-out forwards; animation-play-state: paused, running; }
+.mg-rider--bad { animation: mg-fall var(--dur) linear var(--delay) forwards, mg-fizzle 0.4s ease-out forwards; animation-play-state: paused, running; }
+.mg-rider--gone { animation: mg-fall var(--dur) linear var(--delay) forwards, mg-gone 0.5s ease-out forwards; }
+/* a balloon marked by the ATP ultimate waits (disabled) for its bolt; struck, it flickers between itself and an
+   x-ray negative for 0.4 s while the bolt hits, then bursts (see UltStrike) */
+.mg-rider--struck .mg-air { transform-origin: 50% 40%; animation: mg-struck-flicker 0.05s steps(1) 8, mg-skill-pop 0.12s ease-in 0.4s forwards; }
+.mg-rider--struck .mg-rider__banner { animation: mg-banner-out 0.1s linear 0.4s forwards; }
+@keyframes mg-struck-flicker {
+  0% { filter: grayscale(1) invert(1) brightness(1.3) drop-shadow(0 0 6px #fbbf24); }
+  50% { filter: brightness(2.2) drop-shadow(0 0 6px #60a5fa); }
+}
+/* a bombed balloon: the fire pillar reaches it at BOMB_FUSE (0.73 s) and it is gone (see FirePortal) */
+.mg-rider--bombed .mg-air { transform-origin: 50% 40%; animation: mg-skill-pop 0.1s ease-in 0.73s forwards; }
+.mg-rider--bombed .mg-rider__banner { animation: mg-banner-out 0.1s linear 0.73s forwards; }
+@keyframes mg-skill-pop { to { transform: scale(1.25); opacity: 0; } }
+@keyframes mg-banner-out { to { opacity: 0; } }
+.mg-rider:disabled { cursor: default; }
+.mg-rider:focus-visible .mg-rider__balloon { outline: 3px solid #fde68a; outline-offset: 2px; border-radius: 12px; }
+@keyframes mg-fall { from { top: -45%; } to { top: 100%; } }
+@keyframes mg-burst { 50% { transform: scale(1.4); opacity: 0.8; } to { transform: scale(1.7); opacity: 0; } }
+@keyframes mg-fizzle { 30% { transform: translateX(-8px) rotate(-8deg); } 60% { transform: translateX(8px) rotate(8deg); } to { transform: scale(0.3); opacity: 0; filter: grayscale(1); } }
+@keyframes mg-gone { to { opacity: 0; transform: scale(0.5); filter: grayscale(1); } }
+
+.mg-flyer {
+  --size: 54px;
+  position: absolute; left: -80px; z-index: 5; width: var(--size); height: var(--size); border: 0; border-radius: 50%; cursor: crosshair;
+  display: grid; place-items: center; padding: 0; background: none; touch-action: manipulation;
+  animation: mg-fly 9s linear var(--fdelay) forwards;
+}
+/* the invisible ring keeps a 44px tap target */
+.mg-flyer::after { content: ''; position: absolute; inset: calc((var(--size) - var(--tap)) / 2); border-radius: 50%; }
+.mg-flyer__icon { display: block; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.mg-flyer--rev { animation-direction: reverse; animation-fill-mode: both; }
+/* the skill orbs' magic circle spins (the fire one the other way) and a ring pulses round it; inside, the ice chips
+   circle slowly and the fire swirl turns */
+.mg-orb__chips { animation: mg-flyer-spin 14s linear infinite; }
+.mg-orb__swirl { animation: mg-flyer-spin 4s linear infinite reverse; }
+.mg-flyer__rune { animation: mg-flyer-spin 4s linear infinite; }
+.mg-flyer__rune--back { animation-duration: 6s; animation-direction: reverse; }
+.mg-flyer__pulse { animation: mg-flyer-pulse 1s ease-in-out infinite; }
+@keyframes mg-flyer-spin { to { transform: rotate(360deg); } }
+@keyframes mg-flyer-pulse { 50% { transform: scale(1.12); opacity: 0.3; } }
+@keyframes mg-fly { 0% { left: -80px; transform: translateY(0); } 25% { transform: translateY(-14px); } 50% { transform: translateY(8px); } 75% { transform: translateY(-10px); } 100% { left: calc(100% + 20px); transform: translateY(0); } }
+
+/* ---------- Balloon Pop: rune skills (BalloonSkills.jsx) ---------- */
+.mg-rune { display: block; width: 100%; height: 100%; overflow: visible; }
+.mg-spin { display: block; width: 100%; height: 100%; animation: mg-rune-spin 6s linear infinite; }
+.mg-spin--back { animation-direction: reverse; }
+.mg-spin--slow { animation-duration: 40s; }
+.mg-spin--fast { animation-duration: 1.2s; }
+@keyframes mg-rune-spin { to { transform: rotate(360deg); } }
+/* lightning: a bolt's box is stretched and turned from one point to another; its poses flip every 40 ms */
+.mg-bolt { position: absolute; height: 40px; margin-top: -20px; transform-origin: 0 50%; pointer-events: none; }
+.mg-bolt__art { display: block; width: 100%; height: 100%; overflow: visible; }
+.mg-bolt__pose { opacity: 0; animation: mg-bolt-pose 0.12s steps(1) infinite; }
+@keyframes mg-bolt-pose { 0% { opacity: 1; } 33.34%, 100% { opacity: 0; } }
+
+/* For the ultimate, three flat runes rise round the wizard from the wall at his feet, one after another, fading as they
+   go up. */
+.mg-rising { position: absolute; bottom: 58px; z-index: 6; width: 0; height: 0; pointer-events: none; }
+.mg-rising__ring {
+  --rs: calc(0.8 - var(--k) * 0.1); position: absolute; left: -78px; top: -78px; width: 156px; height: 156px; opacity: 0;
+  animation: mg-rising-ring 0.8s ease-out calc(0.15s + var(--k) * 0.16s) forwards;
+}
+@keyframes mg-rising-ring {
+  0% { opacity: 0; transform: scale(var(--rs), calc(var(--rs) * 0.25)); }
+  20% { opacity: 0.95; }
+  100% { opacity: 0; transform: translateY(-160px) scale(var(--rs), calc(var(--rs) * 0.25)); }
+}
+
+/* Ice: the rune leaves the staff 0.25 s after the hit, reaches the middle of the sky behind the balloons at
+   ICE_FREEZE (0.67 s), opens across it by 1.17 s (fading to half so it stays behind the balloons), holds, and fades out over the last 0.6 s. */
+.mg-sigil { position: absolute; left: 0; top: 0; z-index: 4; pointer-events: none; animation: mg-sigil 3.02s linear 0.25s both; }
+@keyframes mg-sigil {
+  0% { opacity: 0; transform: translate(var(--x0), var(--y0)) scale(var(--s0)); animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  2% { opacity: 1; }
+  13.9% { transform: translate(var(--x1), var(--y1)) scale(var(--s1)); animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  30.5% { opacity: 0.5; transform: translate(var(--x1), var(--y1)) scale(1); }
+  80.1% { opacity: 0.5; }
+  100% { opacity: 0; transform: translate(var(--x1), var(--y1)) scale(1); }
+}
+
+/* Bomb: inside the balloon, the fire rune leaves the staff at 0.25 s, flattens into a portal above the balloon by
+   0.65 s (fading to half, like the sky runes), and drops a pillar of fire that reaches the balloon at BOMB_FUSE (0.73 s); embers rise as it burns away. */
+.mg-portal { position: absolute; left: 50%; top: 37.2%; width: 0; height: 0; pointer-events: none; }
+.mg-portal__rune { position: absolute; left: -36px; top: -36px; width: 72px; height: 72px; animation: mg-portal-rune 0.9s linear 0.25s both; }
+@keyframes mg-portal-rune {
+  0% { opacity: 1; transform: translate(var(--fx), var(--fy)) scale(0.3); animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  28.9% { transform: translate(0, var(--lift)) scale(0.56, 0.2); animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  44.4% { opacity: 0.5; transform: translate(0, var(--lift)) scale(1, 0.35); }
+  77.8% { opacity: 0.5; }
+  100% { opacity: 0; transform: translate(0, var(--lift)) scale(1, 0.35); }
+}
+.mg-portal__pillar {
+  position: absolute; left: -13px; top: var(--lift); width: 26px; height: 900px; transform-origin: 50% 0; opacity: 0;
+  background: linear-gradient(90deg, transparent, #f97316 20%, #fde047 38% 62%, #f97316 80%, transparent);
+  animation: mg-portal-pillar 0.48s ease-out 0.67s forwards;
+}
+@keyframes mg-portal-pillar {
+  0% { opacity: 1; transform: scaleY(0); }
+  23% { transform: none; }
+  62% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: scaleX(0.15); }
+}
+.mg-portal__ember { position: absolute; left: -2px; top: -2px; width: 4px; height: 4px; border-radius: 50%; background: #fde047; opacity: 0; animation: mg-portal-ember 0.5s ease-out 0.73s forwards; }
+.mg-portal__ember:nth-of-type(even) { background: #fb923c; }
+@keyframes mg-portal-ember {
+  0% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc((var(--k) - 3.5) * 6px), calc(-40px - var(--k) * 4px)) scale(0.4); }
+}
+
+/* The ATP ultimate, Heaven's seal (2.6 s): the sky dims, a bolt climbs from the staff and the lightning rune opens high
+   in the sky behind the balloons (0.25-0.7 s); its five small circles charge one by one; at ULT_STRIKE (1.15 s) the
+   sky flashes and two bolts come down (inside the balloons, below); everything fades from 2.1 s. */
+.mg-ult { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.mg-ult__dim { position: absolute; inset: 0; background: #0a0714; opacity: 0; animation: mg-ult-dim 2.6s linear forwards; }
+@keyframes mg-ult-dim { 11.5%, 80.8% { opacity: 0.5; } 96%, 100% { opacity: 0; } }
+.mg-ult__rune { position: absolute; opacity: 0; animation: mg-ult-rune 2.6s linear forwards; }
+@keyframes mg-ult-rune {
+  0%, 9.6% { opacity: 0; transform: scale(var(--s0)); animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  10% { opacity: 1; }
+  26.9% { opacity: 0.55; transform: none; }
+  80.8% { opacity: 0.55; }
+  100% { opacity: 0; transform: none; }
+}
+.mg-ult__charge { opacity: 0; animation: mg-ult-charge 1.2s ease-out calc(0.7s + var(--k) * 0.09s) forwards; }
+@keyframes mg-ult-charge { 10%, 100% { opacity: 0.55; } }
+.mg-ult__up .mg-bolt__art { transform-origin: 0 50%; animation: mg-ult-up 0.6s ease-out forwards; }
+@keyframes mg-ult-up { 0% { transform: scaleX(0); } 75% { opacity: 1; transform: none; } 100% { opacity: 0; transform: none; } }
+.mg-ult-flash { position: absolute; inset: 0; z-index: 9; pointer-events: none; background: #fffbeb; opacity: 0; animation: mg-ult-flash 0.25s linear 1.15s forwards; }
+@keyframes mg-ult-flash { 0% { opacity: 0.75; } 100% { opacity: 0; } }
+/* inside a struck balloon: the bolt holds 0.4 s, then a gold and blue blast */
+.mg-strike { position: absolute; left: 50%; top: 37.2%; width: 0; height: 0; pointer-events: none; }
+.mg-strike__bolt .mg-bolt__art { animation: mg-strike-bolt 0.45s linear forwards; }
+@keyframes mg-strike-bolt { 88% { opacity: 1; } 100% { opacity: 0; } }
+.mg-blast { position: absolute; left: -100px; top: -100px; width: 200px; height: 200px; overflow: visible; }
+.mg-blast__wave, .mg-blast__fire, .mg-blast__sparks { opacity: 0; transform-origin: 0 0; animation: 0.45s ease-out 0.4s forwards; }
+.mg-blast__wave { animation-name: mg-blast-wave; }
+.mg-blast__fire { animation-name: mg-blast-fire; }
+.mg-blast__sparks { animation-name: mg-blast-sparks; }
+@keyframes mg-blast-wave { 0% { opacity: 1; transform: scale(0.1); stroke-width: 6; } 100% { opacity: 0; transform: none; stroke-width: 0.5; } }
+@keyframes mg-blast-fire { 0% { opacity: 1; transform: scale(0.15); } 100% { opacity: 0; transform: none; } }
+@keyframes mg-blast-sparks { 0% { opacity: 1; transform: scale(0.5); } 100% { opacity: 0; transform: scale(1.8); } }
+
+/* Castle backdrop: a far, faded layer (mirrored) behind a near shadow layer. */
+/* Sized by height so the castle and the town strip share one scale (110/290 of the castle's height). */
+/* The sky is the size container, so the castle can be capped by both its height and its width (never cropped on phones). */
+.mg-sky { container-type: size; }
+/* Phones: clue + whole sky on one screen; 410px covers the game bar, HUD, a three-line clue and a host's bottom nav,
+   --mg-top-inset the page header above (a host's own, or .mg-page-head). */
+@media (max-width: 560px) {
+  .mg-sky { height: clamp(300px, calc(100svh - 410px - var(--mg-top-inset, 0px)), 540px); min-height: 0; }
+  .mg-rider__balloon { width: min(78%, 54px); }
+}
+.mg-root .mg-backdrop {
+  --bd-h: min(60cqh, 70cqw);
+  position: absolute; left: 50%; bottom: 50px; height: var(--bd-h); width: auto; aspect-ratio: 400 / 290; max-width: none;
+  transform: translateX(-50%); pointer-events: none;
+}
+.mg-root .mg-backdrop--far { --bd-h: min(48cqh, 56cqw); bottom: 84px; transform: translateX(-50%) scaleX(-1); }
+.mg-town { --bd-h: min(60cqh, 70cqw); position: absolute; inset: auto 0 50px; height: calc(var(--bd-h) * 110 / 290); background: center bottom / auto 100% repeat-x; pointer-events: none; }
+.mg-town--far { --bd-h: min(48cqh, 56cqw); bottom: 84px; transform: scaleX(-1); }
+.mg-sky__far { position: absolute; inset: 0; opacity: 0.45; pointer-events: none; }
+.mg-backdrop {
+  --bd-body: hsl(258 26% 24%); --bd-roof: hsl(258 26% 20%); --bd-rock: #2b243f; --bd-dark: hsl(256 30% 13%);
+  --bd-window: hsl(256 34% 10%); --bd-line: hsl(258 22% 31%); --bd-tree: hsl(250 28% 14%); --bd-tree-lit: hsl(250 24% 18%);
+  --bd-moss: hsl(150 14% 25% / 0.75);
+}
+.mg-backdrop--far {
+  --bd-body: hsl(270 22% 40%); --bd-roof: hsl(270 22% 37%); --bd-rock: #5c4870; --bd-dark: hsl(270 22% 32%);
+  --bd-window: hsl(270 24% 30%); --bd-line: hsl(270 20% 46%); --bd-tree: hsl(262 22% 33%); --bd-tree-lit: hsl(262 20% 37%);
+  --bd-moss: hsl(220 14% 42% / 0.6);
+}
+.mg-bd-body { fill: var(--bd-body); } .mg-bd-roof { fill: var(--bd-roof); } .mg-bd-rock { fill: var(--bd-rock); }
+.mg-bd-dark { fill: var(--bd-dark); } .mg-bd-window { fill: var(--bd-window); } .mg-bd-moss { fill: var(--bd-moss); }
+.mg-bd-tree { fill: var(--bd-tree); } .mg-bd-tree-lit { fill: var(--bd-tree-lit); }
+.mg-bd-trunk { fill: none; stroke: var(--bd-tree); stroke-width: 5; stroke-linecap: round; }
+.mg-bd-line { fill: none; stroke: var(--bd-line); stroke-width: 1.2; stroke-linecap: round; }
+.mg-bd-timber { fill: none; stroke: var(--bd-dark); stroke-width: 1.8; }
+.mg-sky__haze { position: absolute; inset: auto 0 50px; height: 60px; pointer-events: none; background: linear-gradient(transparent, hsl(285 38% 42% / 0.5)); }
+
+/* Stone wall in front of the wizard: coursed blocks with staggered joints, a coping course and capped merlons. */
+.mg-castle {
+  position: absolute; inset: auto 0 0; height: 66px; z-index: 7; pointer-events: none;
+  /* Merlons are phased so one ends exactly at each side of the wizard's opening (50% − 62px … 50% + 38px). */
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='16'%3E%3Cpath d='M0 0h26v16H0z' fill='%234a4263'/%3E%3Cpath d='M0 0h26v3H0z' fill='%23605880'/%3E%3Cpath d='M13.5 3v13M0 9.5h26' stroke='%23574f74' fill='none'/%3E%3C/svg%3E") calc(50% - 67px) 0 / 42px 16px repeat-x;
+  /* Leave an opening in the battlements where the wizard stands, so no merlon cuts across him. */
+  -webkit-mask: linear-gradient(#000 0 0) 0 16px / 100% 100% no-repeat, linear-gradient(#000 0 0) left top / calc(50% - 62px) 16px no-repeat, linear-gradient(#000 0 0) right top / calc(50% - 38px) 16px no-repeat;
+  mask: linear-gradient(#000 0 0) 0 16px / 100% 100% no-repeat, linear-gradient(#000 0 0) left top / calc(50% - 62px) 16px no-repeat, linear-gradient(#000 0 0) right top / calc(50% - 38px) 16px no-repeat;
+}
+.mg-castle::before {
+  content: ''; position: absolute; inset: 16px 0 0;
+  background:
+    linear-gradient(hsl(255 18% 40%), hsl(255 18% 40%)) 0 0 / 100% 3px no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='24'%3E%3Cpath d='M0 .5H48M0 12.5H48M.5 0V12M24.5 12V24' stroke='%23574f74' fill='none'/%3E%3Cpath d='M1 1h22v2H1zM25 13h22v2H25zM1 13h22v2H1zM25 1h22v2H25z' fill='%23ffffff' fill-opacity='.04'/%3E%3C/svg%3E") 0 3px / 48px 24px,
+    linear-gradient(hsl(255 20% 30%), hsl(255 22% 22%));
+}
+.mg-wizard {
+  position: absolute; left: 50%; bottom: 20px; z-index: 6; width: 110px; height: 143px; pointer-events: none;
+  transform: translateX(-62%); filter: drop-shadow(0 0 8px rgba(196, 181, 253, 0.45));
+}
+.mg-root .mg-wizard svg { width: 100%; height: 100%; overflow: visible; }
+.mg-wizard__arm { transform-box: view-box; transform-origin: 130px 140px; }
+.mg-wizard__staff { transform-box: view-box; transform-origin: 160px 170px; }
+.mg-wizard__glow { transform-box: fill-box; transform-origin: center; }
+/* Idle: the arm breathes gently at the shoulder. Cast: a small wind-up, the arm lifts the staff, the staff swings
+   forward on the hand, then both overshoot a little and settle (SWING_AT in BalloonPop.jsx = the forward swing). */
+.mg-wizard .mg-wizard__arm { animation: mg-arm-idle 3.2s ease-in-out infinite; }
+.mg-wizard--cast .mg-wizard__arm { animation: mg-arm-cast 0.5s ease-in-out; }
+.mg-wizard--cast .mg-wizard__staff { animation: mg-staff-swing 0.5s ease-in-out; }
+.mg-wizard--cast .mg-wizard__orb-red { animation: mg-orb-red 0.5s ease-out; }
+.mg-wizard--cast .mg-wizard__glow { animation: mg-orb-aura 0.5s ease-out; }
+@keyframes mg-arm-idle { 50% { transform: rotate(-2.5deg); } }
+@keyframes mg-arm-cast { 16% { transform: rotate(7deg); } 42% { transform: rotate(-42deg); } 58% { transform: rotate(-32deg); } 80% { transform: rotate(3deg); } }
+@keyframes mg-staff-swing { 16% { transform: rotate(6deg); } 42% { transform: rotate(12deg); } 58% { transform: rotate(-26deg); } 80% { transform: rotate(4deg); } }
+@keyframes mg-orb-red { 8%, 70% { opacity: 1; } }
+/* Casting a skill: the arm lifts and the staff stays upright, held high; the pearl takes the skill's colour (blue for
+   ice, red for fire, gold to blue for the ATP ultimate), its glow pulses and rings spread out from it. */
+.mg-wizard__ring { transform-box: fill-box; transform-origin: center; }
+/* The staff's runes glow on and off; the ribbon sways under the head. In the ultimate the runes flash gold. */
+.mg-wizard__runes { animation: mg-runes 2.4s ease-in-out infinite; }
+.mg-wizard .mg-wizard__ribbon { transform-box: view-box; transform-origin: 158px 88px; animation: mg-ribbon 2.2s ease-in-out infinite; }
+.mg-wizard--ult .mg-wizard__runes { animation: mg-runes-flash 0.35s ease-in-out 6; }
+@keyframes mg-runes { 50% { opacity: 0.35; } }
+@keyframes mg-runes-flash { 50% { stroke: #facc15; } }
+@keyframes mg-ribbon { 50% { transform: rotate(7deg); } }
+.mg-wizard--ice .mg-wizard__arm, .mg-wizard--fire .mg-wizard__arm { animation: mg-arm-power 1.5s ease-in-out; }
+.mg-wizard--ice .mg-wizard__staff, .mg-wizard--fire .mg-wizard__staff { animation: mg-staff-power 1.5s ease-in-out; }
+.mg-wizard--ice .mg-wizard__orb-ice, .mg-wizard--fire .mg-wizard__orb-red { animation: mg-orb-skill 1.5s ease-in-out; }
+.mg-wizard--ice .mg-wizard__glow { animation: mg-glow-ice 1.5s ease-in-out; }
+.mg-wizard--fire .mg-wizard__glow { animation: mg-glow-fire 1.5s ease-in-out; }
+.mg-wizard--ice .mg-wizard__ring, .mg-wizard--fire .mg-wizard__ring { animation: mg-orb-ring 0.6s ease-out 0.2s 2; }
+.mg-wizard--ice .mg-wizard__ring { stroke: #bae6fd; }
+.mg-wizard--fire .mg-wizard__ring { stroke: #fdba74; }
+.mg-wizard--ult .mg-wizard__arm { animation: mg-arm-ult 2.2s ease-in-out; }
+.mg-wizard--ult .mg-wizard__staff { animation: mg-staff-ult 2.2s ease-in-out; }
+.mg-wizard--ult .mg-wizard__orb-volt { animation: mg-orb-ult 2.2s ease-in-out; }
+.mg-wizard--ult .mg-wizard__glow { animation: mg-glow-ult 2.2s ease-in-out; }
+.mg-wizard--ult .mg-wizard__ring { stroke: #fde68a; animation: mg-orb-ring 0.55s ease-out 0.1s 4; }
+@keyframes mg-arm-power { 18%, 75% { transform: rotate(-32deg); } }
+@keyframes mg-staff-power { 18%, 75% { transform: rotate(28deg); } }
+@keyframes mg-arm-ult { 12%, 82% { transform: rotate(-32deg); } }
+@keyframes mg-staff-ult { 12%, 82% { transform: rotate(28deg); } }
+@keyframes mg-orb-skill { 15%, 80% { opacity: 1; } }
+@keyframes mg-orb-ult { 8%, 85% { opacity: 1; } }
+@keyframes mg-glow-ice { 15%, 75% { fill: #7dd3fc; opacity: 0.55; transform: scale(1.8); } }
+@keyframes mg-glow-fire { 15%, 75% { fill: #fb923c; opacity: 0.55; transform: scale(1.8); } }
+@keyframes mg-glow-ult {
+  10%, 40%, 70% { fill: #fbbf24; opacity: 0.6; transform: scale(2); }
+  25%, 55%, 85% { fill: #60a5fa; opacity: 0.5; transform: scale(2.3); }
+}
+@keyframes mg-orb-ring { 0% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(3); } }
+@keyframes mg-orb-aura { 20%, 45% { fill: #e0322b; opacity: 0.45; transform: scale(1.5); } }
+.mg-fireball {
+  position: absolute; left: -5px; top: -5px; z-index: 8; width: 10px; height: 10px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, #fff7d6 0 25%, #ffb020 45%, #e0322b 75%); box-shadow: 0 0 10px #ff6a2b, 0 0 18px #e0322b;
+}
+.mg-ember {
+  position: absolute; left: -2px; top: -2px; z-index: 8; width: 4px; height: 4px; border-radius: 50%; pointer-events: none;
+  background: #ffb020; box-shadow: 0 0 6px #e0322b; animation: mg-ember 0.45s ease-out forwards;
+}
+@keyframes mg-ember { to { opacity: 0; translate: 0 10px; scale: 0.3; } }
+
+/* Balloon Pop gauge, in the skill orbs' style: the ATP orb in its volt rune, and two bars of dark-blue glass in a gold
+   frame that run out from behind it, joined edge to edge and together as tall as the glass, with the old fighting-game
+   slant. The top one holds three blood vessels (the lives, which drain when one is lost) and stops a cell short of the
+   bottom one, the thicker ATP storage tube, which fills cell by cell and, once full, glows with a moving shine to show
+   it can be tapped. Both lean from the line they share, so their slanted ends follow one diagonal. */
+.mg-gauge { position: absolute; left: 10px; bottom: 10px; z-index: 8; display: grid; justify-items: start; pointer-events: none; }
+/* smaller in the corner of a phone's narrow sky */
+@media (max-width: 560px) { .mg-gauge { left: 6px; bottom: 6px; transform: scale(0.72); transform-origin: left bottom; } }
+/* the bars start at the orb's centre (56 px box, middle at 28 px): lives 14 px tall, tube 18 px, sharing a 2 px border */
+.mg-gauge__lives, .mg-gauge__tube {
+  position: relative; display: flex; gap: 3px; box-sizing: border-box; height: 14px; padding: 0 3px 0 27px;
+  border: 2px solid transparent; border-radius: 0 3px 3px 0; overflow: hidden;
+  background: linear-gradient(180deg, #1e3a8a, #0b1430) padding-box, linear-gradient(180deg, #fde68a, #8a5a12) border-box;
+  box-shadow: inset 0 2px 3px rgb(0 0 0 / 0.6), 0 2px 0 rgb(0 0 0 / 0.45);
+}
+/* a cell of the tube is 24.25 px wide; the lives use the same cells, one fewer */
+.mg-gauge__lives { position: absolute; z-index: 0; left: 30px; top: 13px; width: 113px; transform: skewX(-32deg); transform-origin: left bottom; }
+.mg-gauge__lives i {
+  position: relative; flex: 1; height: 100%; overflow: hidden; border-radius: 2px;
+  background: #2a0d12; box-shadow: inset 0 2px 3px rgb(0 0 0 / 0.6);
+}
+/* the blood, with a few red cells floating in it */
+.mg-gauge__lives i::before {
+  content: ''; position: absolute; inset: 0; transform: scaleX(0); transform-origin: left; transition: transform 0.45s ease-in;
+  background:
+    radial-gradient(circle at 22% 58%, #ff9a9a 0 1.3px, transparent 1.8px),
+    radial-gradient(circle at 55% 38%, #ff9a9a 0 1.1px, transparent 1.6px),
+    radial-gradient(circle at 84% 62%, #ff9a9a 0 1.3px, transparent 1.8px),
+    linear-gradient(180deg, #ff6676 0%, #e0102e 48%, #8f0019 100%);
+}
+.mg-gauge__lives i.mg-on::before { transform: scaleX(1); }
+.mg-gauge__lives i::after { content: ''; position: absolute; left: 3px; right: 3px; top: 1px; height: 2px; border-radius: 2px; background: rgb(255 255 255 / 0.45); }
+.mg-gauge__atp { position: relative; display: flex; align-items: flex-start; height: 56px; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; pointer-events: auto; }
+.mg-gauge__atp:disabled { cursor: default; }
+/* the ATP skill orb in its volt rune, over the bars' left ends; dimmed until the tube is full */
+.mg-gauge__bolt { position: relative; z-index: 1; display: grid; place-items: center; width: 56px; height: 56px; margin-left: 2px; border-radius: 50%; }
+.mg-gauge__icon { width: 56px; height: 56px; overflow: visible; filter: saturate(0.35) brightness(0.6) drop-shadow(0 2px 0 rgb(0 0 0 / 0.5)); }
+.mg-gauge__pulse { opacity: 0; }
+.mg-gauge__slant { position: relative; display: block; margin: 25px 0 0 -28px; transform: skewX(-32deg); transform-origin: left top; }
+.mg-gauge__tube { width: 140px; height: 18px; }
+.mg-gauge__tube i { flex: 1; height: 100%; border-radius: 2px; background: rgb(255 255 255 / 0.12); transition: background 0.3s; }
+/* the filled cells read as one bar running from the volt rune's blue, through pale blue, to yellow */
+.mg-gauge__tube i.mg-on { background: linear-gradient(90deg, #2563eb, #60a5fa 30%, #dbeafe 55%, #facc15) no-repeat; background-size: 400% 100%; box-shadow: 0 0 6px rgb(96 165 250 / 0.7); }
+.mg-gauge__tube i.mg-on:nth-child(2) { background-position: 33.3% 0; }
+.mg-gauge__tube i.mg-on:nth-child(3) { background-position: 66.6% 0; box-shadow: 0 0 6px rgb(250 204 21 / 0.7); }
+.mg-gauge__tube i.mg-on:nth-child(4) { background-position: 100% 0; box-shadow: 0 0 6px rgb(250 204 21 / 0.7); }
+/* "TAP!" stamped over the full tube, like a fighting game's MAX */
+.mg-gauge__tap {
+  position: absolute; inset: 0 0 0 24px; z-index: 1; display: grid; place-items: center; color: #0c2a4d;
+  font-size: 11px; line-height: 1; font-weight: 900; font-style: italic; letter-spacing: 0.1em; -webkit-text-stroke: 2.5px #fff; paint-order: stroke fill;
+  animation: mg-gauge-tap 0.8s ease-in-out infinite;
+}
+.mg-gauge__atp--ready .mg-gauge__icon { opacity: 1; filter: none; }
+.mg-gauge__atp--ready .mg-gauge__tube { animation: mg-gauge-glow 1s ease-in-out infinite; }
+.mg-gauge__atp--ready .mg-gauge__tube::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 18px;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.8), transparent); animation: mg-gauge-shine 1.2s linear infinite;
+}
+/* the full tube: sparks run round the border without pause; every 1.2 s it surges with a white flash and a burst of
+   edge bolts (flipping between three poses every 80 ms), while a ring ripples out of the badge */
+.mg-gauge__sparks {
+  position: absolute; left: -6px; top: -6px; width: calc(100% + 12px); height: calc(100% + 12px); z-index: 2; overflow: visible; pointer-events: none;
+  animation: mg-gauge-burst 0.4s ease-out;
+}
+.mg-gauge__run rect { animation: mg-gauge-run 1.6s linear infinite; }
+.mg-gauge__run .mg-gauge__run-b { animation-delay: -0.8s; }
+.mg-gauge__surge { animation: mg-gauge-surge 1.2s steps(1) infinite; }
+.mg-gauge__flash { opacity: 0; animation: mg-gauge-flash 1.2s ease-out infinite; }
+.mg-pose { opacity: 0; animation: mg-pose 0.24s steps(1) infinite; }
+.mg-gauge__ripple { position: absolute; inset: 12.5px; border-radius: 50%; border: 2px solid #60a5fa; opacity: 0; animation: mg-gauge-ripple 1.2s ease-out infinite; }
+/* full: the orb glows (its rune stays still) and a ring pulses out */
+.mg-gauge__atp--ready .mg-gauge__icon { filter: drop-shadow(0 0 2px rgb(56 189 248 / 0.5)); }
+.mg-gauge__atp--ready .mg-gauge__rune { opacity: 0.7; }
+.mg-gauge__atp--ready .mg-gauge__pulse { animation: mg-flyer-pulse 1.4s ease-in-out infinite; opacity: 0.4; }
+@keyframes mg-pose { 0% { opacity: 1; } 33.34%, 100% { opacity: 0; } }
+@keyframes mg-gauge-run { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -304; } }
+@keyframes mg-gauge-surge { 0% { opacity: 1; } 24%, 100% { opacity: 0; } }
+@keyframes mg-gauge-flash { 0% { opacity: 0.45; } 22%, 100% { opacity: 0; } }
+@keyframes mg-gauge-ripple { 0% { opacity: 0.9; transform: scale(1); } 45%, 100% { opacity: 0; transform: scale(1.6); } }
+@keyframes mg-gauge-burst { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mg-gauge-glow { 0%, 100% { box-shadow: inset 0 2px 4px #000, 0 0 10px 2px rgb(59 130 246 / 0.6); } 50% { box-shadow: inset 0 2px 4px #000, 0 0 14px 3px rgb(250 204 21 / 0.7); } }
+@keyframes mg-gauge-shine { from { transform: translateX(-20px); } to { transform: translateX(150px); } }
+@keyframes mg-gauge-tap { 50% { transform: scale(1.15); } }
+@keyframes mg-pulse-gold { 50% { box-shadow: 0 0 0 8px rgba(250, 204, 21, 0.3); transform: scale(1.05); } }
+
+/* ---------- Group Sort: mode select ---------- */
+.mg-modes { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 720px) { .mg-modes { grid-template-columns: 1fr 1fr; } }
+.mg-mode {
+  display: flex; flex-direction: column; gap: 8px; padding: 14px; text-align: left; cursor: pointer;
+  background: var(--card-bg); color: var(--card-text); border: 1px solid var(--card-edge); border-radius: 18px; box-shadow: var(--shadow);
+  transition: transform 0.15s, border-color 0.15s;
+}
+.mg-mode:hover { transform: translateY(-2px); border-color: var(--sea-500); }
+/* Same shape as the cover scenes (320 × 150) so they show whole; capped so wide screens stay compact. */
+.mg-mode__art { display: grid; place-items: center; aspect-ratio: 32 / 15; max-height: 230px; border-radius: 12px; overflow: hidden; background: var(--card-panel); }
+.mg-mode__art .mg-scene { width: 100%; height: 100%; }
+.mg-mode__title { font-family: var(--font-serif); font-size: 19px; line-height: 26px; font-weight: 700; }
+@media (min-width: 768px) { .mg-mode__title { font-size: 21px; line-height: 28px; } }
+.mg-mode__desc { color: var(--card-muted); font-size: 14.5px; line-height: 1.5; }
+.mg-mode__meta { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: var(--card-muted); padding-top: 8px; border-top: 1px solid var(--card-hair); }
+
+/* ---------- Group Sort: picture match ---------- */
+/* Picture Match = a noir evidence wall, like its cover: a dark office wall lit through window blinds,
+   photos as pinned polaroids, names as old paper notes, and a red string tying each found pair together.
+   The board keeps its own colours in light and dark mode. */
+.mg-cork {
+  --wall: #2a241f; --wall-dark: #0f0d0c; --pin: #d63a3a; --ink: #241c15; --string: #c0262d; --light: #efe3cc;
+  position: relative; max-width: 980px; margin: 0 auto; padding: 10px 10px 12px; border-radius: 14px; overflow: hidden;
+  border: 1px solid #3a322b;
+  background:
+    radial-gradient(circle at 20% 30%, rgb(255 255 255 / 0.03) 0 1px, transparent 2px) 0 0 / 11px 11px,
+    radial-gradient(ellipse at 75% 15%, var(--wall), var(--wall-dark) 75%);
+  box-shadow: inset 0 0 50px rgb(0 0 0 / 0.75), var(--shadow-lg);
+}
+/* light falling through the blinds, behind the cards */
+.mg-cork::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    repeating-linear-gradient(118deg, transparent 0 22px, rgb(15 13 12 / 0.55) 22px 34px),
+    linear-gradient(118deg, transparent 30%, rgb(239 227 204 / 0.16) 45%, rgb(239 227 204 / 0.05) 70%, transparent 85%);
+  -webkit-mask: linear-gradient(118deg, transparent 30%, #000 45%, #000 70%, transparent 85%);
+  mask: linear-gradient(118deg, transparent 30%, #000 45%, #000 70%, transparent 85%);
+  animation: mg-flicker 5s ease-in-out infinite;
+}
+.mg-pmatch { position: relative; display: grid; grid-template-rows: auto 1fr 1fr auto 1fr 1fr; row-gap: 8px; }
+@media (min-width: 600px) { .mg-pmatch { grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr 1fr; column-gap: 22px; } }
+.mg-pmatch--fade { opacity: 0.45; transition: opacity 0.3s; pointer-events: none; }
+/* a strip of masking tape with the column name on it */
+.mg-pmatch__label {
+  justify-self: start; display: inline-block; margin: 0; padding: 2px 12px; rotate: -1.5deg;
+  font-size: 12px; font-weight: 800; line-height: 18px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink);
+  background: rgb(222 208 180 / 0.9); box-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+}
+/* Every card row is a 1fr row of the one board grid (columns and card grids are subgrids), so photos and
+   notes all come out the same height on every screen size. */
+.mg-pmatch__col { grid-row: span 3; display: grid; grid-template-rows: subgrid; }
+/* 3 × 2 on every screen so all 12 cards fit without scrolling. */
+.mg-pmatch__grid { grid-row: span 2; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: subgrid; gap: 10px; }
+@media (min-width: 600px) { .mg-pmatch__grid { row-gap: 12px; } }
+/* three photos (stage 1: each photo takes two facts): one row on a phone, across both rows side by side */
+.mg-pmatch--three { grid-template-rows: auto auto 0 auto 1fr 1fr; }
+.mg-pmatch__grid--three > .mg-pcard { grid-row: span 2; align-self: center; }
+@media (min-width: 600px) { .mg-pmatch--three { grid-template-rows: auto 1fr 1fr; } }
+.mg-pcard {
+  --r: 0deg;
+  position: relative; display: grid; place-items: center; min-height: 72px; padding: 0; cursor: pointer; font: inherit; color: var(--ink);
+  border: 0; border-radius: 2px; rotate: var(--r);
+  box-shadow: 0 2px 3px rgb(0 0 0 / 0.5), 0 10px 18px rgb(0 0 0 / 0.45);
+  transition: transform 0.15s, box-shadow 0.15s;
+  animation: mg-pin-up 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) backwards; animation-delay: calc(var(--i, 0) * 55ms);
+}
+.mg-pmatch__grid .mg-pcard:nth-child(6n + 1) { --r: -3deg; }
+.mg-pmatch__grid .mg-pcard:nth-child(6n + 2) { --r: 2deg; }
+.mg-pmatch__grid .mg-pcard:nth-child(6n + 3) { --r: -1deg; }
+.mg-pmatch__grid .mg-pcard:nth-child(6n + 4) { --r: 2.5deg; }
+.mg-pmatch__grid .mg-pcard:nth-child(6n + 5) { --r: -2deg; }
+.mg-pmatch__grid .mg-pcard:nth-child(6n + 6) { --r: 1.5deg; }
+/* push pin (a real element so the strings can find its centre) */
+.mg-pcard__pin {
+  position: absolute; top: -5px; left: 50%; z-index: 2; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.75) 0 2px, var(--pin) 3px); box-shadow: 1px 3px 3px rgb(0 0 0 / 0.4);
+  transition: background 0.2s;
+}
+.mg-pcard:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 4px 6px rgb(0 0 0 / 0.5), 0 16px 26px rgb(0 0 0 / 0.5); }
+/* polaroid: aged frame with a thicker bottom for the caption; the photo is only lightly toned so the tissue stays clear */
+.mg-pcard--pic { grid-template-rows: auto auto; gap: 2px; padding: 6px 6px 3px; background: #e6dcc8; }
+.mg-pcard__photo { display: block; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; background: var(--art-bg); box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08); }
+.mg-pcard__photo svg { display: block; width: 100%; height: 100%; filter: sepia(0.35) saturate(0.85); }
+.mg-pcard__photo .mg-pic { display: block; width: 100%; height: 100%; object-fit: contain; filter: sepia(0.2) saturate(0.9); }
+.mg-pcard__caption {
+  width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: center;
+  font-size: clamp(11px, 1.4vw, 13px); font-weight: 700; line-height: 1.5; color: #4a3b2c;
+}
+/* old paper note with a folded corner */
+.mg-pcard--text { padding: 14px 7px 9px; background: linear-gradient(135deg, var(--note) 84%, var(--note-dark) 84%); }
+.mg-pmatch__grid .mg-pcard--text:nth-child(4n + 1) { --note: #ddd0b4; --note-dark: #b9aa8a; }
+.mg-pmatch__grid .mg-pcard--text:nth-child(4n + 2) { --note: #cfc1a3; --note-dark: #a8987a; }
+.mg-pmatch__grid .mg-pcard--text:nth-child(4n + 3) { --note: #e4d9c2; --note-dark: #bfb294; }
+.mg-pmatch__grid .mg-pcard--text:nth-child(4n + 4) { --note: #d6c7a7; --note-dark: #b0a080; }
+.mg-pcard--text strong { font-weight: 800; font-size: clamp(12px, 1.5vw, 15px); text-align: center; line-height: 1.3; }
+.mg-pcard--selected,
+.mg-pcard--selected:hover {
+  transform: translateY(-7px) scale(1.06); z-index: 3;
+  box-shadow: 0 0 0 3px var(--light), 0 0 0 6px var(--string), 0 0 26px rgb(239 227 204 / 0.35), 0 16px 24px rgb(0 0 0 / 0.6);
+}
+.mg-pcard--matched, .mg-pcard--matched:hover { cursor: default; transform: none; }
+/* a found pair's pins are redrawn on top of its string (see .mg-cork__strings), so hide the card's own */
+.mg-pcard--matched .mg-pcard__pin, .mg-pcard--tied .mg-pcard__pin { visibility: hidden; }
+.mg-pcard--wrong { box-shadow: 0 0 0 3px var(--bad), 0 8px 14px rgb(0 0 0 / 0.25); animation: mg-shake 0.4s; }
+.mg-pcard:focus-visible { outline: 3px solid var(--light); outline-offset: 3px; }
+/* strings sit over the cards, between the pins */
+.mg-cork__strings { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.mg-cork__strings path {
+  fill: none; stroke-width: 2.5; stroke-linecap: round; filter: drop-shadow(1px 2px 1px rgb(0 0 0 / 0.35));
+  stroke-dasharray: 1; animation: mg-string 0.5s ease-out;
+}
+.mg-cork__strings circle { fill: url(#mg-pin-red); filter: drop-shadow(1px 3px 2px rgb(0 0 0 / 0.4)); }
+/* rubber stamp over the board when a case is cleared */
+.mg-cork__stamp {
+  position: absolute; top: 50%; left: 50%; z-index: 5; margin: 0; padding: 6px 18px; pointer-events: none; white-space: nowrap;
+  font-family: var(--font-serif); font-weight: 800; font-size: clamp(26px, 7vw, 46px); letter-spacing: 0.08em; color: var(--string);
+  border: 4px double var(--string); border-radius: 6px; background: rgb(15 13 12 / 0.88); box-shadow: 0 8px 24px rgb(0 0 0 / 0.6);
+  transform: translate(-50%, -50%) rotate(-10deg); animation: mg-stamp 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes mg-stamp { from { opacity: 0; transform: translate(-50%, -50%) rotate(-10deg) scale(2.2); } }
+@keyframes mg-pin-up { from { opacity: 0; transform: translateY(-30px) scale(1.15); } }
+@keyframes mg-string { from { stroke-dashoffset: 1; } }
+
+/* ---------- Group Sort: conveyor (factory + robot arm) ---------- */
+.mg-factory {
+  /* size: scene height, crate box, crate bottom (= belt top), how far the arm cable reaches */
+  --fh: 190px; --cw: 96px; --ch: 62px; --cb: 46px; --reach: 44px; --rest: 8px; --mw: 64px; --crate-font: 9.5px;
+}
+.mg-conveyor {
+  /* factory colors, shared by the scene and the button panel */
+  --f-ceil: #b9e4ec; --f-sky: #8fd0dc; --f-floor: #6aa8b3; --f-ghost: #ffffff;
+  --f-steel: #3d5560; --f-steel-dark: #2b3d45; --f-arm: #2b3d45; --f-arm-top: #2b3d45; --f-roller: #e7f3f5;
+  --f-crate: #d9a066; --f-crate-edge: #a8723d; --f-tape: #ecc792; --f-label: #fff8ec; --f-ink: #4a2f12;
+  --f-btn: #e9f4f6; --f-btn-ink: #1d2a30; --f-btn-edge: #8fb3bb;
+}
+.mg-factory {
+  position: relative; height: var(--fh); margin: 6px 0 12px; overflow: hidden; border-radius: 18px; border: 2px solid var(--f-steel-dark);
+  background: linear-gradient(var(--f-ceil) 0 12px, var(--f-sky) 12px 76%, var(--f-floor) 76%);
+}
+@media (max-width: 520px) {
+  .mg-factory { --fh: 160px; --cw: 76px; --ch: 52px; --cb: 38px; --reach: 32px; --rest: 4px; --mw: 50px; --crate-font: 7.5px; }
+  .mg-factory .mg-crate__box { padding: 9px 3px 3px; }
+  .mg-factory .mg-crate__tape { width: 14px; height: 9px; }
+  .mg-factory .mg-crate__label { padding: 1px 3px; line-height: 1.08; }
+}
+.mg-factory__ghost { position: absolute; top: 20px; width: 52px; height: auto; transform: translateX(-50%); color: var(--f-ghost); opacity: 0.22; }
+@media (max-width: 520px) { .mg-factory__ghost { width: 40px; } }
+/* Solid (not see-through) silhouettes, so where two workers pass only the front one shows.
+   Front lane: taller than the crate machine; back lane: a bit smaller, higher and paler. */
+.mg-worker {
+  --wh: 104px; position: absolute; bottom: 6px; left: calc(var(--wh) * -1.2);
+  color: color-mix(in srgb, var(--f-ghost) 30%, var(--f-sky)); animation: mg-walk-r 20s linear infinite;
+}
+.mg-worker--back { --wh: 90px; bottom: 20px; color: color-mix(in srgb, var(--f-ghost) 20%, var(--f-sky)); }
+.mg-worker svg { display: block; width: calc(var(--wh) * 54 / 47); height: var(--wh); max-width: none; }
+/* A thin outline in the wall colour separates a worker from whoever walks behind them. */
+.mg-worker svg g { stroke: var(--f-sky); stroke-width: 0.8px; paint-order: stroke; }
+.mg-worker--l { animation-name: mg-walk-l; }
+.mg-worker--l svg { transform: scaleX(-1); }
+@keyframes mg-walk-r { from { left: calc(var(--wh) * -1.2); } to { left: 100%; } }
+@keyframes mg-walk-l { from { left: 100%; } to { left: calc(var(--wh) * -1.2); } }
+.mg-worker__limb { transform-box: fill-box; transform-origin: 50% 0; animation: mg-step var(--step, 0.45s) ease-in-out infinite alternate; }
+.mg-worker__limb--alt { animation-direction: alternate-reverse; }
+@keyframes mg-step { from { transform: rotate(-20deg); } to { transform: rotate(20deg); } }
+@media (max-width: 520px) {
+  .mg-worker { --wh: 86px; bottom: 4px; }
+  .mg-worker--back { --wh: 74px; bottom: 16px; }
+}
+.mg-factory__rail { position: absolute; left: 0; right: 0; top: 12px; height: 8px; background: var(--f-steel); z-index: 3; }
+.mg-factory__machine {
+  position: absolute; left: 0; bottom: calc(var(--cb) - 16px); width: var(--mw); height: calc(var(--ch) + 30px); z-index: 3; border-radius: 0 8px 0 0;
+  background: var(--f-steel); box-shadow: inset -5px 0 0 var(--f-steel-dark);
+}
+.mg-factory__screen {
+  position: absolute; left: 8px; top: 10px; width: calc(var(--mw) - 22px); height: 22px; border-radius: 3px; background: #f4fbfc;
+  background-image: repeating-linear-gradient(90deg, #8fb3bb 0 3px, transparent 3px 6px); background-size: 100% 60%; background-position: bottom; background-repeat: no-repeat;
+}
+.mg-factory__dial { position: absolute; left: calc(50% - 16px); top: 42px; width: 26px; height: 26px; border-radius: 50%; background: #f4fbfc; border: 3px solid var(--f-steel-dark); }
+.mg-factory__dial::after { content: ''; position: absolute; left: 50%; top: 3px; width: 2px; height: 8px; background: var(--f-steel-dark); transform-origin: bottom; transform: rotate(-30deg); animation: mg-dial 2.4s ease-in-out infinite alternate; }
+@keyframes mg-dial { to { transform: rotate(40deg); } }
+.mg-factory__belt {
+  position: absolute; left: calc(var(--mw) - 16px); right: calc(var(--cw) * 0.7); bottom: calc(var(--cb) - 16px); height: 16px; z-index: 2; border-radius: 8px; background-color: var(--f-steel-dark);
+  background-image: radial-gradient(circle, var(--f-roller) 0 2.5px, transparent 3px); background-size: 20px 16px; animation: mg-rollers 0.7s linear infinite;
+}
+@keyframes mg-rollers { to { background-position: 20px 0; } }
+.mg-factory__legs {
+  position: absolute; left: calc(var(--mw) + 14px); right: calc(var(--cw) * 0.7 + 18px); bottom: 0; height: calc(var(--cb) - 16px); z-index: 1;
+  border-left: 5px solid var(--f-steel-dark); border-right: 5px solid var(--f-steel-dark); background: linear-gradient(transparent 10px, var(--f-steel-dark) 10px 15px, transparent 15px);
+}
+.mg-factory--stopped .mg-worker, .mg-factory--stopped .mg-worker__limb, .mg-factory--stopped .mg-factory__belt, .mg-factory--stopped .mg-crate:not(.mg-crate--falling), .mg-factory--stopped .mg-factory__dial::after { animation-play-state: paused; }
+
+.mg-crate { position: absolute; left: calc(-1 * var(--cw) - 18px); bottom: var(--cb); width: var(--cw); height: var(--ch); z-index: 2; animation: mg-belt var(--dur) linear forwards; }
+.mg-crate--grabbed { animation-play-state: paused; }
+@keyframes mg-belt { from { left: calc(-1 * var(--cw) - 18px); } to { left: calc(100% - var(--cw) * 1.2); } }
+/* Missed crate: pivots on the belt's end (its bottom centre sits on the edge), tipping faster and faster, then drops (gravity). */
+.mg-crate--falling { left: calc(100% - var(--cw) * 1.2); z-index: 1; transform-origin: 50% 100%; animation: mg-crate-fall 1s forwards; }
+@keyframes mg-crate-fall {
+  0% { transform: none; animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.55); }
+  45% { transform: translateX(calc(var(--cw) * 0.08)) rotate(34deg); animation-timing-function: cubic-bezier(0.45, 0, 1, 0.6); }
+  100% { transform: translate(calc(var(--cw) * 0.45), calc(var(--cb) + var(--ch) + 24px)) rotate(115deg); }
+}
+
+
+.mg-crate__box {
+  position: relative; display: grid; place-items: center; width: 100%; height: 100%; padding: 11px 5px 4px; border-radius: 4px;
+  background: var(--f-crate); border: 2px solid var(--f-crate-edge); box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.08);
+}
+.mg-crate__tape { position: absolute; left: 50%; top: 0; width: 16px; height: 12px; transform: translateX(-50%); background: var(--f-tape); border-inline: 1px solid #c4925a; }
+.mg-crate__label {
+  display: grid; place-items: center; width: 100%; height: 100%; padding: 1px 4px; border-radius: 3px; background: var(--f-label);
+  color: var(--f-ink); font-size: var(--crate-font); font-weight: 700; line-height: 1.06; text-align: center; overflow: hidden;
+}
+.mg-crate--lead .mg-crate__box { border-color: #f59e0b; box-shadow: 0 0 0 3px #fde68a, 0 0 14px rgba(245, 158, 11, 0.7); }
+.mg-crate__stamp {
+  position: absolute; right: -7px; top: -7px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  color: #fff; font-weight: 800; font-size: 13px; border: 2px solid #fff;
+}
+.mg-crate__stamp--good { background: var(--ok); }
+.mg-crate__stamp--bad { background: var(--bad); }
+
+.mg-arm { position: absolute; top: 12px; z-index: 4; display: flex; flex-direction: column; align-items: center; transform: translateX(-50%); transition: left 0.22s ease-out; }
+/* Same shape as the Conveyor Sort cover: a mount, a ribbed rod, a trapezoid head on a wide bar, two claws. */
+.mg-arm__carriage { width: 30px; height: 10px; border-radius: 3px; background: var(--f-arm-top); }
+.mg-arm__cable {
+  width: 9px; height: var(--rest); background: repeating-linear-gradient(var(--f-steel-dark) 0 3px, #8fb3bb 3px 4.5px);
+  box-shadow: inset 1.5px 0 0 var(--f-steel-dark), inset -1.5px 0 0 var(--f-steel-dark);
+}
+.mg-arm--grab .mg-arm__cable { animation: mg-arm-reach 0.72s ease-in-out; }
+@keyframes mg-arm-reach { 0%, 28% { height: var(--rest); } 50%, 58% { height: var(--reach); } 100% { height: var(--rest); } }
+.mg-arm__head { position: relative; width: calc(var(--cw) + 10px); height: 19px; }
+.mg-arm__head::before {
+  content: ''; position: absolute; left: 22%; right: 22%; top: 0; height: 13px; background: var(--f-arm);
+  clip-path: polygon(12% 0, 88% 0, 100% 100%, 0 100%);
+}
+.mg-arm__head::after { content: ''; position: absolute; left: 0; right: 0; top: 12px; height: 7px; border-radius: 3.5px; background: var(--f-steel); }
+.mg-arm__claw { position: absolute; top: 16px; width: 6px; height: calc(var(--ch) * 0.5 - 2px); border-radius: 3px; background: var(--f-arm); z-index: 2; transform-origin: top; transition: transform 0.15s; }
+.mg-arm__claw::after { content: ''; position: absolute; bottom: 0; width: 9px; height: 5px; border-radius: 3px; background: var(--f-arm); }
+.mg-arm__claw--l { left: 1px; transform: rotate(16deg); }
+.mg-arm__claw--l::after { left: 0; }
+.mg-arm__claw--r { right: 1px; transform: rotate(-16deg); }
+.mg-arm__claw--r::after { right: 0; }
+.mg-arm--grab .mg-arm__claw--l { animation: mg-claw-l 0.72s ease-in-out; }
+.mg-arm--grab .mg-arm__claw--r { animation: mg-claw-r 0.72s ease-in-out; }
+@keyframes mg-claw-l { 0%, 44% { transform: rotate(16deg); } 52%, 92% { transform: rotate(0deg); } }
+@keyframes mg-claw-r { 0%, 44% { transform: rotate(-16deg); } 52%, 92% { transform: rotate(0deg); } }
+.mg-arm__held { position: absolute; left: 50%; top: 16px; width: var(--cw); height: var(--ch); transform: translateX(-50%); animation: mg-held 0.36s ease-in forwards; }
+@keyframes mg-held { 0%, 55% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -20px) scale(0.85); } }
+
+.mg-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; border-radius: 18px; background: var(--f-steel); box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.25); }
+.mg-panel--six { gap: 8px; }
+.mg-panel--six .mg-bin__art { max-width: 70px; }
+.mg-panel--six .mg-bin__label { font-size: 13px; }
+.mg-bin {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 88px; padding: 8px 6px 6px; cursor: pointer;
+  border-radius: 16px; border: 3px solid var(--f-btn-ink); background: var(--f-btn); box-shadow: 0 5px 0 var(--f-btn-ink);
+  transition: transform 0.08s, box-shadow 0.08s, background 0.15s, border-color 0.15s;
+}
+.mg-bin__art { width: 100%; max-width: 100px; border-radius: 8px; overflow: hidden; background: var(--art-bg); border: 2px solid var(--f-btn-edge); }
+.mg-bin__art .mg-pic { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: contain; }
+.mg-bin__label { font-weight: 800; font-size: 15px; color: var(--f-btn-ink); }
+.mg-bin:hover:not(:disabled) { filter: brightness(1.04); }
+.mg-bin:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 var(--f-btn-ink); }
+.mg-bin--good { border-color: var(--ok); background: #e7f8ee; animation: mg-press-ok 0.35s; }
+@keyframes mg-press-ok { 40% { transform: scale(1.05); } }
+.mg-bin--bad { border-color: var(--bad); background: #fdecec; animation: mg-shake 0.4s; }
+
+/* ---------- Diameter: muscle zoom puzzle (games/diameter) ---------- */
+/* Same look as the main site's student pages ("Coastal Soft", Games = sea green): a .coast-card board, white panels,
+   Nunito Sans text at the Lessons sizes, Playfair Display for titles. The stage stays light so the renders read. */
+.mg-zp {
+  position: relative; display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--card-edge); border-radius: 18px;
+  background: var(--card-bg); color: var(--card-text); box-shadow: var(--shadow);
+}
+.mg-zp__top { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.mg-zp__pill {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 4px 12px; border: 1px solid var(--card-hair); border-radius: 999px;
+  background: var(--card-chip); color: var(--card-text); font: inherit; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.mg-zp__pill--low { border-color: var(--bad); background: var(--bad-bg); color: var(--bad); }
+.mg-zp__steps { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.mg-zp__steps li { padding: 4px 11px; border-radius: 999px; background: var(--card-chip); color: var(--card-muted); font-size: 12px; font-weight: 700; }
+.mg-zp__steps li.mg-on { background: var(--sea-600); color: var(--on-accent); }
+.mg-zp__steps li.mg-done { background: var(--card-panel); color: var(--card-text); }
+.mg-zp__clue {
+  min-height: 56px; padding: 12px 16px; border: 1px solid var(--card-hair); border-radius: 12px; background: var(--surface); color: var(--text);
+  font-size: 15px; line-height: 1.55; scroll-margin: 12px;
+}
+.mg-zp__clue b { display: block; margin-bottom: 3px; color: var(--card-muted); font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+.mg-zp__clue b span { color: var(--sea-600); }
+.mg-zp__stage {
+  position: relative; align-self: center; width: 100%; max-width: 760px; aspect-ratio: 3 / 2; overflow: hidden; border: 1px solid var(--card-edge); border-radius: 14px;
+  touch-action: manipulation; cursor: crosshair;
+  background: radial-gradient(circle at 50% 42%, #ffffff 0, hsl(195 60% 94%) 45%, hsl(165 40% 86%) 100%);
+  animation: mg-zp-in 0.3s ease-out;
+}
+.mg-zp__stage img { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; user-select: none; }
+.mg-zp__base { transition: opacity 0.4s; }
+.mg-zp__full { opacity: 0; transition: opacity 0.6s; }
+.mg-zp__full.mg-on { opacity: 1; }
+.mg-zp__part { opacity: 0; transform: scale(1.04); transition: opacity 0.35s, transform 0.35s; }
+.mg-zp__part.mg-on { opacity: 1; transform: none; filter: drop-shadow(0 0 4px #fff); }
+.mg-zp__slot {
+  position: absolute; inset: 0; pointer-events: none; background: hsl(165 60% 40%); opacity: 0.3;
+  mask-size: 100% 100%; -webkit-mask-size: 100% 100%; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat;
+  animation: mg-zp-slot 2.4s ease-in-out infinite;
+}
+.mg-zp__num {
+  position: absolute; z-index: 1; display: grid; place-items: center; width: 24px; height: 24px; margin: -12px 0 0 -12px; pointer-events: none;
+  border: 2px solid #fff; border-radius: 50%; background: hsl(165 52% 32%); color: #fff; font-size: 12.5px; font-weight: 800;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.3);
+}
+.mg-zp__num.mg-on { background: #16a34a; }
+.mg-zp__pop {
+  position: absolute; z-index: 2; transform: translate(-50%, -50%); pointer-events: none; white-space: nowrap;
+  color: #fff; font-size: 19px; font-weight: 800; text-shadow: 0 1px 0 hsl(165 52% 22%), 0 0 8px hsl(165 52% 28%); animation: mg-zp-up 1s ease-out forwards;
+}
+.mg-zp__pop--bad { color: #fee2e2; text-shadow: 0 1px 0 #991b1b, 0 0 8px #b91c1c; }
+.mg-zp__loading { position: absolute; inset: 0; display: grid; place-items: center; color: hsl(165 40% 20%); font-weight: 700; }
+.mg-zp__msg { min-height: 22px; margin: 0; color: var(--card-text); font-size: 14.5px; font-weight: 700; text-align: center; }
+.mg-zp__tray { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+.mg-zp__piece {
+  display: grid; grid-template-rows: 1fr auto; place-items: center; height: 92px; padding: 4px 4px 3px; border: 1px solid var(--card-edge); border-radius: 12px; background: var(--art-bg);
+  box-shadow: 0 2px 6px hsl(165 35% 30% / 0.12); cursor: grab; touch-action: none; transition: transform 0.15s, border-color 0.15s;
+}
+.mg-zp__piece--picked { border: 2px solid var(--sea-600); transform: translateY(-3px); box-shadow: 0 6px 14px hsl(165 35% 30% / 0.25); }
+.mg-zp__piece--done { visibility: hidden; }
+.mg-zp__piece--wrong { animation: mg-shake 0.4s; }
+.mg-zp__thumb { max-width: 92%; max-height: 58px; pointer-events: none; }
+/* the piece's name, under its picture */
+.mg-zp__pname { max-width: 100%; color: hsl(165 45% 16%); font-size: 11.5px; font-weight: 700; line-height: 1.2; text-align: center; hyphens: auto; overflow-wrap: anywhere; pointer-events: none; }
+.mg-zp__ghost { position: fixed; z-index: 40; width: 110px; transform: translate(-50%, -50%); pointer-events: none; filter: drop-shadow(0 6px 8px rgb(0 0 0 / 0.4)); }
+.mg-zp__tip { margin: 0; color: var(--card-muted); font-size: 13px; text-align: center; }
+@keyframes mg-zp-slot { 50% { opacity: 0.16; } }
+@keyframes mg-zp-in { from { opacity: 0; } }
+@keyframes mg-zp-up { to { transform: translate(-50%, -90%); opacity: 0; } }
+@media (max-width: 560px) {
+  .mg-zp { gap: 10px; padding: 12px; }
+  .mg-zp__clue { padding: 10px 12px; font-size: 14.5px; }
+  .mg-zp__tray { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
+  .mg-zp__piece { height: 86px; }
+  .mg-zp__thumb { max-height: 46px; }
+  .mg-zp__piece { padding: 4px 2px 3px; }
+  .mg-zp__pname { font-size: 9.5px; letter-spacing: -0.01em; }
+  .mg-zp__num { width: 20px; height: 20px; margin: -10px 0 0 -10px; font-size: 11px; }
+  }
+
+/* Diameter, blueprint look (overrides the block above; the user's pick, 2026-11-14): each stage is an architect's
+   drawing sheet. Navy paper with a white grid, a white frame, a drawing number, stage tabs like a sheet index, the
+   model drawn pale on the paper until each part snaps in and takes its colour, a dimension line with the real size, the
+   clue as a spec box, and the pieces as numbered part cards (P-01 ...). */
+.mg-zp {
+  --bp: #1d4f86; --bp-ink: #e8f2ff; --bp-hair: rgb(232 242 255 / 0.55); --bp-hi: #ffd23f; --bp-mono: Consolas, "Cascadia Mono", ui-monospace, Menlo, monospace;
+  gap: 8px; border: 0; border-radius: 10px; color: var(--bp-ink); box-shadow: 0 6px 18px rgb(10 30 60 / 0.35);
+  background:
+    linear-gradient(rgb(255 255 255 / 0.09) 1px, transparent 1px) 0 0 / 100px 100px,
+    linear-gradient(90deg, rgb(255 255 255 / 0.09) 1px, transparent 1px) 0 0 / 100px 100px,
+    linear-gradient(rgb(255 255 255 / 0.045) 1px, transparent 1px) 0 0 / 20px 20px,
+    linear-gradient(90deg, rgb(255 255 255 / 0.045) 1px, transparent 1px) 0 0 / 20px 20px,
+    var(--bp);
+}
+/* the white frame of the drawing sheet */
+.mg-zp::before { content: ""; position: absolute; inset: 8px; border: 2px solid var(--bp-ink); border-radius: 4px; pointer-events: none; }
+.mg-zp__top { align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--bp-hair); }
+.mg-zp__dwg { margin-right: auto; font: 700 17px/1.2 var(--bp-mono); letter-spacing: 0.14em; text-transform: uppercase; }
+.mg-zp__pill { min-height: 30px; border: 1px solid var(--bp-ink); border-radius: 2px; background: rgb(255 255 255 / 0.08); color: var(--bp-ink); font-family: var(--bp-mono); }
+.mg-zp__pill--low { border-color: #fca5a5; background: rgb(185 28 28 / 0.55); color: #fff; }
+.mg-zp__steps li { border: 1px solid var(--bp-hair); border-radius: 2px; background: transparent; color: rgb(232 242 255 / 0.75); font: 12px/1.3 var(--bp-mono); text-transform: uppercase; }
+.mg-zp__steps li.mg-done { background: rgb(232 242 255 / 0.16); color: var(--bp-ink); }
+.mg-zp__steps li.mg-on { border-color: var(--bp-hi); background: var(--bp-hi); color: var(--bp); font-weight: 700; }
+.mg-zp__clue { border: 1px solid var(--bp-ink); border-radius: 2px; background: rgb(10 35 70 / 0.35); color: var(--bp-ink); }
+.mg-zp__clue b { color: var(--bp-hi); font-family: var(--bp-mono); }
+.mg-zp__stage {
+  max-width: 680px; margin: 2px 0 0; border: 1px dashed var(--bp-hair); border-radius: 2px; cursor: crosshair;
+  background: radial-gradient(ellipse at 50% 45%, rgb(255 255 255 / 0.1), transparent 70%);
+}
+/* the model not yet built: drawn pale on the blue paper */
+.mg-zp__base { filter: grayscale(1) brightness(1.35) contrast(0.9); opacity: 0.85; }
+.mg-zp__part.mg-on { filter: drop-shadow(0 0 3px rgb(255 255 255 / 0.7)); }
+.mg-zp__slot { background: #cfe3ff; opacity: 0.25; }
+.mg-zp__num { border: 2px solid var(--bp); background: var(--bp-hi); color: var(--bp); box-shadow: 0 1px 4px rgb(0 0 0 / 0.4); }
+.mg-zp__num.mg-on { background: #4ade80; }
+.mg-zp__loading { color: var(--bp-ink); font-family: var(--bp-mono); }
+/* dimension line: a rule with end ticks and the real size under it */
+.mg-zp__dim {
+  position: relative; align-self: center; width: min(100%, 600px); margin: 0; padding-top: 5px; border-top: 1px solid var(--bp-ink);
+  color: var(--bp-ink); font: 12px/1.2 var(--bp-mono); text-align: center;
+}
+.mg-zp__dim::before, .mg-zp__dim::after { content: ""; position: absolute; top: -6px; width: 1px; height: 11px; background: var(--bp-ink); }
+.mg-zp__dim::before { left: 0; }
+.mg-zp__dim::after { right: 0; }
+.mg-zp__msg { min-height: 0; margin: -2px 0; color: var(--bp-hi); font-size: 14px; }
+.mg-zp__msg:empty { display: none; }
+.mg-zp__tip { color: rgb(232 242 255 / 0.75); }
+.mg-zp__tray { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; padding: 0; }
+.mg-zp__piece {
+  position: relative; grid-template-rows: auto auto; align-content: start; height: auto; gap: 4px; padding: 6px 6px 5px;
+  border: 1px solid var(--bp-ink); border-radius: 2px; background: rgb(255 255 255 / 0.07); box-shadow: none; color: var(--bp-ink);
+}
+.mg-zp__pno { position: absolute; top: 3px; right: 5px; color: var(--bp-hi); font: 10px/1 var(--bp-mono); pointer-events: none; }
+.mg-zp__plate { --plate: 64px; display: grid; place-items: center; width: 100%; height: calc(var(--plate) * 0.8); pointer-events: none; }
+/* the picture always fits its box, whatever its shape (a tall, narrow part must not stretch the card) */
+.mg-zp__plate .mg-zp__thumb {
+  width: calc(var(--plate) * 1.2); height: calc(var(--plate) * 0.72); max-width: 100%; max-height: none; object-fit: contain;
+  filter: drop-shadow(0 0 1px rgb(255 255 255 / 0.9)) drop-shadow(0 0 2px rgb(255 255 255 / 0.5));
+}
+.mg-zp__pname {
+  width: 100%; padding-top: 4px; border-top: 1px dashed var(--bp-hair); color: var(--bp-ink); font: 11.5px/1.25 var(--bp-mono); text-align: left;
+}
+.mg-zp__piece--picked { border: 2px solid var(--bp-hi); padding: 5px 5px 4px; background: rgb(255 210 63 / 0.18); transform: translateY(-3px); box-shadow: 0 6px 12px rgb(0 0 0 / 0.3); }
+@media (max-width: 560px) {
+  .mg-zp { padding: 16px 14px; }
+  .mg-zp::before { inset: 5px; }
+  .mg-zp__dwg { font-size: 13px; letter-spacing: 0.08em; }
+  .mg-zp__steps li { padding: 3px 7px; font-size: 10.5px; }
+  .mg-zp__tray { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; }
+  .mg-zp__piece { height: auto; padding: 5px 4px 4px; }
+  .mg-zp__plate { --plate: 54px; }
+  .mg-zp__pname { font-size: 10px; }
+}
+
+/* ---------- Shared bits ---------- */
+.mg-shake { animation: mg-shake 0.4s; }
+@keyframes mg-shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+@keyframes mg-fade { from { opacity: 0; } }
+@keyframes mg-pop-in { from { transform: scale(0.85); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .mg-sc-bob, .mg-sc-drift, .mg-sc-spin, .mg-sc-hop, .mg-sc-deal, .mg-sc-belt, .mg-sc-convey, .mg-sc-twinkle, .mg-sc-breathe, .mg-sc-flicker, .mg-btn--pulse,
+  .mg-hub-hero__mascot, .mg-armin__body, .mg-armin__head, .mg-armin__arm, .mg-armin__leg, .mg-armin__pupil, .mg-armin [class*='mg-armin__'], .mg-mascot-bar__bubble--nudge, .mg-factory__belt, .mg-factory__dial::after, .mg-worker__limb { animation: none; }
+  .mg-pcard, .mg-pmatch, .mg-cork::before, .mg-cork__strings path, .mg-cork__stamp { transition: none; animation: none; }
+  .mg-sc-smoke { animation: none; opacity: 0.35; }
+}
+.mg-crash { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }

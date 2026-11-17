@@ -10,6 +10,8 @@ export default defineConfig({
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
       "@shared": fileURLToPath(new URL("./shared", import.meta.url)),
+      // src/muscle-games is shared with the standalone Muscle Games repo, which imports react-router-dom v6.
+      "react-router-dom": "react-router",
     },
   },
 });

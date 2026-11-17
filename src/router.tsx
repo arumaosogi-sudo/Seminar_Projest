@@ -5,7 +5,7 @@ import { createBrowserRouter, Navigate, type RouteObject } from "react-router";
  * Page files export a default React component.
  *
  * 🧩 Teammate areas (placeholders, replace the page files — routes are already wired):
- *    /games/*    → src/pages/games/
+ *    /games/*    → src/muscle-games/ (mounted by src/pages/games/MuscleGamesPage.tsx)
  *    /explore/*  → src/pages/explore/
  *    /tests/*    → src/pages/tests/   (the Worker API for tests is ready — see docs/ARCHITECTURE.md §5)
  */
@@ -20,12 +20,8 @@ const studentRoutes: RouteObject[] = [
   { path: "lessons", ...page(() => import("./pages/lessons/LessonsList")) },
   { path: "lessons/:slug", ...page(() => import("./pages/lessons/Lesson")) },
 
-  // 🧩 Games (teammate)
-  { path: "games", ...page(() => import("./pages/games/GamesHub")) },
-  { path: "games/balloon-pop", ...page(() => import("./pages/games/BalloonPop")) },
-  { path: "games/group-sort", ...page(() => import("./pages/games/GroupSort")) },
-  { path: "games/diameter", ...page(() => import("./pages/games/Diameter")) },
-  { path: "games/result", ...page(() => import("./pages/games/GameResult")) },
+  // 🎮 Games — src/muscle-games (hub + Balloon Pop, Group Sort, Diameter; scores saved via /api/me/game-runs)
+  { path: "games/*", ...page(() => import("./pages/games/MuscleGamesPage")) },
 
   // 🧩 3D Explore (teammate)
   { path: "explore", ...page(() => import("./pages/explore/Explore3D")) },
@@ -65,6 +61,7 @@ export const routes: RouteObject[] = [
       { path: "tests/:testId", ...page(() => import("./pages/admin/TestBuilder")) },
       { path: "tests/:testId/assign", ...page(() => import("./pages/admin/AssignTest")) },
       { path: "results", ...page(() => import("./pages/admin/Results")) },
+      { path: "games", ...page(() => import("./pages/admin/GameScores")) },
       { path: "students", ...page(() => import("./pages/admin/Students")) },
       { path: "settings", ...page(() => import("./pages/admin/Settings")) },
     ],
