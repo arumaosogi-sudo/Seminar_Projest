@@ -33,7 +33,7 @@ function GameCard({ g, n }) {
           <span className="mg-chip">🎯 {MAX_SCORE} points</span>
         </div>
         <p className="mg-game-card__best">
-          {top === undefined ? 'No score yet this session' : `Best this session: ${top} / ${MAX_SCORE}`}
+          {top === undefined ? 'No score yet' : `Your best: ${top} / ${MAX_SCORE}`}
         </p>
         <Link to={g.id} className="mg-btn mg-btn--primary mg-btn--block mg-btn--pulse" aria-label={`Play ${g.title}`}>
           ▶ Play

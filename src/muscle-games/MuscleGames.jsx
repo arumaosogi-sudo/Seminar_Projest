@@ -45,9 +45,20 @@ class GameErrorBoundary extends Component {
  * gameHeader={false} drops each game's page header (back link, title), for hosts that render their own on game pages too.
  * playerId identifies the signed-in student: runs that could not be saved wait in this browser (outbox.js) and are
  * sent again only while the same player is signed in.
+ * savedBest ({ [scoreKey]: best out of 10 }) is the student's best already saved by the host, shown as "Your best".
  */
-export default function MuscleGames({ onGameFinish, hubTitle = true, gameHeader = true, playerId = null, className = '' }) {
-  const config = useMemo(() => ({ onGameFinish, hubTitle, gameHeader, playerId }), [onGameFinish, hubTitle, gameHeader, playerId]);
+export default function MuscleGames({
+  onGameFinish,
+  hubTitle = true,
+  gameHeader = true,
+  playerId = null,
+  savedBest = null,
+  className = '',
+}) {
+  const config = useMemo(
+    () => ({ onGameFinish, hubTitle, gameHeader, playerId, savedBest }),
+    [onGameFinish, hubTitle, gameHeader, playerId, savedBest]
+  );
 
   // Retry runs that failed to save: now, when the device comes back online, and every 20 s while any are waiting.
   useEffect(() => {
@@ -66,7 +77,7 @@ export default function MuscleGames({ onGameFinish, hubTitle = true, gameHeader 
   return (
     <div className={`mg-root ${className}`.trim()}>
       <GamesConfigContext.Provider value={config}>
-        <ScoresProvider>
+        <ScoresProvider key={playerId ?? 'guest'}>
           <FxProvider>
             <GameErrorBoundary>
               <Routes>

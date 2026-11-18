@@ -234,7 +234,7 @@ export default function GamePage({ game, Game }) {
               <small> / {MAX_SCORE}</small>
             </p>
             <p className="mg-result__best">
-              Best this session: <strong>{bestOf(game, best)} / {MAX_SCORE}</strong>
+              Your best: <strong>{bestOf(game, best)} / {MAX_SCORE}</strong>
             </p>
             {onGameFinish && (
               <p className={`mg-save mg-save--${result.save}`} role="status">

@@ -17,7 +17,7 @@ export default function FrameHead({ title, children, className = 'mg-fhead', tit
       <span className={`${pill} mg-fpill--score`} aria-label={`Score ${score} out of ${MAX_SCORE}`}>
         Score {score}/{MAX_SCORE}
       </span>
-      <span className={pill} aria-label={`Best this session ${best ?? 'none yet'}`}>
+      <span className={pill} aria-label={`Your best ${best ?? 'none yet'}`}>
         Best {best ?? '—'}
       </span>
     </div>

@@ -1,6 +1,7 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useMatch } from "react-router";
-import type { GameRunBody } from "@shared/contract";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { GameBest, GameRunBody } from "@shared/contract";
 import { api } from "@/lib/api";
 import { useMe } from "@/lib/auth";
 import { useDocumentTitle } from "@/components/student/useDocumentTitle";
@@ -15,6 +16,20 @@ import "@fontsource/cinzel-decorative/latin-900.css";
 /** /games/* — the Muscle Games module. Every finished (or left) run, scored out of 10, is saved to the student's record (GAME-7). */
 export default function MuscleGamesPage() {
   useDocumentTitle("Games");
+  const qc = useQueryClient();
+  // Runs that fail to save (Wi-Fi drop) wait in this browser and are re-sent only for this same student.
+  const me = useMe().data;
+  const playerId = me?.role === "student" ? String(me.student.id) : null;
+  // The best already saved for this student (same numbers as the instructor's Game scores page), per game mode.
+  const savedRuns = useQuery({
+    queryKey: ["me", "game-runs", playerId],
+    queryFn: () => api.get<GameBest[]>("/me/game-runs"),
+    enabled: playerId !== null,
+  });
+  const savedBest = useMemo(
+    () => (savedRuns.data ? Object.fromEntries(savedRuns.data.map((r) => [r.scoreKey, r.best])) : null),
+    [savedRuns.data],
+  );
   const saveRun = useCallback(async (run: MuscleGameRun) => {
     const body: GameRunBody = {
       runId: run.runId,
@@ -25,15 +40,13 @@ export default function MuscleGamesPage() {
       mistakes: run.mistakes,
     };
     await api.post("/me/game-runs", body);
-  }, []);
+    void qc.invalidateQueries({ queryKey: ["me", "game-runs"] });
+  }, [qc]);
   // The hub and every game get the same page header as the other student pages (breadcrumb, phone back button).
   const onHub = useMatch("/games") !== null;
   const gameMatch = useMatch("/games/:gameId");
   const gameIndex = GAMES.findIndex((g) => g.id === gameMatch?.params.gameId);
   const game = GAMES[gameIndex];
-  // Runs that fail to save (Wi-Fi drop) wait in this browser and are re-sent only for this same student.
-  const me = useMe().data;
-  const playerId = me?.role === "student" ? String(me.student.id) : null;
   // coast-sans: the same Nunito Sans text font as Lessons and 3D Explore.
   return (
     <div className="coast-sans">
@@ -60,6 +73,7 @@ export default function MuscleGamesPage() {
         hubTitle={!onHub}
         gameHeader={!game}
         playerId={playerId}
+        savedBest={savedBest}
         className="[--mg-bottom-inset:calc(76px+env(safe-area-inset-bottom))] [--mg-top-inset:80px] md:[--mg-bottom-inset:0px] md:[--mg-top-inset:0px]"
       />
     </div>

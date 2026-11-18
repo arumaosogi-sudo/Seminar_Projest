@@ -243,8 +243,10 @@ export const gameRunBody = z.object({
 });
 export type GameRunBody = z.input<typeof gameRunBody>;
 
+/** GET /api/me/game-runs — one row per game mode (score key) the student has played. */
 export interface GameBest {
   gameId: GameId;
+  scoreKey: GameScoreKey;
   best: number;
   plays: number;
   lastPlayedAt: string;

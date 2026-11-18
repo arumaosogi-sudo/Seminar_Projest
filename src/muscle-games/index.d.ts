@@ -24,6 +24,8 @@ export const MuscleGames: ComponentType<{
   gameHeader?: boolean;
   /** The signed-in student; runs that failed to save are re-sent only while this same player is signed in. */
   playerId?: string | null;
+  /** The student's best already saved by the host, per score key (out of 10); shown as "Your best". */
+  savedBest?: Record<string, number> | null;
   className?: string;
 }>;
 

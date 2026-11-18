@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { gameRunBody, type GameBest, type GameId } from "../../shared/contract";
+import { gameRunBody, type GameBest, type GameId, type GameScoreKey } from "../../shared/contract";
 import { execute, nowIso, queryAll } from "../db";
 import type { AppEnv } from "../env";
 import { readBody } from "../http";
@@ -42,14 +42,19 @@ gameRoutes.post("/me/game-runs", async (c) => {
   return c.json({ ok: true }, 201);
 });
 
-/** GET /api/me/game-runs — the signed-in student's best score (out of 10) per game, any mode. */
+/**
+ * GET /api/me/game-runs — the signed-in student's saved best (out of 10) per game mode, so the games page shows the
+ * same best as the instructor's Game scores page (a game's best is its best mode).
+ */
 gameRoutes.get("/me/game-runs", async (c) => {
   const s = c.get("student");
-  const rows = await queryAll<{ game_id: GameId; best: number; plays: number; last_played_at: string }>(
+  const rows = await queryAll<{ game_id: GameId; score_key: GameScoreKey; best: number; plays: number; last_played_at: string }>(
     c.env.DB,
-    `SELECT game_id, MAX(score) AS best, COUNT(*) AS plays, MAX(updated_at) AS last_played_at
-       FROM game_runs WHERE student_id = ? GROUP BY game_id`,
+    `SELECT game_id, score_key, MAX(score) AS best, COUNT(*) AS plays, MAX(updated_at) AS last_played_at
+       FROM game_runs WHERE student_id = ? GROUP BY game_id, score_key`,
     s.id,
   );
-  return c.json<GameBest[]>(rows.map((r) => ({ gameId: r.game_id, best: r.best, plays: r.plays, lastPlayedAt: r.last_played_at })));
+  return c.json<GameBest[]>(
+    rows.map((r) => ({ gameId: r.game_id, scoreKey: r.score_key, best: r.best, plays: r.plays, lastPlayedAt: r.last_played_at })),
+  );
 });
