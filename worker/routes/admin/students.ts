@@ -234,6 +234,8 @@ studentAdminRoutes.post("/enrollments/:id/move", async (c) => {
   if (already) throw conflict(`The student is already enrolled in ${to.name}.`);
   await db.batch([
     stmt(db, "UPDATE enrollments SET class_id = ? WHERE id = ?", to.id, id),
+    // Game runs keep a copy of the section; keep it in step so deleting the old section can't remove them.
+    stmt(db, "UPDATE game_runs SET class_id = ? WHERE enrollment_id = ?", to.id, id),
     auditStmt(db, c.get("admin").email, "student.move", "enrollment", id, {
       studentId: enr.student_id,
       fromClassId: from.id,
