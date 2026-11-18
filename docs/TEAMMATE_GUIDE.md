@@ -2,8 +2,9 @@
 
 > ✅ หน้า Tests (รายการข้อสอบ / ทำข้อสอบ / ผลสอบ) ทำเสร็จแล้วเมื่อ 7 ต.ค. 2026 — ไม่ต้องทำซ้ำ ใช้เป็นตัวอย่างการเรียก API ได้
 
-> หน้าของคุณ "ถูกจองไว้แล้ว" — route ต่อไว้ครบใน `src/router.tsx` ตอนนี้แต่ละหน้าแสดง placeholder (กรอบเส้นประ 🧩)
-> พร้อม checklist ของสิ่งที่ต้องทำ ให้ **แทนที่ไฟล์ทั้งไฟล์** แต่ต้องคง `export default` ไว้
+> ✅ Games ทำเสร็จแล้ว (PR #1, merge 17 พ.ย. 2026): โมดูลเกมอยู่ที่ `src/muscle-games/` ต่อเข้าเว็บที่ `src/pages/games/MuscleGamesPage.tsx`
+> (route เดียว `/games/*`) คะแนนบันทึกลง D1 ตาราง `game_runs` — กติกาอยู่ใน `docs/ARCHITECTURE.md` §4.1
+> ✅ 3D Explore + Sarcomere ทำเสร็จแล้ว
 
 ## 1. รันโปรเจกต์บนเครื่อง
 
@@ -24,11 +25,11 @@ npm run dev                        # เปิด http://localhost:5173 (Vite + 
 
 | ส่วน | Route | ไฟล์ | Requirement |
 |---|---|---|---|
-| Games hub | `/games` | `src/pages/games/GamesHub.tsx` | GAME-1..3, 5 |
-| Balloon Pop | `/games/balloon-pop` | `src/pages/games/BalloonPop.tsx` | GAME-1, 5, 6 |
-| Group Sort | `/games/group-sort` | `src/pages/games/GroupSort.tsx` | GAME-2, 4, 5, 6 |
-| Diameter | `/games/diameter` | `src/pages/games/Diameter.tsx` | GAME-3, 4, 5, 6 |
-| Game result | `/games/result` | `src/pages/games/GameResult.tsx` | GAME-6 |
+| ✅ Games hub | `/games` | `src/muscle-games/GamesHub.jsx` (ผ่าน `src/pages/games/MuscleGamesPage.tsx`) | GAME-1..3, 5, 7 |
+| ✅ Balloon Pop | `/games/balloon-pop` | `src/muscle-games/games/BalloonPop.jsx` | GAME-1, 5, 6 |
+| ✅ Group Sort | `/games/group-sort` | `src/muscle-games/games/GroupSort.jsx` | GAME-2, 4, 5, 6 |
+| ✅ Diameter | `/games/diameter` | `src/muscle-games/games/diameter/` | GAME-3, 4, 5, 6 |
+| ✅ Game scores (อาจารย์) | `/admin/games` | `src/pages/admin/GameScores.tsx` | GAME-7 |
 | 3D Explore | `/explore` | `src/pages/explore/Explore3D.tsx` | 3D-1..4, 7, 10, 11, 14 |
 | Sarcomere | `/explore/sarcomere` | `src/pages/explore/Sarcomere.tsx` | 3D-5..9 |
 | ✅ Tests list (เสร็จแล้ว) | `/tests` | `src/pages/tests/TestsList.tsx` | TEST-1, 5 |

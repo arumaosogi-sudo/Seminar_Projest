@@ -3,8 +3,8 @@
 เว็บแอปสื่อการเรียนรู้เรื่องระบบกล้ามเนื้อ (พัฒนาจาก **Key Point Book 1: The skeletal muscle** ของ ผศ.ดร.กีรกานต์ สมสวน, มฟล.)
 วิชา 1305394 Seminar in Software Engineering · ทีม **MedicSync**
 
-นักศึกษาสแกน QR ของ Section → Sign in ด้วย Google (@lamduan.mfu.ac.th) → หน้า Home 3 เมนู (**Games · 3D Explore · Tests**)
-อาจารย์ใช้ **Admin dashboard** จัดการ Section/QR, สร้างข้อสอบแบบ Google Form, ดูผล Pretest/Posttest และ Export Excel
+นักศึกษาสแกน QR ของ Section → Sign in ด้วย Google (@lamduan.mfu.ac.th) → หน้า Home 5 เมนู (**Pretest · Lessons · Games · 3D Explore · Posttest**)
+อาจารย์ใช้ **Admin dashboard** จัดการ Section/QR, สร้างข้อสอบแบบ Google Form, ดูผล Pretest/Posttest, ดูคะแนนเกม (Game scores) และ Export Excel
 
 ---
 
@@ -57,15 +57,16 @@ npm run admin:hash                  # พิมพ์รหัสผ่าน (�
 docs/plan/            ⚖️ ข้อบังคับ + requirement + stack + แผนงาน (อ่านก่อนเริ่มงาน)
 docs/ARCHITECTURE.md  สัญญา API, กติกา auth/ข้อสอบ, endpoint ทั้งหมด
 docs/DESIGN_NOTES.md  ค่าจาก Figma (สี ขนาด ฟอนต์ layout) + ข้อแตกต่างที่ตั้งใจ — อ่านก่อนทำหน้าใหม่
-docs/TEAMMATE_GUIDE.md คู่มือสำหรับเพื่อนในทีมที่รับทำหน้า Games / 3D
+docs/TEAMMATE_GUIDE.md คู่มือสำหรับเพื่อนในทีมที่ทำหน้า Games / 3D
 shared/contract.ts    type + zod schema ที่ frontend และ API ใช้ร่วมกัน
 migrations/           schema ของ D1
 worker/               API (Cloudflare Worker + Hono)
 src/                  React app
   pages/              Login, Join, Onboarding, Home, Credits, Privacy
   pages/admin/        หน้าอาจารย์ทั้งหมด
-  pages/games/        🧩 เพื่อนในทีม (placeholder)
-  pages/explore/      🧩 เพื่อนในทีม (placeholder)
+  pages/games/        ✅ MuscleGamesPage.tsx ต่อโมดูลเกมเข้ากับเว็บ + บันทึกคะแนน
+  muscle-games/       ✅ โมดูลเกม 3 เกม (Balloon Pop · Group Sort · Diameter)
+  pages/explore/      ✅ 3D Explore + Sarcomere
   pages/tests/        ✅ Tests: รายการ / ทำข้อสอบ / ผลสอบ
 ```
 
@@ -74,8 +75,8 @@ src/                  React app
 | ส่วน | ผู้รับผิดชอบ | สถานะ |
 |---|---|---|
 | Login / Join QR / Onboarding, ฐานข้อมูล, API ทั้งหมด (รวม API ทำข้อสอบ + ตรวจคะแนน), Home, Admin ทุกหน้า | nitiphum01 | ✅ รอบแรกเสร็จ |
-| Games (Balloon Pop, Group Sort, Diameter, Result) | เพื่อนในทีม | 🧩 placeholder |
-| 3D Explore + Sarcomere | เพื่อนในทีม | 🧩 placeholder |
+| Games (Balloon Pop, Group Sort, Diameter) + บันทึกคะแนนเกม (GAME-7) | PatiphatDam (PR #1) | ✅ merge 17 พ.ย. 2026 |
+| 3D Explore + Sarcomere | ทีม | ✅ เสร็จ |
 | หน้า Tests: รายการ / ทำข้อสอบ / ผลสอบ | nitiphum01 | ✅ เสร็จ (7 ต.ค. 2026) |
 
 ## ☁️ Deploy ขึ้น Cloudflare
